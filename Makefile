@@ -32,3 +32,6 @@ $(OBJ_DIR):
 clean:
 	rm -f $(OBJS) $(DEPS) $(EXE)
 	rmdir $(OBJ_DIR)
+
+format:
+	@find . -regex '.*\.\(cpp\|hpp\|cu\|cuh\|c\|h\)' -exec clang-format -style=file -i {} \;
