@@ -4,7 +4,7 @@
 #include <cstddef>
 #include <cstdint>
 
-enum LogLevel { LOW, NORMAL, CRITICAL };
+enum LogLevel { LVL_LOW, LVL_NORMAL, LVL_CRITICAL };
 
 class SDCard {
    private:

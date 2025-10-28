@@ -30,7 +30,10 @@ int SDCard::init_log(void) {
 
 void SDCard::log_msg(LogLevel lvl, String msg) {
     if (!m_file) {
-        m_file.print(lvl == LOW ? "[LOW]" : lvl == NORMAL ? "[NORMAL]" : "CRITICAL");
+        m_file.print(lvl == LVL_LOW        ? "[LOW]"
+                     : lvl == LVL_NORMAL   ? "[NORMAL]"
+                     : lvl == LVL_CRITICAL ? "[CRITICAL]"
+                                           : "[?]");
         m_file.println(msg);
     }
 }
