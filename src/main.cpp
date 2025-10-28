@@ -1,8 +1,9 @@
-#include <iostream>
+#include <Arduino.h>
 
-/**
- * This is the main function
-*/
-int main() {
-    std::cout << "Hello, World!\n";
+void setup() {
+    Serial.println("Hello, World!");
+}
+
+void loop() {
+
 }
