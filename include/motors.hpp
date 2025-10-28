@@ -10,7 +10,7 @@ enum DrivingMode {
 
 class GearMotor {
 public:
-	GearMotor(int pin_1, int pin_2);
+	GearMotor(int pin_1, int pin_2, int encoder_pin_1, int encoder_pin_2, int max_pwm);
 	int set_speed(int speed);
 	int forward(int speed);
 	int backward(int speed);
@@ -18,8 +18,11 @@ public:
 	int brake();
 	int stop();
 private:
-	int pin_1;
-	int pin_2;
-	int max_pwm;
+	const int PIN_1;
+	const int PIN_2;
+	const int ENCODER_PIN_1;
+	const int ENCODER_PIN_2;
+	const int MAX_PWM;
+	int rpm;
 	DrivingMode mode;
 };
