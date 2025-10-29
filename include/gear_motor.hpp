@@ -1,6 +1,7 @@
 #pragma once
-// Adafruit DRV8871 DC Motor Driver Breakout Board
 
+
+// TODO: This is no longer the one we use : [Adafruit DRV8871 DC Motor Driver Breakout Board]
 class GearMotor {
   public:
     GearMotor(int pin_1, int pin_2, int encoder_pin_1, int encoder_pin_2, int max_pwm);
@@ -12,6 +13,7 @@ class GearMotor {
 
   private:
     void set_rpm(int pin, int speed);
+    void encoder_interrupt();
 
     static constexpr int MAX_PWM = 255; // TODO: Change this before running on real hardware!
     static constexpr int MIN_PWM = 40;  // TODO: Change this before running on real hardware!
@@ -22,4 +24,6 @@ class GearMotor {
     const int ENCODER_PIN_1;
     const int ENCODER_PIN_2;
     int m_desired_rpm;
+    int m_actual_rpm;
+    int m_t_last_i;
 };
