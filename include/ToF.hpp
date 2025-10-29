@@ -1,63 +1,70 @@
 #pragma once
-
 #include <Arduino.h>
 #include <Wire.h>
-#include "Adafruit_VL53L4CD.h"
-#include "Adafruit_VL6180X.h"
+#include <VL53L4CD.h>         // Pololu long-range ToF (VL53L4CD)
+#include <Adafruit_VL6180X.h> // Adafruit short-range ToF (VL6180X)
 
-// super small wrapper for one ToF sensor behind a TCA9548A channel.
-// we have two kinds:
-//  - VL6180X (short range)
-//  - VL53L4CD (long range)
-//
-// defaults:
-//  - we use Wire (no Wire1 stuff)
-//  - TCA address is 0x70 (change the #define if your board is different)
-
+// we're on a TCA9548A mux, so we select exactly one channel before any I2C call.
 #define TCA_ADDR 0x70
+
+struct ToFReading {
+  uint16_t mm = 0;
+  bool valid = false;
+};
 
 class ToF {
 public:
-  enum class Type : uint8_t { Short_VL6180X, Long_VL53L4CD };
+  // common API every sensor supports
+  virtual bool start() = 0;       // start ranging (VL53 continuous; VL618 polled)
+  virtual ToFReading read() = 0;  // one reading (returns last if no fresh sample)
 
-  struct Reading {
-    uint16_t mm = 0;
-    bool valid = false;
-  };
-
-  // keep it simple: only the mux channel, the sensor type, and a label for prints
-  ToF(uint8_t tca_channel, Type type, const char* label)
-  : ch_(tca_channel), type_(type), label_(label) {}
-
-  // probe the sensor on its mux channel
-  bool begin();
-
-  // start continuous ranging for VL53; no-op for VL6180X (we just poll it)
-  bool start();
-
-  // get one distance reading (mm + valid flag)
-  Reading read();
-
-  // last reading validity (just a tiny helper)
   bool isValid() const { return last_.valid; }
-
   const char* label() const { return label_; }
   uint8_t channel() const { return ch_; }
-  Type type() const { return type_; }
+  bool isInitialized() const { return initialized_; }
+
+protected:
+  ToF(uint8_t mux_channel, const char* label)
+    : ch_(mux_channel), label_(label) {}
+
+  // helper: select our mux branch
+  void selectMux_() const {
+    Wire.beginTransmission(TCA_ADDR);
+    Wire.write(1 << ch_);
+    Wire.endTransmission();
+    delay(1); // tiny settle cuz thats what others do
+  }
+
+  // shared state
+  uint8_t ch_;
+  const char* label_;
+  bool initialized_ = false;
+  bool running_ = false;
+  ToFReading last_{};
+};
+
+// ----------------- Long range: VL53L4CD (Pololu) -----------------
+class ToFVL53 : public ToF {
+public:
+  // constructor now performs init/probe + basic config
+  ToFVL53(uint8_t mux_channel, const char* label);
+
+  bool start() override;
+  ToFReading read() override;
 
 private:
-  // select one TCA9548A channel (one-hot mask)
-  void tcaSelect_();
+  VL53L4CD vl53_; // Pololu API instance
+};
 
-  // drivers (we only use the one that matches type_)
-  Adafruit_VL53L4CD vl53_;
-  Adafruit_VL6180X  vl618_;
+// ----------------- Short range: VL6180X (Adafruit) ----------------
+class ToFVL6180 : public ToF {
+public:
+  // constructor now performs init/probe + basic config
+  ToFVL6180(uint8_t mux_channel, const char* label);
 
-  uint8_t ch_;
-  Type type_;
-  const char* label_;
+  bool start() override;
+  ToFReading read() override;
 
-  bool ok_ = false;
-  bool running_ = false;
-  Reading last_{};
+private:
+  Adafruit_VL6180X vl618_; // Adafruit API instance
 };

@@ -1,78 +1,97 @@
 #include "ToF.hpp"
 
-// gate I2C to just our branch on the mux
-void ToF::tcaSelect_() {
-  Wire.beginTransmission(TCA_ADDR);
-  Wire.write(1 << ch_);
-  Wire.endTransmission();
-  delay(1); // tiny settle helps (idk ive seen others do this)
-}
+// =================== ToFVL53 (VL53L4CD) ===================
 
-bool ToF::begin() {
-  tcaSelect_();
-
-  if (type_ == Type::Long_VL53L4CD) {
-    // default I2C addr for VL53L4CD is 0x29 (mux isolates so it's fine)
-    if (!vl53_.begin(0x29, &Wire)) return false;
-    ok_ = true;
+// constructor: probe + basic config
+ToFVL53::ToFVL53(uint8_t mux_channel, const char* label)
+  : ToF(mux_channel, label) {
+  selectMux_();
+  
+  // Pololu API: init() -> true on success
+  if (vl53_.init()) {
+    // (optional) timing setup; defaults are hopefully ok. Uncomment if you want faster updates:
+    // vl53_.setRangeTiming(50, 0); // 50 ms budget, continuous mode (0 = unlimited)
+    initialized_ = true;
   } else {
-    // VL6180X init is just begin() on the default addr behind the mux
-    if (!vl618_.begin()) return false;
-    ok_ = true;
+    initialized_ = false;
   }
+  
   running_ = false;
   last_ = {};
-  return ok_;
 }
 
-bool ToF::start() {
-  if (!ok_) return false;
-  tcaSelect_();
-
-  if (type_ == Type::Long_VL53L4CD) {
-    running_ = vl53_.startRanging(); // continuous mode
-  } else {
-    // VL6180X doesn’t need a start; we just mark it as running for symmetry
-    running_ = true;
-  }
-  return running_;
+bool ToFVL53::start() {
+  if (!initialized_) return false;
+  selectMux_();
+  
+  // continuous mode; read() will poll dataReady()
+  vl53_.startContinuous();
+  running_ = true;
+  return true;
 }
 
-ToF::Reading ToF::read() {
-  Reading r{};
-  if (!ok_ || !running_) return r;
-
-  tcaSelect_();
-
-  if (type_ == Type::Long_VL53L4CD) {
-    // non-blocking: only when a fresh sample is ready
-    if (vl53_.dataReady()) {
-      vl53_.clearInterrupt();
-      if (!vl53_.read()) {
-        r.valid = false;
-        last_ = r;
-        return r;
-      }
-      r.mm = vl53_.distance();
-      // basic sanity window
-      r.valid = (r.mm > 0 && r.mm < 2000);
-      last_ = r;
-      return r;
-    } else {
-      // no new sample yet; return last known (could be invalid)
-      return last_;
-    }
-  } else {     
-    // VL6180X: single-shot read + status check
-    uint8_t mm_u8 = vl618_.readRange();
-    uint8_t st = vl618_.readRangeStatus();
-    if (st == VL6180X_ERROR_NONE) {
-      r.mm = static_cast<uint16_t>(mm_u8);
-      r.valid = (r.mm > 0 && r.mm <= 255);
-    } else {
-      r.valid = false;
-    }
+ToFReading ToFVL53::read() {
+  ToFReading r{};
+  if (!initialized_ || !running_) return r;
+  
+  selectMux_();
+  if (vl53_.dataReady()) {
+    // read(false) = just fetch value; then clear interrupt
+    r.mm = vl53_.read(false);
+    vl53_.clearInterrupt();
+    
+    // status 0 = good; also require positive distance
+    r.valid = (vl53_.ranging_data.range_status == 0 && r.mm > 0);
     last_ = r;
     return r;
   }
+  
+  // no fresh sample — return the last one we stored
+  return last_;
+}
+
+// =================== ToFVL6180 (VL6180X) ===================
+
+// constructor: probe + basic config
+ToFVL6180::ToFVL6180(uint8_t mux_channel, const char* label)
+  : ToF(mux_channel, label) {
+  selectMux_();
+  
+  // Adafruit API: begin() -> true on success
+  if (vl618_.begin()) {
+    initialized_ = true;
+  } else {
+    initialized_ = false;
+  }
+  
+  running_ = false;
+  last_ = {};
+}
+
+bool ToFVL6180::start() {
+  if (!initialized_) return false;
+  
+  // nothing to "start" for VL6180X; we just poll in read()
+  running_ = true;
+  return true;
+}
+
+ToFReading ToFVL6180::read() {
+  ToFReading r{};
+  if (!initialized_ || !running_) return r;
+  
+  selectMux_();
+  
+  // single-shot read + status check
+  uint8_t mm8 = vl618_.readRange();
+  uint8_t st  = vl618_.readRangeStatus();
+  if (st == 0) {
+    r.mm = static_cast<uint16_t>(mm8);
+    r.valid = (r.mm > 0);
+  } else {
+    r.valid = false;
+  }
+  
+  last_ = r;
+  return r;
 }
