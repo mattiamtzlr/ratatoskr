@@ -1,8 +1,8 @@
 #include "gear_motor.hpp"
-#include "esp32-hal.h"
-#include <Arduino.h>
 
-#define GEARING 20 // TODO: These two constants may not be correct, test with actual hardware
+#define GEARING \
+    20  // TODO: These two constants may not be correct, test with actual
+        // hardware
 #define ENCODERMULT 12
 
 /*
@@ -15,21 +15,28 @@ GearMotor::GearMotor(int in1, int in2, int encoder_pin_1, int encoder_pin_2,
       IN2(in2),
       ENCODER_PIN_1(encoder_pin_1),
       ENCODER_PIN_2(encoder_pin_2) {
-    m_actual_rpm = 0;
+
+	m_actual_rpm = 0;
+	m_desired_rpm = 0;
+	m_t_last_i = 0;
+
+
+
     pinMode(IN1, OUTPUT);
     pinMode(IN2, OUTPUT);
 
     pinMode(ENCODER_PIN_1, INPUT_PULLUP);
     pinMode(ENCODER_PIN_2, INPUT_PULLUP);
 
-    attachInterrupt(digitalPinToInterrupt(ENCODER_PIN_1), encoder_interrupt(), RISING);
+    attachInterrupt(digitalPinToInterrupt(ENCODER_PIN_1), encoder_interrupt,
+                    RISING);
 }
 
 /**
  * private method; executed whenever `ENCODER_PIN_1` input signal
  * changes
  */
-void GearMotor::encoder_interrupt() {
+void IRAM_ATTR GearMotor::encoder_interrupt() {
     // This function is heavily inspired from
     // https://www.adafruit.com/product/4640
     int t_curr_i = micros();
@@ -49,9 +56,7 @@ void GearMotor::encoder_interrupt() {
 /**
  * Get the rpm of the motor
  */
-int GearMotor::get_rpm() {
-    return m_actual_rpm;
-}
+int GearMotor::get_rpm() { return m_actual_rpm; }
 
 /**
  * private method; sets rpm of specified pin.errorhandling

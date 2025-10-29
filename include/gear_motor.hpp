@@ -1,5 +1,5 @@
 #pragma once
-
+#include <Arduino.h>
 
 // TODO: This is no longer the one we use : [Adafruit DRV8871 DC Motor Driver Breakout Board]
 class GearMotor {
@@ -13,7 +13,7 @@ class GearMotor {
 
   private:
     void set_rpm(int pin, int speed);
-    void encoder_interrupt();
+    void IRAM_ATTR encoder_interrupt();
 
     static constexpr int MAX_PWM = 255; // TODO: Change this before running on real hardware!
     static constexpr int MIN_PWM = 40;  // TODO: Change this before running on real hardware!
@@ -24,6 +24,6 @@ class GearMotor {
     const int ENCODER_PIN_1;
     const int ENCODER_PIN_2;
     int m_desired_rpm;
-    int m_actual_rpm;
-    int m_t_last_i;
+    volatile int m_actual_rpm;
+    volatile int m_t_last_i;
 };
