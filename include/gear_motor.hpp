@@ -10,10 +10,11 @@ class GearMotor {
     void spin_ccw(int speed);
     void stop();
     int get_rpm();
+    void encoder_interrupt();
+    static void isr_trampoline(void *obj_isr);
 
   private:
     void set_rpm(int pin, int speed);
-    void IRAM_ATTR encoder_interrupt();
 
     static constexpr int MAX_PWM = 255; // TODO: Change this before running on real hardware!
     static constexpr int MIN_PWM = 40;  // TODO: Change this before running on real hardware!
