@@ -1,7 +1,7 @@
 #include "ToF.hpp"
 
 ToFVL53L1X::ToFVL53L1X(SensorPosition position, TwoWire *wire, uint8_t i2c_address)
-    : m_position(position) {
+    : position(position) {
     if (m_sensor.begin(i2c_address, wire)) {
         m_sensor.setTimingBudget(TIMING_BUDGET);  // 50 ms per measurement
     } else {

@@ -22,7 +22,10 @@ class ToFVL53L1X {
     // Read current distance in millimeters
     uint16_t read();
 
+    // The sensor this is
+    const SensorPosition position;
+    
+
    private:
-    SensorPosition m_position;
     Adafruit_VL53L1X m_sensor;
 };
