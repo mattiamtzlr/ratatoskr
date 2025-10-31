@@ -50,10 +50,7 @@ void MPU6050::setAccelSensitivity(AccelSensitivity range){
         default:
     }
 
-    Wire.beginTransmission(m_addr);
-    Wire.write(MPU6050_REG_ACCEL_CONFIG);   
-    Wire.write(range);       
-    Wire.endTransmission(true);
+    writeByte(MPU6050_REG_ACCEL_CONFIG, range);
 }
 
 void MPU6050::setGyroSensitivity(GyroSensitivity range){
@@ -73,10 +70,7 @@ void MPU6050::setGyroSensitivity(GyroSensitivity range){
         default:
     }
 
-    Wire.beginTransmission(m_addr);
-    Wire.write(MPU6050_REG_GYRO_CONFIG);   
-    Wire.write(range);       
-    Wire.endTransmission(true);
+    writeByte(MPU6050_REG_GYRO_CONFIG, range);
 }
 
 uint8_t MPU6050::readByte(uint8_t reg){
