@@ -18,11 +18,7 @@ bool MPU6050::begin(){
     Wire.write(0x00);
     uint8_t status = Wire.endTransmission(true);
 
-    if(status == 0){
-        return true;
-    } else {
-        return false;
-    }
+    return status == 0;
 }
 
 void MPU6050::setAccelSensitivity(AccelSensitivity range){
