@@ -74,7 +74,7 @@ uint8_t MPU6050::readByte(uint8_t reg){
     Wire.write(reg);
     Wire.endTransmission(true);
 
-    Wire.requestFrom(reg, 1);
+    Wire.requestFrom(m_addr, 1);
 
     if(Wire.available()){
         data = Wire.read();
@@ -87,7 +87,7 @@ uint8_t MPU6050::readByte(uint8_t reg){
 void MPU6050::readBytes(uint8_t reg, uint8_t count, uint8_t* dest){
     Wire.beginTransmission(m_addr);
     Wire.write(reg);
-    Wire.endTransmission(true);
+    Wire.endTransmission(false);
 
     uint8_t received = Wire.requestFrom(m_addr, count);
 
@@ -116,9 +116,9 @@ Vector3D MPU6050::readRawAccel(){
     uint8_t raw_data[BYTES_TO_READ];
 
     readBytes(MPU6050_REG_ACCEL_XOUT_H, BYTES_TO_READ, raw_data);
-    uint16_t x = raw_data[0] << 8 | raw_data[1];
-    uint16_t y = raw_data[2] << 8 | raw_data[3];
-    uint16_t z = raw_data[4] << 8 | raw_data[5];
+    uint16_t x = uint16_t(raw_data[0] << 8 | raw_data[1]);
+    uint16_t y = uint16_t(raw_data[2] << 8 | raw_data[3]);
+    uint16_t z = uint16_t(raw_data[4] << 8 | raw_data[5]);
     
     Vector3D res = {(float)x, (float)y, (float)z};
     return res;
@@ -130,9 +130,9 @@ Vector3D MPU6050::readRawGyro(){
     uint8_t raw_data[BYTES_TO_READ];
 
     readBytes(MPU6050_REG_GYRO_XOUT_H, BYTES_TO_READ, raw_data);
-    uint16_t x = raw_data[0] << 8 | raw_data[1];
-    uint16_t y = raw_data[2] << 8 | raw_data[3];
-    uint16_t z = raw_data[4] << 8 | raw_data[5];
+    uint16_t x = uint16_t(raw_data[0] << 8 | raw_data[1]);
+    uint16_t y = uint16_t(raw_data[2] << 8 | raw_data[3]);
+    uint16_t z = uint16_t(raw_data[4] << 8 | raw_data[5]);
     
     Vector3D res = {(float)x, (float)y, (float)z};
     return res;
@@ -140,10 +140,10 @@ Vector3D MPU6050::readRawGyro(){
 
 Vector3D MPU6050::readScaledAccel(){
     Vector3D raw = readRawAccel();
-    return rawToScaled(raw.x, raw.y, raw.y, m_accelScale);
+    return rawToScaled(raw.x, raw.y, raw.z, m_accelScale);
 }
 
 Vector3D MPU6050::readScaledGyro(){
     Vector3D raw = readRawGyro();
-    return rawToScaled(raw.x, raw.y, raw.y, m_gyroScale);
+    return rawToScaled(raw.x, raw.y, raw.z, m_gyroScale);
 }
