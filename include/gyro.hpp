@@ -6,12 +6,12 @@
 static const uint8_t MPU6050_ADDRESS = 0x68;
 
 // MPU6050 Registers Addresses 
-static const uint8_t MPU6050_REG_PWR_MGMT_1 = 0x6B;
-static const uint8_t MPU6050_REG_ACCEL_XOUT_H = 0x3B;
-static const uint8_t MPU6050_REG_GYRO_XOUT_H = 0x43;
-static const uint8_t MPU6050_REG_WHO_AM_I = 0x68;
-static const uint8_t MPU6050_REG_ACCEL_CONFIG = 0x1C;
-static const uint8_t MPU6050_REG_GYRO_CONFIG = 0x1B;
+static constexpr uint8_t MPU6050_REG_PWR_MGMT_1 = 0x6B;
+static constexpr uint8_t MPU6050_REG_ACCEL_XOUT_H = 0x3B;
+static constexpr uint8_t MPU6050_REG_GYRO_XOUT_H = 0x43;
+static constexpr uint8_t MPU6050_REG_WHO_AM_I = 0x68;
+static constexpr uint8_t MPU6050_REG_ACCEL_CONFIG = 0x1C;
+static constexpr uint8_t MPU6050_REG_GYRO_CONFIG = 0x1B;
 
 
 // Sensitivity for gyroscope

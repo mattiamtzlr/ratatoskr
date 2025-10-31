@@ -1,39 +1,51 @@
 #include "../include/gyro.hpp"
 #include <Arduino.h>
 
-MPU6050::MPU6050(uint8_t addr) : m_addr(addr){
-    bool status = begin();
-    if(status == 0){
-        Serial.println("MPU6050 setup correctly");
-    } else {
-        Serial.println("Error during setup of MPU6050");
-        return;
-    }
+// Scale convertions for Accel
+static constexpr float ACCEL_SCALE_2G = 16384.0f;
+static constexpr float ACCEL_SCALE_4G = 8192.0f;
+static constexpr float ACCEL_SCALE_8G = 4096.0f;
+static constexpr float ACCEL_SCALE_16G = 2048.0f;
 
-}
+// Scale convertions for Gyro
+static constexpr float GYRO_SCALE_250_DEG = 131.0f;
+static constexpr float GYRO_SCALE_500_DEG = 65.5f;
+static constexpr float GYRO_SCALE_1000_DEG = 32.8f;
+static constexpr float GYRO_SCALE_2000_DEG = 16.4f;
+
+MPU6050::MPU6050(uint8_t addr) : m_addr(addr), m_accelScale(ACCEL_RANGE_16G), m_gyroScale(GYRO_SCALE_250_DEG){}
 
 bool MPU6050::begin(){
-    Wire.beginTransmission(m_addr);
-    Wire.write(MPU6050_REG_PWR_MGMT_1);
-    Wire.write(0x00);
-    uint8_t status = Wire.endTransmission(true);
-
-    return status == 0;
+    // Wake up the MPU-6050
+    writeByte(MPU6050_REG_PWR_MGMT_1, 0x00);
+    
+    // Who Am I check
+    uint8_t device_id = readByte(MPU6050_REG_WHO_AM_I);
+    
+    if (device_id != 0x68) {
+        Serial.print("MPU6050 Error: Device ID 0x");
+        Serial.print(device_id, HEX);
+        Serial.println(" != 0x68.");
+        return false;
+    }
+    
+    Serial.println("MPU6050 initialized successfully.");
+    return true;
 }
 
 void MPU6050::setAccelSensitivity(AccelSensitivity range){
     switch(range){
         case ACCEL_RANGE_2G:
-            m_accelScale = 16384;
+            m_accelScale = ACCEL_SCALE_2G;
             break;
         case ACCEL_RANGE_4G:
-            m_accelScale = 8192;
+            m_accelScale = ACCEL_SCALE_4G;
             break;
         case ACCEL_RANGE_8G:
-            m_accelScale = 4096;
+            m_accelScale = ACCEL_SCALE_8G;
             break;
         case ACCEL_RANGE_16G:
-            m_accelScale = 2048;
+            m_accelScale = ACCEL_SCALE_16G;
             break;
         default:
     }
@@ -47,16 +59,16 @@ void MPU6050::setAccelSensitivity(AccelSensitivity range){
 void MPU6050::setGyroSensitivity(GyroSensitivity range){
     switch(range){
         case GYRO_RANGE_250_DEG:
-            m_gyroScale = 131;
+            m_gyroScale = GYRO_SCALE_250_DEG;
             break;
         case GYRO_RANGE_500_DEG:
-            m_gyroScale = 65.5;
+            m_gyroScale = GYRO_SCALE_500_DEG;
             break;
         case GYRO_RANGE_1000_DEG:
-            m_gyroScale = 32.8;
+            m_gyroScale = GYRO_SCALE_1000_DEG;
             break;
         case GYRO_RANGE_2000_DEG:
-            m_gyroScale = 16.4;
+            m_gyroScale = GYRO_SCALE_2000_DEG;
             break;
         default:
     }
