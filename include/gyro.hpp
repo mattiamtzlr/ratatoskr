@@ -9,22 +9,25 @@ static const uint8_t MPU6050_ADDRESS = 0x68;
 static const uint8_t MPU6050_REG_PWR_MGMT_1 = 0x6B;
 static const uint8_t MPU6050_REG_ACCEL_XOUT_H = 0x3B;
 static const uint8_t MPU6050_REG_GYRO_XOUT_H = 0x43;
-static const uint8_t MPU6050_REG_WHO_AM_I = 0x75;
+static const uint8_t MPU6050_REG_WHO_AM_I = 0x68;
+static const uint8_t MPU6050_REG_ACCEL_CONFIG = 0x1C;
+static const uint8_t MPU6050_REG_GYRO_CONFIG = 0x1B;
+
 
 // Sensitivity for gyroscope
 enum GyroSensitivity{
-    GYRO_RANGE_250_DEG,
-    GYRO_RANGE_500_DEG,
-    GYRO_RANGE_1000_DEG,
-    GYRO_RANGE_2000_DEG
+    GYRO_RANGE_250_DEG = 0b00,
+    GYRO_RANGE_500_DEG = 0b01,
+    GYRO_RANGE_1000_DEG = 0b10,
+    GYRO_RANGE_2000_DEG = 0b11
 };
 
 // Sensitivity for accelerometer
 enum AccelSensitivity {
-    ACCEL_RANGE_2G,
-    ACCEL_RANGE_4G,
-    ACCEL_RANGE_8G,
-    ACCEL_RANGE_16G
+    ACCEL_RANGE_2G = 0b00,
+    ACCEL_RANGE_4G = 0b01,
+    ACCEL_RANGE_8G = 0b10,
+    ACCEL_RANGE_16G = 0b11
 };
 
 // Holds 3-axis reading 
@@ -39,16 +42,15 @@ public:
     MPU6050(uint8_t addr = MPU6050_ADDRESS);
     
     // Setup gyroscope and accelerometer
-    bool init();
+    bool begin();
 
     void setGyroSensitivity(GyroSensitivity range);
     void setAccelSensitivity(AccelSensitivity range);
 
     Vector3D readRawGyro();
     Vector3D readRawAccel();
-
     
-    Vector3D readRawGyro(); // Rerturns deg/s
+    Vector3D readScaledGyro(); // Rerturns deg/s
     Vector3D readScaledAccel(); // Returns G's
 
 private:
