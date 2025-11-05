@@ -13,17 +13,18 @@ enum SensorPosition {
 class ToF {
    public:
     // Constructor performs initialization
-    ToF(SensorPosition position, uint8_t shutdown_pin, uint8_t irq_pin,
-        uint8_t i2c_address, TwoWire *wire = &Wire);
+    ToF(SensorPosition position, uint8_t i2c_address);
 
     // Start continuous ranging
-    void start();
+    void start(TwoWire *wire = &Wire);
 
     // Read current distance in millimeters
     uint16_t read();
 
+    bool dataReady();
     // The sensor this is
     const SensorPosition position;
+    const uint8_t i2c_address;
 
    private:
     Adafruit_VL53L1X m_sensor;
