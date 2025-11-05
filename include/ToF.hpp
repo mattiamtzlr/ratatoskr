@@ -1,5 +1,5 @@
 #include <Adafruit_VL53L1X.h>
-#include "Wire.h"
+#include <Wire.h>
 // Valid timing budgets: 15, 20, 33, 50, 100, 200 and 500ms! (from lib)
 #define TIMING_BUDGET 50
 
@@ -10,11 +10,11 @@ enum SensorPosition {
     RIGHT = 3         // side-right
 };
 
-class ToFVL53L1X {
+class ToF {
    public:
     // Constructor performs initialization
-    ToFVL53L1X(SensorPosition position, uint8_t shutdown_pin, uint8_t irq_pin, TwoWire *wire,
-               uint8_t i2c_address = 0x29);
+    ToF(SensorPosition position, uint8_t shutdown_pin, uint8_t irq_pin,
+        uint8_t i2c_address, TwoWire *wire = &Wire);
 
     // Start continuous ranging
     void start();
