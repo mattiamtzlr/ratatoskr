@@ -17,7 +17,9 @@ Cardinal current_heading = NORTH;
 Position current_position = {0, 0};
 Position goals[4] = {{7, 7}, {8, 7}, {7, 8}, {8, 8}};
 
-bool in_goals() {
+void log(const std::string& text) { std::cerr << text << std::endl; }
+
+inline bool in_goals() {
     for (int i = 0; i < 4; i++) {
         if (goals[i].x == current_position.x &&
             goals[i].y == current_position.y) {
@@ -27,7 +29,6 @@ bool in_goals() {
     return false;
 }
 
-void log(const std::string& text) { std::cerr << text << std::endl; }
 
 void turn_cardinal(Cardinal target) {
     int diff = (target - current_heading) % 4;
