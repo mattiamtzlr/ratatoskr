@@ -1,7 +1,9 @@
 #include "ToF.hpp"
 
-ToFVL53L1X::ToFVL53L1X(SensorPosition position, TwoWire *wire, uint8_t i2c_address)
+ToFVL53L1X::ToFVL53L1X(SensorPosition position, uint8_t shutdown_pin,
+                       uint8_t irq_pin, TwoWire *wire, uint8_t i2c_address)
     : position(position) {
+    m_sensor = Adafruit_VL53L1X(shutdown_pin, irq_pin);
     if (m_sensor.begin(i2c_address, wire)) {
         m_sensor.setTimingBudget(TIMING_BUDGET);  // 50 ms per measurement
     } else {
@@ -9,9 +11,7 @@ ToFVL53L1X::ToFVL53L1X(SensorPosition position, TwoWire *wire, uint8_t i2c_addre
     }
 }
 
-void ToFVL53L1X::start() {
-    m_sensor.startRanging();
-}
+void ToFVL53L1X::start() { m_sensor.startRanging(); }
 
 uint16_t ToFVL53L1X::read() {
     if (m_sensor.dataReady()) {
