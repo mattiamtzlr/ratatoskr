@@ -3,17 +3,22 @@
 #include <string>
 
 #include "API.hpp"
+#include "maze.hpp"
 
-enum Cardinal { NORTH = 0, EAST = 1, SOUTH = 2, WEST = 3 };
+enum Cardinal { C_NORTH = 0, C_EAST = 1, C_SOUTH = 2, C_WEST = 3 };
 typedef struct _Position {
-    int x;
-    int y;
+    size_t x;
+    size_t y;
 } Position;
 
 std::map<Cardinal, char> cardinalToChar = {
-    {NORTH, 'n'}, {EAST, 'e'}, {SOUTH, 's'}, {WEST, 'w'}};
+    {C_NORTH, 'n'}, {C_EAST, 'e'}, {C_SOUTH, 's'}, {C_WEST, 'w'}};
 
-Cardinal current_heading = NORTH;
+std::map<Cardinal, Direction> cardinalToDir = {
+    {C_NORTH, NORTH}, {C_EAST, EAST}, {C_SOUTH, SOUTH}, {C_WEST, WEST}};
+
+Maze maze = Maze();
+Cardinal current_heading = C_NORTH;
 Position current_position = {0, 0};
 Position goals[4] = {{7, 7}, {8, 7}, {7, 8}, {8, 8}};
 
@@ -29,7 +34,6 @@ inline bool in_goals() {
     return false;
 }
 
-
 void turn_cardinal(Cardinal target) {
     int diff = (target - current_heading) % 4;
     if (diff == 3) {
@@ -44,12 +48,12 @@ void turn_cardinal(Cardinal target) {
 
 void move_forward() {
     API::moveForward();
-    current_position.y += ((current_heading == NORTH)   ? 1
-                           : (current_heading == SOUTH) ? -1
-                                                        : 0);
-    current_position.x += ((current_heading == EAST)   ? 1
-                           : (current_heading == WEST) ? -1
-                                                       : 0);
+    current_position.y += ((current_heading == C_NORTH)   ? 1
+                           : (current_heading == C_SOUTH) ? -1
+                                                          : 0);
+    current_position.x += ((current_heading == C_EAST)   ? 1
+                           : (current_heading == C_WEST) ? -1
+                                                         : 0);
     API::setColor(current_position.x, current_position.y, 'G');
 }
 
@@ -57,9 +61,8 @@ void set_wall(Cardinal direction, bool wall_detected) {
     if (wall_detected) {
         API::setWall(current_position.x, current_position.y,
                      cardinalToChar[direction]);
-    } else {
-        API::clearWall(current_position.x, current_position.y,
-                       cardinalToChar[direction]);
+        maze.set_wall(current_position.x, current_position.y,
+                      cardinalToDir[current_heading]);
     }
 }
 

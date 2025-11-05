@@ -14,6 +14,8 @@ class Maze {
   public:
     void set_wall(size_t x, size_t y, Direction d);
     void clear_wall(size_t x, size_t y, Direction d);
+    void set_distance(size_t x, size_t y);
+    int get_distance(size_t x, size_t y);
     int get_walls_at(size_t x, size_t y);
     int maze_width();
     int maze_height();
