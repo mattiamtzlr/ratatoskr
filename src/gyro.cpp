@@ -47,7 +47,6 @@ void MPU6050::setAccelSensitivity(AccelSensitivity range){
         case ACCEL_RANGE_16G:
             m_accelScale = ACCEL_SCALE_16G;
             break;
-        default:
     }
 
     writeByte(MPU6050_REG_ACCEL_CONFIG, range);
@@ -67,7 +66,6 @@ void MPU6050::setGyroSensitivity(GyroSensitivity range){
         case GYRO_RANGE_2000_DEG:
             m_gyroScale = GYRO_SCALE_2000_DEG;
             break;
-        default:
     }
 
     writeByte(MPU6050_REG_GYRO_CONFIG, range);

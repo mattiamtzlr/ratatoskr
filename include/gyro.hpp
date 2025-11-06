@@ -3,7 +3,7 @@
 #include <Wire.h>
 
 // Defalut address for MPU6050
-static const uint8_t MPU6050_ADDRESS = 0x68;
+static constexpr uint8_t MPU6050_ADDRESS = 0x68;
 
 // MPU6050 Registers Addresses 
 static constexpr uint8_t MPU6050_REG_PWR_MGMT_1 = 0x6B;
