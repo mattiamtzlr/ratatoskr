@@ -3,7 +3,7 @@
 #define GEARING 31.5
 #define ENCODERMULT 6
 
-void GearMotor::isr_trampoline(void *obj) {
+void IRAM_ATTR GearMotor::isr_trampoline(void *obj) {
     ((GearMotor *)obj)->encoder_interrupt();
 }
 /*
@@ -25,7 +25,7 @@ GearMotor::GearMotor(int in1, int in2, int encoder_pin_1, int encoder_pin_2,
 /**
  * executed on `ENCODER_PIN_1` input rising edge.
  */
-void GearMotor::encoder_interrupt() {
+void IRAM_ATTR GearMotor::encoder_interrupt() {
     // This function is heavily inspired from
     // https://www.adafruit.com/product/4640
     int t_curr_i = micros();
@@ -47,7 +47,6 @@ int GearMotor::get_rpm() {
     revolutions /= GEARING;            // account for gear ratio
     revolutions /= ENCODERMULT;  // account for multiple ticks per rotation
     return revolutions;
-    ;
 }
 
 /**
