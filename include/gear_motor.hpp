@@ -11,7 +11,6 @@ class GearMotor {
     void stop();
     int get_rpm();
     void encoder_interrupt();
-    static void isr_trampoline(void *obj_isr);
 
   private:
     void set_rpm(int pin, int speed);

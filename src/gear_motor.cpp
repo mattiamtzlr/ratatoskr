@@ -5,6 +5,9 @@
         // hardware
 #define ENCODERMULT 12
 
+void isr_trampoline(void *obj) {
+    ((GearMotor *)obj)->encoder_interrupt();
+}
 /*
  * GearMotor class constructor
  */
@@ -29,13 +32,10 @@ GearMotor::GearMotor(int in1, int in2, int encoder_pin_1, int encoder_pin_2,
                        this, RISING);
 }
 
-void IRAM_ATTR isr_trampoline(void *obj) {
-    ((GearMotor *)obj)->encoder_interrupt();
-}
 /**
- * private method; executed on `ENCODER_PIN_1` input rising edge.
+ * executed on `ENCODER_PIN_1` input rising edge.
  */
-void IRAM_ATTR GearMotor::encoder_interrupt() {
+void GearMotor::encoder_interrupt() {
     // This function is heavily inspired from
     // https://www.adafruit.com/product/4640
     int t_curr_i = micros();
@@ -63,7 +63,7 @@ int GearMotor::get_rpm() { return m_actual_rpm; }
 
 void GearMotor::set_rpm(int pin, int rpm) {
     m_desired_rpm = rpm;
-    int pwm = (MIN_PWM + (MAX_PWM - MIN_PWM) * m_desired_rpm / MAX_RPM);
+    int pwm = rpm;
     analogWrite(pin, pwm);
 }
 
@@ -87,6 +87,6 @@ void GearMotor::spin_ccw(int rpm) {
  * Stop motor by forcing brake
  */
 void GearMotor::stop() {
-    digitalWrite(IN1, LOW);
-    digitalWrite(IN2, LOW);
+    analogWrite(IN1, 0);
+    analogWrite(IN2, 0);
 }
