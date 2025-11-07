@@ -1,5 +1,6 @@
-#include "../include/gyro.hpp"
+#include "gyro.hpp"
 #include <Arduino.h>
+#include <map>
 
 // Scale convertions for Accel
 static constexpr float ACCEL_SCALE_2G = 16384.0f;
@@ -12,6 +13,21 @@ static constexpr float GYRO_SCALE_250_DEG = 131.0f;
 static constexpr float GYRO_SCALE_500_DEG = 65.5f;
 static constexpr float GYRO_SCALE_1000_DEG = 32.8f;
 static constexpr float GYRO_SCALE_2000_DEG = 16.4f;
+
+std::map<AccelSensitivity, float> rangeToScaleAccel = {
+        {ACCEL_RANGE_2G, ACCEL_SCALE_2G},
+        {ACCEL_RANGE_4G, ACCEL_SCALE_4G},
+        {ACCEL_RANGE_8G, ACCEL_SCALE_8G},
+        {ACCEL_RANGE_16G, ACCEL_SCALE_16G},
+};
+
+std::map<GyroSensitivity, float> rangeToScaleGyro = {
+        {GYRO_RANGE_250_DEG, GYRO_SCALE_250_DEG},
+        {GYRO_RANGE_500_DEG, GYRO_SCALE_500_DEG},
+        {GYRO_RANGE_1000_DEG, GYRO_SCALE_1000_DEG},
+        {GYRO_RANGE_2000_DEG, GYRO_SCALE_2000_DEG},
+};
+
 
 MPU6050::MPU6050(uint8_t addr) : m_addr(addr), m_accelScale(ACCEL_RANGE_16G), m_gyroScale(GYRO_SCALE_250_DEG){}
 
@@ -34,39 +50,13 @@ bool MPU6050::begin(){
 }
 
 void MPU6050::setAccelSensitivity(AccelSensitivity range){
-    switch(range){
-        case ACCEL_RANGE_2G:
-            m_accelScale = ACCEL_SCALE_2G;
-            break;
-        case ACCEL_RANGE_4G:
-            m_accelScale = ACCEL_SCALE_4G;
-            break;
-        case ACCEL_RANGE_8G:
-            m_accelScale = ACCEL_SCALE_8G;
-            break;
-        case ACCEL_RANGE_16G:
-            m_accelScale = ACCEL_SCALE_16G;
-            break;
-    }
+    m_accelScale = rangeToScaleAccel[range];
 
     writeByte(MPU6050_REG_ACCEL_CONFIG, range);
 }
 
 void MPU6050::setGyroSensitivity(GyroSensitivity range){
-    switch(range){
-        case GYRO_RANGE_250_DEG:
-            m_gyroScale = GYRO_SCALE_250_DEG;
-            break;
-        case GYRO_RANGE_500_DEG:
-            m_gyroScale = GYRO_SCALE_500_DEG;
-            break;
-        case GYRO_RANGE_1000_DEG:
-            m_gyroScale = GYRO_SCALE_1000_DEG;
-            break;
-        case GYRO_RANGE_2000_DEG:
-            m_gyroScale = GYRO_SCALE_2000_DEG;
-            break;
-    }
+    m_gyroScale = rangeToScaleGyro[range];
 
     writeByte(MPU6050_REG_GYRO_CONFIG, range);
 }
