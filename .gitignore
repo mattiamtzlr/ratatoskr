@@ -1,4 +1,7 @@
 .cache
 .pio
+.vscode
 compile_commands.json
+*.gcode
+*.bgcode
 out
