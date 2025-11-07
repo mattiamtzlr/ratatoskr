@@ -1,9 +1,33 @@
 #include <Arduino.h>
 
+#include "gear_motor.hpp"
+
+#define MOTOR_IN1 18
+#define MOTOR_IN2 19
+#define ENC_OUT1 5
+#define ENC_OUT2 21
+
+GearMotor motor(MOTOR_IN1, MOTOR_IN2, ENC_OUT1, ENC_OUT2, 50);
+
 void setup() {
-    Serial.println("Hello, World!");
+    Serial.begin(115200);
+
+    pinMode(MOTOR_IN1, OUTPUT);
+    pinMode(MOTOR_IN2, OUTPUT);
+    pinMode(ENC_OUT1, INPUT);
+    pinMode(ENC_OUT2, INPUT);
+
+    attachInterruptArg(digitalPinToInterrupt(ENC_OUT2), motor.isr_trampoline,
+                       &motor, RISING);
 }
-
 void loop() {
-
+    Serial.println("starting...");
+    motor.stop();
+    motor.spin_ccw(60);
+    delay(2000);
+    while (1) {
+        delay(100);
+        Serial.println(motor.get_rpm());
+    }
+    motor.stop();
 }
