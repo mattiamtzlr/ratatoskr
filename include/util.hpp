@@ -14,3 +14,9 @@ std::map<Direction, char> dirToCardinalChar = {
     {NONE, '\0'}, {NORTH, 'n'}, {EAST, 'e'}, {SOUTH, 's'}, {WEST, 'w'}};
 std::map<char, Direction> cardinalCharToDir = {
     {'\0', NONE}, {'n', NORTH}, {'e', EAST}, {'s', SOUTH}, {'w', WEST}};
+
+struct Position {
+    size_t x;
+    size_t y;
+    Position(size_t x, size_t y) : x(x), y(y) {}
+};

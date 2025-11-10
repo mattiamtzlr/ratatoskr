@@ -22,3 +22,12 @@ int Mouse::mazeHeight() {
 int Mouse::mazeWidth() {
     return m_maze.maze_width();
 }
+
+void Mouse::setPosition(int x, int y) {
+    pos.x = x;
+    pos.y = y;
+}
+
+Position Mouse::getPosition() {
+    return pos;
+}

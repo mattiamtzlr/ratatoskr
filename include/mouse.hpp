@@ -1,9 +1,11 @@
 #pragma once
 #include "maze.hpp"
+#include "util.hpp"
 
 class Mouse {
   private:
     Maze &m_maze;
+    Position pos = Position(0,0);
 
   public:
     Mouse(Maze &maze);
@@ -16,6 +18,9 @@ class Mouse {
 
     int mazeWidth();
     int mazeHeight();
+
+    void setPosition(int x, int y);
+    Position getPosition();
 
     virtual void moveForward(int distance = 1) = 0;
     virtual void turn(int angle) = 0;
