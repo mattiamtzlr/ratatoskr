@@ -1,14 +1,15 @@
 #include "mouse.hpp"
 #include "maze.hpp"
+#include "util.hpp"
 
 void Mouse::turnLeft() {
     turn(90);
-    dir = (Direction)((dir + 3) % 4);
+    dir = rotate_left(dir);
 }
 
 void Mouse::turnRight() {
     turn(-90);
-    dir = (Direction)((dir + 1) % 4);
+    dir = rotate_right(dir);
 }
 
 void Mouse::moveForward(int distance) {
@@ -23,4 +24,8 @@ void Mouse::setPosition(int x, int y) {
 
 Position Mouse::getPosition() {
     return pos;
+}
+
+Direction Mouse::getDirection() {
+    return dir;
 }

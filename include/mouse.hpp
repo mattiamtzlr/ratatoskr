@@ -12,6 +12,7 @@ class Mouse {
 
     void setPosition(int x, int y);
     Position getPosition();
+    Direction getDirection();
 
     // Call this method inside the overriding method in the derived class!
     virtual void moveForward(int distance = 1);
