@@ -1,27 +1,12 @@
 #pragma once
-#include "gear_motor.hpp"
-#include "gyro.hpp"
-#include "led_matrix.hpp"
 #include "maze.hpp"
-#include "tof.hpp"
-#include "util.hpp"
 
 class Mouse {
-   private:
+  private:
     Maze &m_maze;
-    GearMotor &m_motor_left;
-    GearMotor &m_motor_right;
-    ToF &m_tof_left;
-    ToF &m_tof_front_left;
-    ToF &m_tof_front_right;
-    ToF &m_tof_right;
-    MPU6050 &m_gyro;
-    LEDMatrix &m_screen;
 
-   public:
-    Mouse(Maze &maze, GearMotor &motor_right, GearMotor &motor_left,
-          ToF &tof_left, ToF &tof_front_left, ToF &tof_front_right,
-          ToF &tof_right, MPU6050 &gyro, LEDMatrix &screen);
+  public:
+    Mouse(Maze &maze);
 
     void turnLeft();
     void turnRight();
