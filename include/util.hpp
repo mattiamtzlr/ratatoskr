@@ -2,17 +2,16 @@
 #include <map>
 
 enum Direction {
-    NONE = 0b0000,
-    NORTH = 0b1000,
-    EAST = 0b0100,
-    SOUTH = 0b0010,
-    WEST = 0b0001,
+    NORTH = 0,
+    EAST = 1,
+    SOUTH = 2,
+    WEST = 3,
 };
 
 std::map<Direction, char> dirToCardinalChar = {
-    {NONE, '\0'}, {NORTH, 'n'}, {EAST, 'e'}, {SOUTH, 's'}, {WEST, 'w'}};
+    {NORTH, 'n'}, {EAST, 'e'}, {SOUTH, 's'}, {WEST, 'w'}};
 std::map<char, Direction> cardinalCharToDir = {
-    {'\0', NONE}, {'n', NORTH}, {'e', EAST}, {'s', SOUTH}, {'w', WEST}};
+    {'n', NORTH}, {'e', EAST}, {'s', SOUTH}, {'w', WEST}};
 
 struct Position {
     size_t x;
