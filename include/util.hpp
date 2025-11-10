@@ -8,9 +8,9 @@ enum Direction {
     WEST = 3,
 };
 
-std::map<Direction, char> dirToCardinalChar = {
+static std::map<Direction, char> dirToCardinalChar = {
     {NORTH, 'n'}, {EAST, 'e'}, {SOUTH, 's'}, {WEST, 'w'}};
-std::map<char, Direction> cardinalCharToDir = {
+static std::map<char, Direction> cardinalCharToDir = {
     {'n', NORTH}, {'e', EAST}, {'s', SOUTH}, {'w', WEST}};
 
 struct Position {

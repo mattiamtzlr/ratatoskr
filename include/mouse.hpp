@@ -26,6 +26,4 @@ class Mouse {
 
     virtual bool wasReset() = 0;
     virtual void ackReset() = 0;
-
-    virtual ~Mouse() = 0;
 };
