@@ -6,6 +6,7 @@
 #include "tof.hpp"
 #include "util.hpp"
 #include "mouse.hpp"
+#include <Arduino.h>
 
 class Ratatoskr : public Mouse {
    private:

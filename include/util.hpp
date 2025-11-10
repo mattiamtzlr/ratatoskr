@@ -1,6 +1,5 @@
 #pragma once
 #include <map>
-#include "Arduino.h"
 
 enum Direction {
     NONE = 0b0000,

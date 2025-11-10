@@ -18,7 +18,7 @@ Ratatoskr::Ratatoskr(Maze &maze, GearMotor &motor_left, GearMotor &motor_right,
  * turn @angle radians in counterclockwise direction
  */
 void Ratatoskr::turn(int angle) {
-  time_to_turn = PERIOD / (360*angle) // relation using angle
+  float time_to_turn = PERIOD / (360*angle); // relation using angle
   if (angle > 0) {                    // move right wheel forward, left wheel back
     m_motor_left.spin_cw(TURN_PWM);
     m_motor_right.spin_cw(TURN_PWM);
@@ -34,7 +34,7 @@ void Ratatoskr::turn(int angle) {
  * move @distance [one cell (16 cm)] forwards
  */
 void Ratatoskr::moveForward(int distance) {
-  time_forward = distance * TIME_PER_CELL;
+  float time_forward = distance * TIME_PER_CELL;
   m_motor_left.spin_ccw(FORWARD_PWM);
   m_motor_right.spin_cw(FORWARD_PWM);
   delay(time_forward);
