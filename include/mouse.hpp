@@ -1,24 +1,14 @@
 #pragma once
-#include "maze.hpp"
 #include "util.hpp"
 
 class Mouse {
   private:
-    Maze &m_maze;
     Position pos = Position(0,0);
     Direction dir = NORTH;
 
   public:
-    Mouse(Maze &maze);
-
     void turnLeft();
     void turnRight();
-
-    void setWall(int x, int y, char direction);
-    void clearWall(int x, int y, char direction);
-
-    int mazeWidth();
-    int mazeHeight();
 
     void setPosition(int x, int y);
     Position getPosition();
