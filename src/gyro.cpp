@@ -1,6 +1,4 @@
 #include "gyro.hpp"
-#include <Arduino.h>
-#include <map>
 
 // Scale convertions for Accel
 static constexpr float ACCEL_SCALE_2G = 16384.0f;

@@ -1,4 +1,5 @@
-#include <Arduino.h>
+#pragma once
+#include "util.hpp"
 #include <SD.h>
 
 #include <cstddef>

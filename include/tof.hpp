@@ -1,3 +1,4 @@
+#include "util.hpp"
 #include <Adafruit_VL53L1X.h>
 #include <Wire.h>
 // Valid timing budgets: 15, 20, 33, 50, 100, 200 and 500ms! (from lib)

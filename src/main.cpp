@@ -1,5 +1,4 @@
-#include "Adafruit_VL53L1X.h"
-#include "ToF.hpp"
+#include "tof.hpp"
 
 ToF tof = ToF(LEFT, 0x29);  // rip xshut and irq
 

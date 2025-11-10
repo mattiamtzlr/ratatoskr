@@ -1,4 +1,4 @@
-#include "ToF.hpp"
+#include "tof.hpp"
 
 ToF::ToF(SensorPosition position, uint8_t i2c_address)
     : position(position), i2c_address(i2c_address) {
