@@ -19,6 +19,7 @@ class Mouse {
 
     virtual void moveForward(int distance = 1) = 0;
     virtual void turn(int angle) = 0;
+    
 
     virtual bool wallFront() = 0;
     virtual bool wallRight() = 0;

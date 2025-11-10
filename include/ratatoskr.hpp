@@ -17,6 +17,7 @@ class Ratatoskr : public Mouse {
     ToF &m_tof_right;
     MPU6050 &m_gyro;
     LEDMatrix &m_screen;
+    
 
    public:
     Ratatoskr(Maze &maze, GearMotor &motor_right, GearMotor &motor_left,
@@ -32,4 +33,11 @@ class Ratatoskr : public Mouse {
 
     virtual bool wasReset();
     virtual void ackReset();
+
+    static const float    PERIOD;           // TODO: we compute this by recording 360/T 
+    static const u_int8_t TURN_PWM = 100;   // TODO: we set this arbiturarily
+
+    static const float    TIME_PER_CELL;    // TODO: we compute this by how long rat goes 16 cm
+    static const u_int8_t FORWARD_PWM = 150;// TODO: we set this arbiturarily
+    inline void stop();
 };
