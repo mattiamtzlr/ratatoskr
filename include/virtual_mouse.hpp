@@ -1,6 +1,7 @@
 #pragma once
 
 #include "mouse.hpp"
+#include "API.hpp"
 
 class VirtualMouse : public Mouse {
 
