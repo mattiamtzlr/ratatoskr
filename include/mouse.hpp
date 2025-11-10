@@ -6,6 +6,7 @@ class Mouse {
   private:
     Maze &m_maze;
     Position pos = Position(0,0);
+    Direction dir = NORTH;
 
   public:
     Mouse(Maze &maze);
@@ -22,9 +23,11 @@ class Mouse {
     void setPosition(int x, int y);
     Position getPosition();
 
-    virtual void moveForward(int distance = 1) = 0;
+    // Call this method inside the overriding method in the derived class!
+    virtual void moveForward(int distance = 1);
+
     virtual void turn(int angle) = 0;
-    
+
 
     virtual bool wallFront() = 0;
     virtual bool wallRight() = 0;

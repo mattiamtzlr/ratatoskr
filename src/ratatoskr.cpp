@@ -34,6 +34,7 @@ void Ratatoskr::turn(int angle) {
  * move @distance [one cell (16 cm)] forwards
  */
 void Ratatoskr::moveForward(int distance) {
+  Mouse::moveForward(distance); // Don't remove this, this updates the position of the mouse in the maze!
   float time_forward = distance * TIME_PER_CELL;
   m_motor_left.spin_ccw(FORWARD_PWM);
   m_motor_right.spin_cw(FORWARD_PWM);

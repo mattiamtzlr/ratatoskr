@@ -2,6 +2,7 @@
 #include "API.hpp"
 
 void VirtualMouse::moveForward(int distance) {
+    Mouse::moveForward(distance);
     API::moveForward(distance);
 }
 void VirtualMouse::turn(int angle) {
