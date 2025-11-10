@@ -1,9 +1,11 @@
 #include "virtual_mouse.hpp"
 #include "API.hpp"
+#include "util.hpp"
 
 void VirtualMouse::moveForward(int distance) {
     Mouse::moveForward(distance);
     API::moveForward(distance);
+    API::setColor(getPosition().x, getPosition().y, 'G');
 }
 void VirtualMouse::turn(int angle) {
     if (angle == 90) API::turnLeft();
@@ -12,15 +14,26 @@ void VirtualMouse::turn(int angle) {
 }
 
 bool VirtualMouse::wallFront() {
-    return API::wallFront();
+    if (API::wallFront()) {
+        API::setWall(getPosition().x, getPosition().y, dirToCardinalChar[getDirection()]);
+        return true;
+    }
+    return false;
 
 }
 bool VirtualMouse::wallRight() {
-    return API::wallRight();
-
+    if (API::wallRight()) {
+        API::setWall(getPosition().x, getPosition().y, dirToCardinalChar[rotate_right(getDirection())]);
+        return true;
+    }
+    return false;
 }
 bool VirtualMouse::wallLeft() {
-    return API::wallLeft();
+    if (API::wallLeft()) {
+        API::setWall(getPosition().x, getPosition().y, dirToCardinalChar[rotate_left(getDirection())]);
+        return true;
+    }
+    return false;
 }
 
 bool VirtualMouse::wasReset() {
