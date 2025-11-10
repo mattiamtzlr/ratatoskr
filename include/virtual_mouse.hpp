@@ -1,0 +1,16 @@
+#pragma once
+
+#include "mouse.hpp"
+
+class VirtualMouse : public Mouse {
+
+    virtual void moveForward(int distance = 1);
+    virtual void turn(int angle);
+
+    virtual bool wallFront();
+    virtual bool wallRight();
+    virtual bool wallLeft();
+
+    virtual bool wasReset();
+    virtual void ackReset();
+};
