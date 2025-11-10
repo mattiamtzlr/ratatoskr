@@ -19,3 +19,13 @@ int Maze::maze_height() {
 int Maze::maze_width() {
     return MAZE_WIDTH;
 }
+
+bool Maze::at_target(Position pos) {
+    for (int i = 0; i < 4; i++) {
+        if (targets[i].x == pos.x &&
+            targets[i].y == pos.y) {
+            return true;
+        }
+    }
+    return false;
+}
