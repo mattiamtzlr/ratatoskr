@@ -21,7 +21,7 @@ class Ratatoskr : public Mouse {
     
 
    public:
-    Ratatoskr(Maze &maze, GearMotor &motor_right, GearMotor &motor_left,
+    Ratatoskr(Maze &maze, GearMotor &motor_left, GearMotor &motor_right,
               ToF &tof_left, ToF &tof_front_left, ToF &tof_front_right,
               ToF &tof_right, MPU6050 &gyro, LEDMatrix &screen);
 
@@ -41,4 +41,7 @@ class Ratatoskr : public Mouse {
     static const float    TIME_PER_CELL;    // TODO: we compute this by how long rat goes 16 cm
     static const u_int8_t FORWARD_PWM = 150;// TODO: we set this arbiturarily
     inline void stop();
+
+    static const uint16_t FRONT_WALL_MM = 110;   // front considered blocked if any front ToF < this
+    static const uint16_t SIDE_WALL_MM  = 70;    // side considered blocked if side ToF < this
 };

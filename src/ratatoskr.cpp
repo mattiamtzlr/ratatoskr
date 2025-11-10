@@ -48,6 +48,37 @@ void Ratatoskr::stop() {
 }
 
 //===============================[ SENSING ]====================================
-bool Ratatoskr::wallFront() {}
-bool Ratatoskr::wallRight() {}
-bool Ratatoskr::wallLeft() {}
+// Below 15 cm (or 10)
+/**
+ * Front wall if either front-left or front-right ToF sees something closer than FRONT_WALL_MM.
+ * Ignores zero readings (sensor not ready).
+ */
+bool Ratatoskr::wallFront() {
+  const uint16_t d_fl = m_tof_front_left.read();
+  const uint16_t d_fr = m_tof_front_right.read();
+
+  const bool fl_valid = (d_fl > 0);
+  const bool fr_valid = (d_fr > 0);
+
+  const bool fl_block = fl_valid && (d_fl < FRONT_WALL_MM);
+  const bool fr_block = fr_valid && (d_fr < FRONT_WALL_MM);
+
+  // If only one is valid, use it; if both, OR; if none, assume no wall
+  return fl_block || fr_block;
+}
+
+/**
+ * Right wall if right ToF < SIDE_WALL_MM (ignoring zeros).
+ */
+bool Ratatoskr::wallRight() {
+  const uint16_t d_r = m_tof_right.read();
+  return (d_r > 0) && (d_r < SIDE_WALL_MM);
+}
+
+/**
+ * Left wall if left ToF < SIDE_WALL_MM (ignoring zeros).
+ */
+bool Ratatoskr::wallLeft() {
+  const uint16_t d_l = m_tof_left.read();
+  return (d_l > 0) && (d_l < SIDE_WALL_MM);
+}
