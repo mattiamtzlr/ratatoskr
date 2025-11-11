@@ -1,6 +1,6 @@
 #include "ratatoskr.hpp"
-#define PERIOD 2000.0
-#define TIME_PER_CELL 2000.0
+#define PERIOD 868.75
+#define TIME_PER_CELL 250.0
 Ratatoskr::Ratatoskr(GearMotor &motor_left, GearMotor &motor_right,
                      ToF &tof_left, ToF &tof_front_left, ToF &tof_front_right,
                      ToF &tof_right /*, MPU6050 &gyro, LEDMatrix &screen*/)
@@ -25,7 +25,7 @@ Ratatoskr::Ratatoskr(GearMotor &motor_left, GearMotor &motor_right,
  */
 void Ratatoskr::turn(int angle) {
     // TODO: use gyro to close the loop; for now, differential spin.
-    float time_to_turn = PERIOD / (360 * angle);  // relation using angle
+    float time_to_turn = PERIOD * std::abs(angle) / 360;  // relation using angle
     if (angle > 0) {  // move right wheel forward, left wheel back
         m_motor_left.spin_cw(TURN_PWM);
         m_motor_right.spin_cw(TURN_PWM);
@@ -49,7 +49,7 @@ void Ratatoskr::moveForward(int distance) {
     u_int8_t pwm_left = FORWARD_PWM;
     u_int8_t pwm_right = FORWARD_PWM;
 
-    for (int i = 0; i < 10; i++) {
+    for (int i = 0; i < 20; i++) {
         if (m_motor_left.get_rpm() > m_motor_right.get_rpm()) {
             pwm_right += 10;
             pwm_left -= 10;
@@ -61,7 +61,7 @@ void Ratatoskr::moveForward(int distance) {
         m_motor_left.spin_ccw(pwm_left);
         m_motor_right.spin_cw(pwm_right);
         // timing/odometry goes here
-        delay(time_forward / 10);
+        delay(time_forward / 20);
     }
     stop();
 }

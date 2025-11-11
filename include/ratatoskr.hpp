@@ -26,11 +26,11 @@ class Ratatoskr : public Mouse {
               ToF &tof_right /*, MPU6050 &gyro, LEDMatrix &screen*/);
 
     // static const float PERIOD;  // TODO: we compute this by recording 360/T
-    static const u_int8_t TURN_PWM = 100;  // TODO: we set this arbiturarily
+    static const u_int8_t TURN_PWM = 150;  // TODO: we set this arbitrarily 
 
     // static const float TIME_PER_CELL;  // TODO: how long rat goes 16 cm
 
-    static const u_int8_t FORWARD_PWM = 150;  // TODO: we set this arbiturarily
+    static const u_int8_t FORWARD_PWM = 170;  // TODO: we set this arbiturarily
 
     inline void stop();
 
