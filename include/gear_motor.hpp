@@ -1,4 +1,5 @@
 #pragma once
+#include <Arduino.h>
 #include "util.hpp"
 
 // TODO: This is no longer the one we use : [Adafruit DRV8871 DC Motor Driver

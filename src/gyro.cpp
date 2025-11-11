@@ -37,13 +37,8 @@ bool MPU6050::begin(){
     uint8_t device_id = readByte(MPU6050_REG_WHO_AM_I);
     
     if (device_id != 0x68) {
-        Serial.print("MPU6050 Error: Device ID 0x");
-        Serial.print(device_id, HEX);
-        Serial.println(" != 0x68.");
         return false;
     }
-    
-    Serial.println("MPU6050 initialized successfully.");
     return true;
 }
 
