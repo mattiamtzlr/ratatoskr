@@ -240,43 +240,46 @@ void Solver::solve() {
     paint_colors(visited, compute_blue_route(x, y));
 
 
+    int order_of_direction[4] = {heading, (heading + 3) % 4, (heading + 1) % 4,
+                                 (heading + 2) % 4};
+    // Popluate the maze from the starting position
+    sense(x, y, heading);
+    recompute();
     // Run
-    while (true) {
-        sense(x, y, heading);
-        recompute();
-        paint_colors(visited, compute_blue_route(x, y));
+    while (!is_goal(x, y)) {
 
-        if (is_goal(x, y)) {
-            std::cerr << "Reached center! Stopping (discovery run)."
-                      << std::endl;
-            break;
-        }
-
-        // choose neighbor with smallest dist; order: left, forward, right, back
-        int best_dir = -1, best_val = INF;
-        int order[4] = {(heading + 3) % 4, heading, (heading + 1) % 4,
-                        (heading + 2) % 4};
+        int best_dir = -1;
+        int best_val = INF;
         for (int k = 0; k < 4; ++k) {
-            int d = order[k];
-            int nx = x + dx(d), ny = y + dy(d);
-            if (!in_bounds(nx, ny)) continue;
-            if (known[x][y][d] && walls[x][y][d]) continue;
-            if (dist[nx][ny] < best_val) {
-                best_val = dist[nx][ny];
-                best_dir = d;
+            int next_x = x + dx(order_of_direction[k]);
+            int next_y = y + dy(order_of_direction[k]);
+
+            if (!in_bounds(next_x, next_y)) continue;
+
+            if (known[x][y][order_of_direction[k]] &&
+                walls[x][y][order_of_direction[k]])
+                continue;
+
+            if (dist[next_x][next_y] < best_val) {
+                best_val = dist[next_x][next_y];
+                best_dir = order_of_direction[k];
             }
         }
 
-        if (best_dir == (heading + 3) % 4) {
-            std::cerr << "Decision: prefer LEFT among equal distances"
-                      << std::endl;
-        }
+        heading = face(best_dir, heading);
+        move_forward(x, y, heading);
+        paint_colors(visited, compute_blue_route(x, y));
+        sense(x, y, heading);
+        recompute();
 
+        /* This is an advanced technique necessary in some mazes, superfluous
+        for now
         // relax local minima
         if (best_dir == -1 || best_val >= dist[x][y]) {
             int m = INF;
             for (int d : {NORTH, EAST, SOUTH, WEST}) {
-                int nx = x + dx(d), ny = y + dy(d);
+                int nx = x + dx(d);
+                int ny = y + dy(d);
                 if (!in_bounds(nx, ny)) continue;
                 if (known[x][y][d] && walls[x][y][d]) continue;
                 m = std::min(m, dist[nx][ny]);
@@ -289,10 +292,7 @@ void Solver::solve() {
             }
             continue;
         }
-
-        heading = face(best_dir, heading);
-        move_forward(x, y, heading);
-        paint_colors(visited, compute_blue_route(x, y));
+        */
     }
 }
 
