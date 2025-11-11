@@ -1,6 +1,10 @@
 #include "mouse.hpp"
+
 #include "maze.hpp"
 #include "util.hpp"
+
+int Mouse::mazeWidth() { return MAZE_WIDTH; }
+int Mouse::mazeHeight() { return MAZE_HEIGHT; }
 
 void Mouse::turnLeft() {
     turn(90);
@@ -13,8 +17,8 @@ void Mouse::turnRight() {
 }
 
 void Mouse::moveForward(int distance) {
-    pos.y += distance * (dir == NORTH) - (dir == SOUTH);
-    pos.x += distance * (dir == EAST) - (dir == WEST);
+    pos.y += distance * ((dir == NORTH) - (dir == SOUTH));
+    pos.x += distance * ((dir == EAST) - (dir == WEST));
 }
 
 void Mouse::setPosition(int x, int y) {
@@ -22,10 +26,6 @@ void Mouse::setPosition(int x, int y) {
     pos.y = y;
 }
 
-Position Mouse::getPosition() {
-    return pos;
-}
+Position Mouse::getPosition() { return pos; }
 
-Direction Mouse::getDirection() {
-    return dir;
-}
+Direction Mouse::getDirection() { return dir; }

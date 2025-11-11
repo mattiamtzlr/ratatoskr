@@ -3,8 +3,8 @@
 #include <cstddef>
 #include "util.hpp"
 
-constexpr int MAZE_WIDTH  = 8;
-constexpr int MAZE_HEIGHT = 8;
+constexpr int MAZE_WIDTH  = 16;
+constexpr int MAZE_HEIGHT = 16;
 
 class Maze {
   private:

@@ -39,8 +39,8 @@ void Solver::solve() {
     // member access ->
     auto bstr = [&](bool v) -> const char * { return v ? "True" : "False"; };
 
-    int width = API::mazeWidth();
-    int height = API::mazeHeight();
+    int width = m_mouse.mazeWidth();
+    int height = m_mouse.mazeHeight();
 
     std::cerr << "Start. Maze size = " << width << " x " << height << std::endl;
 
@@ -68,17 +68,17 @@ void Solver::solve() {
         walls[x][y][d] = is_wall;
         known[x][y][d] = true;
         if (is_wall)
-            API::setWall(x, y, dir_char(d));
+            m_mouse.setWall(x, y, dir_char(d));
         else
-            API::clearWall(x, y, dir_char(d));
+            m_mouse.clearWall(x, y, dir_char(d));
         if (in_bounds(nx, ny)) {
             int od = opposite(d);
             walls[nx][ny][od] = is_wall;
             known[nx][ny][od] = true;
             if (is_wall)
-                API::setWall(nx, ny, dir_char(od));
+                m_mouse.setWall(nx, ny, dir_char(od));
             else
-                API::clearWall(nx, ny, dir_char(od));
+                m_mouse.clearWall(nx, ny, dir_char(od));
         }
     };
 
@@ -137,9 +137,9 @@ void Solver::solve() {
         for (int x = 0; x < width; ++x)
             for (int y = 0; y < height; ++y)
                 if (dist[x][y] < INF)
-                    API::setText(x, y, std::to_string(dist[x][y]));
+                    m_mouse.setText(x, y, std::to_string(dist[x][y]));
                 else
-                    API::setText(x, y, "");
+                    m_mouse.setText(x, y, "");
     };
 
     // Blue route preview
@@ -180,9 +180,9 @@ void Solver::solve() {
     // Paint overlays
     auto paint_colors = [&](const std::set<std::pair<int, int>> &visited,
                             const std::vector<std::pair<int, int>> &blue) {
-        API::clearAllColor();
-        for (auto &p : visited) API::setColor(p.first, p.second, 'G');
-        for (auto &p : blue) API::setColor(p.first, p.second, 'B');
+        m_mouse.clearAllColor();
+        for (auto &p : visited) m_mouse.setColor(p.first, p.second, 'G');
+        for (auto &p : blue) m_mouse.setColor(p.first, p.second, 'B');
     };
 
     // Start
@@ -194,14 +194,14 @@ void Solver::solve() {
 
     // Movement helpers with logs
     auto turn_left = [&]() {
-        API::turnLeft();
+        m_mouse.turnLeft();
         heading = (heading + 3) % 4;
         std::cerr << "Turn left with heading " << dir_letter(heading)
                   << std::endl;
         return heading;
     };
     auto turn_right = [&]() {
-        API::turnRight();
+        m_mouse.turnRight();
         heading = (heading + 1) % 4;
         std::cerr << "Turn right with heading " << dir_letter(heading)
                   << std::endl;
@@ -220,7 +220,7 @@ void Solver::solve() {
         return h;
     };
     auto move_forward = [&](int &cx, int &cy, int h) {
-        API::moveForward(1);
+        m_mouse.moveForward(1);
         cx += dx(h);
         cy += dy(h);
         visited.insert({cx, cy});
@@ -230,9 +230,9 @@ void Solver::solve() {
 
     // Sense & log
     auto sense = [&](int cx, int cy, int h) {
-        bool front = API::wallFront();
-        bool left = API::wallLeft();
-        bool right = API::wallRight();
+        bool front = m_mouse.wallFront();
+        bool left = m_mouse.wallLeft();
+        bool right = m_mouse.wallRight();
         std::cerr << "Sensed @(" << cx << "," << cy << ") F:" << bstr(front)
                   << " L:" << bstr(left) << " R:" << bstr(right) << std::endl;
         std::pair<int, bool> dir_map[3] = {{0, front}, {3, left}, {1, right}};

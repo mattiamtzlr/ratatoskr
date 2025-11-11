@@ -35,11 +35,37 @@ bool VirtualMouse::wallLeft() {
     }
     return false;
 }
+void VirtualMouse::setWall(int x, int y, char direction) {
+    API::setWall(x, y, direction);
+}
+void VirtualMouse::clearWall(int x, int y, char direction) {
+    API::clearWall(x, y, direction);
+}
+
+void VirtualMouse::setColor(int x, int y, char color) {
+    API::setColor(x, y, color);
+}
+void VirtualMouse::clearColor(int x, int y) {
+    API::clearColor(x, y);
+}
+void VirtualMouse::clearAllColor() {
+    API::clearAllColor();
+}
+
+void VirtualMouse::setText(int x, int y, const std::string& text) {
+    API::setText(x, y, text);
+}
+void VirtualMouse::clearText(int x, int y) {
+    API::clearText(x, y);
+}
+void VirtualMouse::clearAllText() {
+    API::clearAllText();
+}
 
 bool VirtualMouse::wasReset() {
     return API::wasReset();
 
 }
-void VirtualMouse::ackReset() {
+void VirtualMouse::VirtualMouse::ackReset() {
     return API::ackReset();
 }
