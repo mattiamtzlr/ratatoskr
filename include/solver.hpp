@@ -33,16 +33,15 @@ class Solver {
     std::vector<std::pair<int, int>> goals;
     std::set<std::pair<int, int>> visited;
 
-
     void set_wall(int x, int y, Direction d, bool is_wall);
     void bfs_recompute();
+    void update_text();
 
     std::vector<std::pair<int, int>> compute_blue_route(int sx, int sy);
 
     // Paint overlays
     void paint_colors(const std::set<std::pair<int, int>> &visited,
                       const std::vector<std::pair<int, int>> &blue);
-
 
     void face(Direction target_dir);
 

@@ -30,8 +30,8 @@ void Solver::set_wall(int x, int y, Direction d, bool is_wall) {
 // Flood-fill bfs_recompute (and paint numbers)
 void Solver::bfs_recompute() {
     m_maze.reset_distances();
-
     std::deque<Position> q;
+
     for (Position &g : m_maze.targets) {
         m_maze.set_distance(g.x, g.y, 0);
         q.push_back(g);
@@ -52,7 +52,8 @@ void Solver::bfs_recompute() {
             }
         }
     }
-
+};
+void Solver::update_text() {
     for (int x = 0; x < width; ++x)
         for (int y = 0; y < height; ++y)
             if (m_maze.get_distance(x, y) < INF)
@@ -60,7 +61,7 @@ void Solver::bfs_recompute() {
                                 std::to_string(m_maze.get_distance(x, y)));
             else
                 m_mouse.setText(x, y, "");
-};
+}
 
 // Blue route preview
 std::vector<std::pair<int, int>> Solver::compute_blue_route(int sx, int sy) {
@@ -71,7 +72,7 @@ std::vector<std::pair<int, int>> Solver::compute_blue_route(int sx, int sy) {
     int y = sy;
 
     while (!m_maze.at_target(m_mouse.getPosition())) {
-        int best_d = -1;
+        Direction best_d = NORTH;
         int best_v = INF;
 
         for (Direction d : {NORTH, EAST, SOUTH, WEST}) {
@@ -143,19 +144,10 @@ void Solver::solve() {
     }
     */
 
-    // Goals (center)
-    if (width % 2 == 0 && height % 2 == 0) {
-        goals = {{width / 2 - 1, height / 2 - 1},
-                 {width / 2, height / 2 - 1},
-                 {width / 2 - 1, height / 2},
-                 {width / 2, height / 2}};
-    } else {
-        goals = {{width / 2, height / 2}};
-    }
-
     // Start
     visited.insert({x, y});
     bfs_recompute();
+    update_text();
     paint_colors(visited, compute_blue_route(x, y));
 
     Direction heading = m_mouse.getDirection();
@@ -165,6 +157,7 @@ void Solver::solve() {
     // Popluate the maze from the starting position
     detect_walls();
     bfs_recompute();
+    update_text();
     // Run
     while (!m_maze.at_target(m_mouse.getPosition())) {
         int best_dir = -1;
