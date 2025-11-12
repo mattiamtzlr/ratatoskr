@@ -7,6 +7,7 @@ ToF tof_left = ToF(LEFT, 0x29);
 ToF tof_left_front = ToF(FRONT_LEFT, 0x28);
 ToF tof_right_front = ToF(FRONT_RIGHT, 0x27);
 ToF tof_right = ToF(RIGHT, 0x26);
+MPU6050 gyro = MPU6050();
 
 /* left motor, pins in order of ESP => motor A resp. 1 */
 #define MOTOR_L_IN1 12
@@ -25,7 +26,7 @@ GearMotor motor_left(MOTOR_L_IN1, MOTOR_L_IN2, ENC_L_OUT1, ENC_L_OUT2, 50);
 GearMotor motor_right(MOTOR_R_IN1, MOTOR_R_IN2, ENC_R_OUT1, ENC_R_OUT2, 50);
 
 Ratatoskr rat(motor_left, motor_right, tof_left, tof_left_front,
-              tof_right_front, tof_right);
+              tof_right_front, tof_right, gyro);
 
 void disableWireless() {
     WiFi.mode(WIFI_OFF);
@@ -39,6 +40,7 @@ void setup() {
 
     Wire.begin();
     disableWireless();
+    gyro.begin();
 
     pinMode(MOTOR_L_IN1, OUTPUT);
     pinMode(MOTOR_L_IN2, OUTPUT);
