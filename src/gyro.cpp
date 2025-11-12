@@ -136,10 +136,18 @@ Vector3D MPU6050::readScaledAccel(){
 
 Vector3D MPU6050::readScaledGyro(){
     Vector3D raw = readRawGyro();
-    return rawToScaled(raw.x, raw.y, raw.z, m_gyroScale);
+    Vector3D scaled = rawToScaled(raw.x, raw.y, raw.z, m_gyroScale);
+    Vector3D scaled_and_unbiased = 
+        {
+            scaled.x - X_OFFSET,
+            scaled.y - Y_OFFSET,
+            scaled.z - Z_OFFSET
+        };
+    return scaled_and_unbiased;
 }
 
 float MPU6050::getAngle(time_t t_now, time_t t_last){
-    m_angle += (float)((t_now - t_last)*1e-6f);
+    Vector3D velocities = readScaledGyro();
+    m_angle += (float)((velocities.z)*(t_now - t_last)*1e-6f);
     return m_angle;
 }
