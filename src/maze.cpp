@@ -40,3 +40,12 @@ bool Maze::in_bounds(Position pos) {
 bool Maze::exists_wall(Position pos, Direction dir) {
     // the following should turn non-zero to true and zero to false.
     return (bool) (get_walls(pos) & 0b1 << dir); }
+
+bool Maze::is_dead_end(Position pos) {
+    for (Direction d : {NORTH, EAST, SOUTH, WEST}) {
+        if (!exists_wall(pos, d) && (get_distance(get_neighbor(pos, d)) < get_distance(pos))) {
+            return false;
+        }
+    }
+    return true;
+}

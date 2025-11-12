@@ -29,4 +29,5 @@ class Maze {
     bool at_target(Position pos);
     bool in_bounds(Position pos);
     bool exists_wall(Position pos, Direction dir);
+    bool is_dead_end(Position pos);
 };
