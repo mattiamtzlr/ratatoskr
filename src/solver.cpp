@@ -149,9 +149,6 @@ void Solver::solve() {
     paint_colors(visited, compute_blue_route(x, y));
 
     Direction heading = m_mouse.getDirection();
-    Direction order_of_direction[4] = {heading, rotate_left(heading),
-                                       rotate_right(heading),
-                                       rotate_half(heading)};
     // Popluate the maze from the starting position
     detect_walls();
     bfs_recompute();
@@ -160,18 +157,16 @@ void Solver::solve() {
     while (!m_maze.at_target(m_mouse.getPosition())) {
         int best_dir = -1;
         int best_val = INF;
-        for (int k = 0; k < 4; ++k) {
-            Position neighbor =
-                get_neighbor(Position(x, y), order_of_direction[k]);
+        for (Direction k : {NORTH, EAST, SOUTH, WEST}) {
+            Position neighbor = get_neighbor(m_mouse.getPosition(), k);
+
             if (!m_maze.in_bounds(neighbor)) continue;
 
-            if (known[x][y][order_of_direction[k]] &&
-                walls[x][y][order_of_direction[k]])
-                continue;
+            if (known[x][y][k] && walls[x][y][k]) continue;
 
             if (m_maze.get_distance(neighbor.x, neighbor.y) < best_val) {
                 best_val = m_maze.get_distance(neighbor.x, neighbor.y);
-                best_dir = order_of_direction[k];
+                best_dir = k;
             }
         }
 
@@ -180,6 +175,7 @@ void Solver::solve() {
         paint_colors(visited, compute_blue_route(x, y));
         detect_walls();
         bfs_recompute();
+        update_text();
     }
 }
 
