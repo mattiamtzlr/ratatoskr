@@ -11,7 +11,6 @@ Solver::Solver(Mouse &mouse, Maze &maze) : m_mouse(mouse), m_maze(maze) {
     known = std::vector<std::vector<std::array<bool, 4>>>(
         width,
         std::vector<std::array<bool, 4>>(height, {false, false, false, false}));
-    dist = std::vector<std::vector<int>>(width, std::vector<int>(height, INF));
 }
 
 void Solver::set_wall(int x, int y, Direction d, bool is_wall) {
@@ -30,12 +29,11 @@ void Solver::set_wall(int x, int y, Direction d, bool is_wall) {
 
 // Flood-fill bfs_recompute (and paint numbers)
 void Solver::bfs_recompute() {
-    for (int x = 0; x < width; ++x)
-        for (int y = 0; y < height; ++y) dist[x][y] = INF;
+    m_maze.reset_distances();
 
     std::deque<Position> q;
     for (Position &g : m_maze.targets) {
-        dist[g.x][g.y] = 0;
+        m_maze.set_distance(g.x, g.y, 0);
         q.push_back(g);
     }
 
@@ -47,18 +45,19 @@ void Solver::bfs_recompute() {
             int ny = pos.y + dy(d);
             if (!m_maze.in_bounds(Position(nx, ny))) continue;
             if (known[pos.x][pos.y][d] && walls[pos.x][pos.y][d]) continue;
-            int nd = dist[pos.x][pos.y] + 1;
-            if (nd < dist[nx][ny]) {
-                dist[nx][ny] = nd;
-                q.emplace_back(nx, ny);
+            int nd = m_maze.get_distance(pos.x, pos.y) + 1;
+            if (nd < m_maze.get_distance(nx, ny)) {
+                m_maze.set_distance(nx, ny, nd);
+                q.emplace_back(Position(nx, ny));
             }
         }
     }
 
     for (int x = 0; x < width; ++x)
         for (int y = 0; y < height; ++y)
-            if (dist[x][y] < INF)
-                m_mouse.setText(x, y, std::to_string(dist[x][y]));
+            if (m_maze.get_distance(x, y) < INF)
+                m_mouse.setText(x, y,
+                                std::to_string(m_maze.get_distance(x, y)));
             else
                 m_mouse.setText(x, y, "");
 };
@@ -79,8 +78,8 @@ std::vector<std::pair<int, int>> Solver::compute_blue_route(int sx, int sy) {
             int nx = x + dx(d), ny = y + dy(d);
             if (!m_maze.in_bounds(Position(nx, ny))) continue;
             if (known[x][y][d] && walls[x][y][d]) continue;
-            if (dist[nx][ny] < best_v) {
-                best_v = dist[nx][ny];
+            if (m_maze.get_distance(nx, ny) < best_v) {
+                best_v = m_maze.get_distance(nx, ny);
                 best_d = d;
             }
         }
@@ -164,9 +163,7 @@ void Solver::solve() {
                                        rotate_right(heading),
                                        rotate_half(heading)};
     // Popluate the maze from the starting position
-    std::cerr << "p1" << std::endl;
     detect_walls();
-    std::cerr << "p2" << std::endl;
     bfs_recompute();
     // Run
     while (!m_maze.at_target(m_mouse.getPosition())) {
@@ -182,8 +179,8 @@ void Solver::solve() {
                 walls[x][y][order_of_direction[k]])
                 continue;
 
-            if (dist[next_x][next_y] < best_val) {
-                best_val = dist[next_x][next_y];
+            if (m_maze.get_distance(next_x, next_y) < best_val) {
+                best_val = m_maze.get_distance(next_x, next_y);
                 best_dir = order_of_direction[k];
             }
         }
