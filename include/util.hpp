@@ -27,3 +27,5 @@ Direction rotate_half(Direction dir);
 
 int dx(Direction d);
 int dy(Direction d);
+
+Position get_neighbor(Position pos, Direction d);
