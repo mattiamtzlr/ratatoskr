@@ -3,23 +3,12 @@
 Solver::Solver(Mouse &mouse, Maze &maze) : m_mouse(mouse), m_maze(maze) {
     width = m_mouse.mazeWidth();
     height = m_mouse.mazeHeight();
-
-    known = std::vector<std::vector<std::array<bool, 4>>>(
-        width,
-        std::vector<std::array<bool, 4>>(height, {false, false, false, false}));
 }
 
-void Solver::set_wall(Position pos, Direction d, bool is_wall) {
-    if (!m_maze.in_bounds(pos)) return;
-    Position neighbor = get_neighbor(pos, d);
-    if (is_wall) m_maze.set_wall(pos, d);
-    known[pos.x][pos.y][d] = true;
-    if (is_wall) m_mouse.setWall(pos.x, pos.y, dirToCardinalChar[d]);
-    if (m_maze.in_bounds(neighbor)) {
-        Direction od = rotate_half(d);
-        if (is_wall) m_maze.set_wall(neighbor, od);
-        known[neighbor.x][neighbor.y][od] = true;
-    }
+void Solver::set_wall(Position pos, Direction d) {
+    m_maze.set_wall(pos, d);
+    Position front_neighbor = get_neighbor(pos, d);
+    if (m_maze.in_bounds(front_neighbor)) m_maze.set_wall(front_neighbor, rotate_half(d));
 };
 
 // Flood-fill bfs_recompute (and paint numbers)
@@ -38,7 +27,7 @@ void Solver::bfs_recompute() {
         for (Direction d : {NORTH, EAST, SOUTH, WEST}) {
             Position neighbor = get_neighbor(pos, d);
             if (!m_maze.in_bounds(neighbor)) continue;
-            if (known[pos.x][pos.y][d] && m_maze.exists_wall(pos, d)) continue;
+            if (m_maze.exists_wall(pos, d)) continue;
             int nd = m_maze.get_distance(pos) + 1;
             if (nd < m_maze.get_distance(neighbor)) {
                 m_maze.set_distance(neighbor, nd);
@@ -72,7 +61,7 @@ std::vector<std::pair<int, int>> Solver::compute_blue_route(int sx, int sy) {
         for (Direction d : {NORTH, EAST, SOUTH, WEST}) {
             Position neighbor = get_neighbor(pos, d);
             if (!m_maze.in_bounds(neighbor)) continue;
-            if (known[x][y][d] && m_maze.exists_wall(pos, d)) continue;
+            if (m_maze.exists_wall(pos, d)) continue;
             if (m_maze.get_distance(neighbor) < best_v) {
                 best_v = m_maze.get_distance(neighbor);
                 best_d = d;
@@ -116,13 +105,13 @@ void Solver::move_forward(int &cx, int &cy) {
 };
 
 // detect_walls & log
-void Solver::detect_walls() {
-    Direction heading = m_mouse.getDirection();
+void Solver::detect_and_set_walls() {
+    Direction forward = m_mouse.getDirection();
     Position pos = m_mouse.getPosition();
 
-    set_wall(pos, heading, m_mouse.wallFront());
-    set_wall(pos, rotate_left(heading), m_mouse.wallLeft());
-    set_wall(pos, rotate_right(heading), m_mouse.wallRight());
+    if (m_mouse.wallFront()) set_wall(pos, forward);
+    if (m_mouse.wallLeft()) set_wall(pos, rotate_left(forward));
+    if (m_mouse.wallRight()) set_wall(pos, rotate_right(forward));
 }
 
 void Solver::solve() {
@@ -145,7 +134,7 @@ void Solver::solve() {
 
     Direction heading = m_mouse.getDirection();
     // Popluate the maze from the starting position
-    detect_walls();
+    detect_and_set_walls();
     bfs_recompute();
     update_text();
     // Run
@@ -157,7 +146,7 @@ void Solver::solve() {
 
             if (!m_maze.in_bounds(neighbor)) continue;
 
-            if (known[x][y][k] && m_maze.exists_wall(Position(x,y), k)) continue;
+            if (m_maze.exists_wall(Position(x,y), k)) continue;
 
             if (m_maze.get_distance(neighbor) < best_val) {
                 best_val = m_maze.get_distance(neighbor);
@@ -168,7 +157,7 @@ void Solver::solve() {
         face((Direction)best_dir);
         move_forward(x, y);
         paint_colors(visited, compute_blue_route(x, y));
-        detect_walls();
+        detect_and_set_walls();
         bfs_recompute();
         update_text();
     }

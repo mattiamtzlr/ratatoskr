@@ -25,14 +25,11 @@ class Solver {
 
     const int INF = height * width + 1;
 
-    // walls[x][y][d], known[x][y][d], dist[x][y]
-    std::vector<std::vector<std::array<bool, 4>>> known;
-    std::vector<std::vector<int>> dist;
 
     std::vector<std::pair<int, int>> goals;
     std::set<std::pair<int, int>> visited;
 
-    void set_wall(Position pos, Direction d, bool is_wall);
+    void set_wall(Position pos, Direction d);
     void bfs_recompute();
     void update_text();
 
@@ -47,7 +44,7 @@ class Solver {
     void move_forward(int &cx, int &cy);
 
     // Sense & log
-    void detect_walls();
+    void detect_and_set_walls();
 
    public:
     void solve();
