@@ -1,27 +1,29 @@
-#include "ToF.hpp"
+#include <Arduino.h>
+#include "tof.hpp"
 
-ToF::ToF(SensorPosition position, uint8_t i2c_address)
-    : position(position), i2c_address(i2c_address) {
-    m_sensor = Adafruit_VL53L1X(0, 0);
+ToF::ToF(SensorPosition position, uint8_t i2c_address, int8_t xshut_pin)
+    : position(position), i2c_address(i2c_address), xshut_pin(xshut_pin) {
+        pinMode(xshut_pin, OUTPUT);
+        digitalWrite(xshut_pin, LOW);
+        delay(50);
+        digitalWrite(xshut_pin, HIGH);
+        delay(5);
+        if (!m_sensor.init(i2c_address)) {
+            Serial.printf("VL53L1X at pin %d failed to init\n", xshut_pin);
+            return ;
+        }
 }
 
 void ToF::start(TwoWire *wire) {
-    if (!m_sensor.begin(0x29, &Wire)) {
-        while (1) delay(10);
-    }
-    if (!m_sensor.startRanging()) {
-        while (1) delay(10);
-    }
-    // Valid timing budgets: 15, 20, 33, 50, 100, 200 and 500ms!
-    m_sensor.setTimingBudget(50);
+    Wire.begin();
+    m_sensor.startContinuous(TIMING_BUDGET);
 }
 
 bool ToF::dataReady() { return m_sensor.dataReady();}
 
 uint16_t ToF::read() {
     if (m_sensor.dataReady()) {
-        uint16_t distance = m_sensor.distance();
-        m_sensor.clearInterrupt();
+        uint16_t distance = m_sensor.read();
         return distance;
     }
     return 0;  // return 0 if not ready (same output in library)
