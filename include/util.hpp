@@ -22,3 +22,8 @@ struct Position {
 Direction rotate_right(Direction dir);
 
 Direction rotate_left(Direction dir);
+
+Direction rotate_half(Direction dir);
+
+int dx(Direction d);
+int dy(Direction d);

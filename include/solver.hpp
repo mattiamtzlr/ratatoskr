@@ -20,7 +20,8 @@ class Solver {
 
     int width;
     int height;
-    int x = 0, y = 0, heading = NORTH;
+    int x = 0;
+    int y = 0;
 
     const int INF = height * width + 1;
 
@@ -32,18 +33,9 @@ class Solver {
     std::vector<std::pair<int, int>> goals;
     std::set<std::pair<int, int>> visited;
 
-    char dir_char(int d);
-    char dir_letter(int d);
-    int dx(int d);
-    int dy(int d);
-    int opposite(int d);
-    const char *bstr(bool v);
 
-    bool in_bounds(int x, int y);
-    void set_wall(int x, int y, int d, bool is_wall);
-    bool is_goal(int x, int y);
-    void recompute();
-    long long key(int a, int b);
+    void set_wall(int x, int y, Direction d, bool is_wall);
+    void bfs_recompute();
 
     std::vector<std::pair<int, int>> compute_blue_route(int sx, int sy);
 
@@ -51,16 +43,13 @@ class Solver {
     void paint_colors(const std::set<std::pair<int, int>> &visited,
                       const std::vector<std::pair<int, int>> &blue);
 
-    // Movement helpers with logs
-    int turn_left();
-    int turn_right();
 
-    int face(int target_dir, int h);
+    void face(Direction target_dir);
 
-    void move_forward(int &cx, int &cy, int h);
+    void move_forward(int &cx, int &cy);
 
     // Sense & log
-    void sense(int cx, int cy, int h);
+    void detect_walls();
 
    public:
     void solve();
