@@ -8,7 +8,7 @@ void Maze::clear_wall(size_t x, size_t y, Direction d) {
     m_wall_storage[x][y] &= (~(0b1 << d));
 }
 
-int Maze::get_walls_at(size_t x, size_t y) { return m_wall_storage[x][y]; }
+int Maze::get_walls(size_t x, size_t y) { return m_wall_storage[x][y]; }
 
 void Maze::reset_distances() {
     for (int x = 0; x < MAZE_WIDTH; ++x)
@@ -36,3 +36,7 @@ bool Maze::in_bounds(Position pos) {
     return 0 <= pos.x && pos.x < MAZE_WIDTH && 0 <= pos.y &&
            pos.y < MAZE_HEIGHT;
 }
+
+bool Maze::exists_wall(Position pos, Direction dir) {
+    // the following should turn non-zero to true and zero to false.
+    return (bool) (get_walls(pos.x, pos.y) & 0b1 << dir); }

@@ -23,9 +23,10 @@ class Maze {
     void clear_wall(size_t x, size_t y, Direction d);
     void set_distance(size_t x, size_t y, int value);
     int get_distance(size_t x, size_t y);
-    int get_walls_at(size_t x, size_t y);
+    int get_walls(size_t x, size_t y);
     int maze_width();
     int maze_height();
     bool at_target(Position pos);
     bool in_bounds(Position pos);
+    bool exists_wall(Position pos, Direction dir);
 };
