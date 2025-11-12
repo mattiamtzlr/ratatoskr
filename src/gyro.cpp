@@ -12,6 +12,10 @@ static constexpr float GYRO_SCALE_500_DEG = 65.5f;
 static constexpr float GYRO_SCALE_1000_DEG = 32.8f;
 static constexpr float GYRO_SCALE_2000_DEG = 16.4f;
 
+const float X_OFFSET = 32.85f;
+const float Y_OFFSET = -1.96f;
+const float Z_OFFSET = 0.2f;
+
 std::map<AccelSensitivity, float> rangeToScaleAccel = {
         {ACCEL_RANGE_2G, ACCEL_SCALE_2G},
         {ACCEL_RANGE_4G, ACCEL_SCALE_4G},
@@ -27,7 +31,7 @@ std::map<GyroSensitivity, float> rangeToScaleGyro = {
 };
 
 
-MPU6050::MPU6050(uint8_t addr) : m_addr(addr), m_accelScale(ACCEL_RANGE_16G), m_gyroScale(GYRO_SCALE_250_DEG){}
+MPU6050::MPU6050(uint8_t addr) : m_addr(addr), m_accelScale(ACCEL_RANGE_16G), m_gyroScale(GYRO_SCALE_250_DEG), m_angle(0){}
 
 bool MPU6050::begin(){
     // Wake up the MPU-6050
@@ -132,5 +136,18 @@ Vector3D MPU6050::readScaledAccel(){
 
 Vector3D MPU6050::readScaledGyro(){
     Vector3D raw = readRawGyro();
-    return rawToScaled(raw.x, raw.y, raw.z, m_gyroScale);
+    Vector3D scaled = rawToScaled(raw.x, raw.y, raw.z, m_gyroScale);
+    Vector3D scaled_and_unbiased = 
+        {
+            scaled.x - X_OFFSET,
+            scaled.y - Y_OFFSET,
+            scaled.z - Z_OFFSET
+        };
+    return scaled_and_unbiased;
+}
+
+float MPU6050::getAngle(time_t t_now, time_t t_last){
+    Vector3D velocities = readScaledGyro();
+    m_angle += (float)((velocities.z)*(t_now - t_last)*1e-6f);
+    return m_angle;
 }

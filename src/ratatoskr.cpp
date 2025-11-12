@@ -3,15 +3,15 @@
 #define TIME_PER_CELL 250.0
 Ratatoskr::Ratatoskr(GearMotor &motor_left, GearMotor &motor_right,
                      ToF &tof_left, ToF &tof_front_left, ToF &tof_front_right,
-                     ToF &tof_right /*, MPU6050 &gyro, LEDMatrix &screen*/)
+                     ToF &tof_right , MPU6050 &gyro/*, LEDMatrix &screen*/)
     : Mouse(),
       m_motor_left(motor_left),
       m_motor_right(motor_right),
       m_tof_left(tof_left),
       m_tof_front_left(tof_front_left),
       m_tof_front_right(tof_front_right),
-      m_tof_right(tof_right) /*,
-       m_gyro(gyro),
+      m_tof_right(tof_right),
+      m_gyro(gyro)/*
        m_screen(screen)*/
 {}
 
@@ -24,16 +24,30 @@ Ratatoskr::Ratatoskr(GearMotor &motor_left, GearMotor &motor_right,
  * driven ccw, idem for cw
  */
 void Ratatoskr::turn(int angle) {
-    // TODO: use gyro to close the loop; for now, differential spin.
-    float time_to_turn = PERIOD * std::abs(angle) / 360;  // relation using angle
-    if (angle > 0) {  // move right wheel forward, left wheel back
-        m_motor_left.spin_cw(TURN_PWM);
-        m_motor_right.spin_cw(TURN_PWM);
+    float threshold = 0.5f;
+    unsigned long t_now = micros();
+    unsigned long t_last = 0;
+    float current_angle = m_gyro.getAngle(t_now, t_last);
+    float target = current_angle + angle;
+    t_last = t_now;
+
+    if(angle > 0){
+        while(current_angle < target - threshold){
+            m_motor_left.spin_cw(TURN_PWM);
+            m_motor_right.spin_cw(TURN_PWM);
+            t_now = micros();
+            current_angle = m_gyro.getAngle(t_now, t_last);
+            t_last = t_now;
+        }
     } else {
-        m_motor_left.spin_ccw(TURN_PWM);
-        m_motor_right.spin_ccw(TURN_PWM);
+        while(current_angle > target + threshold){
+            m_motor_left.spin_ccw(TURN_PWM);
+            m_motor_right.spin_ccw(TURN_PWM);
+            t_now = micros();
+            current_angle = m_gyro.getAngle(t_now, t_last);
+            t_last = t_now;
+        }
     }
-    delay(time_to_turn);
     stop();
 }
 

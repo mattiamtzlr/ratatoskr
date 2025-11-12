@@ -17,13 +17,13 @@ class Ratatoskr : public Mouse {
     ToF &m_tof_front_left;
     ToF &m_tof_front_right;
     ToF &m_tof_right;
-    /*    MPU6050 &m_gyro;
-        LEDMatrix &m_screen;*/
+    MPU6050 &m_gyro;
+       /* LEDMatrix &m_screen;*/
 
    public:
     Ratatoskr(GearMotor &motor_left, GearMotor &motor_right, ToF &tof_left,
               ToF &tof_front_left, ToF &tof_front_right,
-              ToF &tof_right /*, MPU6050 &gyro, LEDMatrix &screen*/);
+              ToF &tof_right , MPU6050 &gyro/*, LEDMatrix &screen*/);
 
     // static const float PERIOD;  // TODO: we compute this by recording 360/T
     static const u_int8_t TURN_PWM = 150;  // TODO: we set this arbitrarily
