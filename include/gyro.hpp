@@ -54,8 +54,12 @@ public:
     Vector3D readScaledGyro(); // Rerturns deg/s
     Vector3D readScaledAccel(); // Returns G's
 
+    // Get current angle in deg (around z axis)
+    float getAngle(time_t t_now, time_t t_last);
+
 private:
     uint8_t m_addr;
+    float m_angle;
     float m_accelScale; // Sensitivity scale factor
     float m_gyroScale;  // Sensitivity scale factor
     
