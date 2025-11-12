@@ -13,12 +13,12 @@ Solver::Solver(Mouse &mouse, Maze &maze) : m_mouse(mouse), m_maze(maze) {
         std::vector<std::array<bool, 4>>(height, {false, false, false, false}));
 }
 
-void Solver::set_wall(int x, int y, Direction d, bool is_wall) {
-    if (!m_maze.in_bounds(Position(x, y))) return;
-    Position neighbor = get_neighbor(Position(x, y), d);
-    walls[x][y][d] = is_wall;
-    known[x][y][d] = true;
-    if (is_wall) m_mouse.setWall(x, y, dirToCardinalChar[d]);
+void Solver::set_wall(Position pos, Direction d, bool is_wall) {
+    if (!m_maze.in_bounds(pos)) return;
+    Position neighbor = get_neighbor(pos, d);
+    walls[pos.x][pos.y][d] = is_wall;
+    known[pos.x][pos.y][d] = true;
+    if (is_wall) m_mouse.setWall(pos.x, pos.y, dirToCardinalChar[d]);
     if (m_maze.in_bounds(neighbor)) {
         Direction od = rotate_half(d);
         walls[neighbor.x][neighbor.y][od] = is_wall;
@@ -84,7 +84,7 @@ std::vector<std::pair<int, int>> Solver::compute_blue_route(int sx, int sy) {
         }
         x += dx(best_d);
         y += dy(best_d);
-        std::pair<int, int> coords = std::make_pair(x, y);
+	std::pair<int, int> coords = std::make_pair(x, y);	
         if (seen.count(coords)) break;
         seen.insert(coords);
         route.emplace_back(x, y);
@@ -122,12 +122,11 @@ void Solver::move_forward(int &cx, int &cy) {
 // detect_walls & log
 void Solver::detect_walls() {
     Direction heading = m_mouse.getDirection();
-    int x = m_mouse.getPosition().x;
-    int y = m_mouse.getPosition().y;
+    Position pos = m_mouse.getPosition();
 
-    set_wall(x, y, heading, m_mouse.wallFront());
-    set_wall(x, y, rotate_left(heading), m_mouse.wallLeft());
-    set_wall(x, y, rotate_right(heading), m_mouse.wallRight());
+    set_wall(pos, heading, m_mouse.wallFront());
+    set_wall(pos, rotate_left(heading), m_mouse.wallLeft());
+    set_wall(pos, rotate_right(heading), m_mouse.wallRight());
 }
 
 void Solver::solve() {

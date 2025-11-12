@@ -33,7 +33,7 @@ class Solver {
     std::vector<std::pair<int, int>> goals;
     std::set<std::pair<int, int>> visited;
 
-    void set_wall(int x, int y, Direction d, bool is_wall);
+    void set_wall(Position pos, Direction d, bool is_wall);
     void bfs_recompute();
     void update_text();
 
