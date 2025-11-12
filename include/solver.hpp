@@ -26,7 +26,6 @@ class Solver {
     const int INF = height * width + 1;
 
     // walls[x][y][d], known[x][y][d], dist[x][y]
-    std::vector<std::vector<std::array<bool, 4>>> walls;
     std::vector<std::vector<std::array<bool, 4>>> known;
     std::vector<std::vector<int>> dist;
 

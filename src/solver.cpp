@@ -4,10 +4,6 @@ Solver::Solver(Mouse &mouse, Maze &maze) : m_mouse(mouse), m_maze(maze) {
     width = m_mouse.mazeWidth();
     height = m_mouse.mazeHeight();
 
-    // walls[x][y][d], known[x][y][d], dist[x][y]
-    walls = std::vector<std::vector<std::array<bool, 4>>>(
-        width,
-        std::vector<std::array<bool, 4>>(height, {false, false, false, false}));
     known = std::vector<std::vector<std::array<bool, 4>>>(
         width,
         std::vector<std::array<bool, 4>>(height, {false, false, false, false}));
@@ -16,12 +12,12 @@ Solver::Solver(Mouse &mouse, Maze &maze) : m_mouse(mouse), m_maze(maze) {
 void Solver::set_wall(Position pos, Direction d, bool is_wall) {
     if (!m_maze.in_bounds(pos)) return;
     Position neighbor = get_neighbor(pos, d);
-    walls[pos.x][pos.y][d] = is_wall;
+    if (is_wall) m_maze.set_wall(pos, d);
     known[pos.x][pos.y][d] = true;
     if (is_wall) m_mouse.setWall(pos.x, pos.y, dirToCardinalChar[d]);
     if (m_maze.in_bounds(neighbor)) {
         Direction od = rotate_half(d);
-        walls[neighbor.x][neighbor.y][od] = is_wall;
+        if (is_wall) m_maze.set_wall(neighbor, od);
         known[neighbor.x][neighbor.y][od] = true;
     }
 };
@@ -42,7 +38,7 @@ void Solver::bfs_recompute() {
         for (Direction d : {NORTH, EAST, SOUTH, WEST}) {
             Position neighbor = get_neighbor(pos, d);
             if (!m_maze.in_bounds(neighbor)) continue;
-            if (known[pos.x][pos.y][d] && walls[pos.x][pos.y][d]) continue;
+            if (known[pos.x][pos.y][d] && m_maze.exists_wall(pos, d)) continue;
             int nd = m_maze.get_distance(pos) + 1;
             if (nd < m_maze.get_distance(neighbor)) {
                 m_maze.set_distance(neighbor, nd);
@@ -66,24 +62,24 @@ std::vector<std::pair<int, int>> Solver::compute_blue_route(int sx, int sy) {
     std::vector<std::pair<int, int>> route;
     std::set<std::pair<int, int>> seen;
 
-    int x = sx;
-    int y = sy;
+
+    Position pos = Position(sx, sy);
 
     while (!m_maze.at_target(m_mouse.getPosition())) {
         Direction best_d = NORTH;
         int best_v = INF;
 
         for (Direction d : {NORTH, EAST, SOUTH, WEST}) {
-            Position neighbor = get_neighbor(Position(x, y), d);
+            Position neighbor = get_neighbor(pos, d);
             if (!m_maze.in_bounds(neighbor)) continue;
-            if (known[x][y][d] && walls[x][y][d]) continue;
+            if (known[x][y][d] && m_maze.exists_wall(pos, d)) continue;
             if (m_maze.get_distance(neighbor) < best_v) {
                 best_v = m_maze.get_distance(neighbor);
                 best_d = d;
             }
         }
-        x += dx(best_d);
-        y += dy(best_d);
+        pos.x += dx(best_d);
+        pos.y += dy(best_d);
         std::pair<int, int> coords = std::make_pair(x, y);
         if (seen.count(coords)) break;
         seen.insert(coords);
@@ -161,7 +157,7 @@ void Solver::solve() {
 
             if (!m_maze.in_bounds(neighbor)) continue;
 
-            if (known[x][y][k] && walls[x][y][k]) continue;
+            if (known[x][y][k] && m_maze.exists_wall(Position(x,y), k)) continue;
 
             if (m_maze.get_distance(neighbor) < best_val) {
                 best_val = m_maze.get_distance(neighbor);
