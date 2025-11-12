@@ -10,6 +10,11 @@ void Maze::clear_wall(size_t x, size_t y, Direction d) {
 
 int Maze::get_walls_at(size_t x, size_t y) { return m_wall_storage[x][y]; }
 
+void Maze::reset_distances() {
+    for (int x = 0; x < MAZE_WIDTH; ++x)
+        for (int y = 0; y < MAZE_HEIGHT; ++y)
+            m_distances[x][y] = MAZE_WIDTH * MAZE_HEIGHT;
+}
 int Maze::maze_height() { return MAZE_HEIGHT; }
 
 int Maze::maze_width() { return MAZE_WIDTH; }
@@ -23,5 +28,6 @@ bool Maze::at_target(Position pos) {
     return false;
 }
 bool Maze::in_bounds(Position pos) {
-    return 0 <= pos.x && pos.x < MAZE_WIDTH && 0 <= pos.y && pos.y < MAZE_HEIGHT;
+    return 0 <= pos.x && pos.x < MAZE_WIDTH && 0 <= pos.y &&
+           pos.y < MAZE_HEIGHT;
 }

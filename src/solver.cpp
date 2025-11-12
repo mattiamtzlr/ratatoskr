@@ -16,7 +16,8 @@ Solver::Solver(Mouse &mouse, Maze &maze) : m_mouse(mouse), m_maze(maze) {
 
 void Solver::set_wall(int x, int y, Direction d, bool is_wall) {
     if (!m_maze.in_bounds(Position(x, y))) return;
-    int nx = x + dx(d), ny = y + dy(d);
+    int nx = x + dx(d);
+    int ny = y + dy(d);
     walls[x][y][d] = is_wall;
     known[x][y][d] = true;
     if (is_wall) m_mouse.setWall(x, y, dirToCardinalChar[d]);
@@ -32,20 +33,21 @@ void Solver::bfs_recompute() {
     for (int x = 0; x < width; ++x)
         for (int y = 0; y < height; ++y) dist[x][y] = INF;
 
-    std::deque<std::pair<int, int>> q;
-    for (auto &g : goals) {
-        dist[g.first][g.second] = 0;
+    std::deque<Position> q;
+    for (Position &g : m_maze.targets) {
+        dist[g.x][g.y] = 0;
         q.push_back(g);
     }
 
     while (!q.empty()) {
-        auto [cx, cy] = q.front();
+        Position pos = q.front();
         q.pop_front();
         for (Direction d : {NORTH, EAST, SOUTH, WEST}) {
-            int nx = cx + dx(d), ny = cy + dy(d);
+            int nx = pos.x + dx(d);
+            int ny = pos.y + dy(d);
             if (!m_maze.in_bounds(Position(nx, ny))) continue;
-            if (known[cx][cy][d] && walls[cx][cy][d]) continue;
-            int nd = dist[cx][cy] + 1;
+            if (known[pos.x][pos.y][d] && walls[pos.x][pos.y][d]) continue;
+            int nd = dist[pos.x][pos.y] + 1;
             if (nd < dist[nx][ny]) {
                 dist[nx][ny] = nd;
                 q.emplace_back(nx, ny);

@@ -18,6 +18,7 @@ class Maze {
         {8, 7},
         {7, 8},
         {8, 8}};  // TODO: Make this settable in the constructor
+    void reset_distances();
     void set_wall(size_t x, size_t y, Direction d);
     void clear_wall(size_t x, size_t y, Direction d);
     void set_distance(size_t x, size_t y);
