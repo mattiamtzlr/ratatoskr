@@ -8,7 +8,8 @@ Solver::Solver(Mouse &mouse, Maze &maze) : m_mouse(mouse), m_maze(maze) {
 void Solver::set_wall(Position pos, Direction d) {
     m_maze.set_wall(pos, d);
     Position front_neighbor = get_neighbor(pos, d);
-    if (m_maze.in_bounds(front_neighbor)) m_maze.set_wall(front_neighbor, rotate_half(d));
+    if (m_maze.in_bounds(front_neighbor))
+        m_maze.set_wall(front_neighbor, rotate_half(d));
 };
 
 // Flood-fill bfs_recompute (and paint numbers)
@@ -50,7 +51,6 @@ void Solver::update_text() {
 std::vector<std::pair<int, int>> Solver::compute_blue_route(int sx, int sy) {
     std::vector<std::pair<int, int>> route;
     std::set<std::pair<int, int>> seen;
-
 
     Position pos = Position(sx, sy);
 
@@ -96,12 +96,10 @@ void Solver::face(Direction target_dir) {
     }
 }
 
-void Solver::move_forward(int &cx, int &cy) {
+void Solver::move_forward() {
     Direction h = m_mouse.getDirection();
     m_mouse.moveForward(1);
-    cx += dx(h);
-    cy += dy(h);
-    visited.insert({cx, cy});
+    visited.insert({m_mouse.getPosition().x, m_mouse.getPosition().y});
 };
 
 // detect_walls & log
@@ -139,14 +137,14 @@ void Solver::solve() {
     update_text();
     // Run
     while (!m_maze.at_target(m_mouse.getPosition())) {
-        int best_dir = -1;
+        Direction best_dir = NORTH;
         int best_val = INF;
         for (Direction k : {NORTH, EAST, SOUTH, WEST}) {
             Position neighbor = get_neighbor(m_mouse.getPosition(), k);
 
             if (!m_maze.in_bounds(neighbor)) continue;
 
-            if (m_maze.exists_wall(Position(x,y), k)) continue;
+            if (m_maze.exists_wall(m_mouse.getPosition(), k)) continue;
 
             if (m_maze.get_distance(neighbor) < best_val) {
                 best_val = m_maze.get_distance(neighbor);
@@ -154,9 +152,10 @@ void Solver::solve() {
             }
         }
 
-        face((Direction)best_dir);
-        move_forward(x, y);
-        paint_colors(visited, compute_blue_route(x, y));
+        face(best_dir);
+        move_forward();
+        paint_colors(visited, compute_blue_route(m_mouse.getPosition().x,
+                                                 m_mouse.getPosition().y));
         detect_and_set_walls();
         bfs_recompute();
         update_text();

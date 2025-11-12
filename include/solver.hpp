@@ -41,7 +41,7 @@ class Solver {
 
     void face(Direction target_dir);
 
-    void move_forward(int &cx, int &cy);
+    void move_forward();
 
     // Sense & log
     void detect_and_set_walls();
