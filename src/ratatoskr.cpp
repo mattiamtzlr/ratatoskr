@@ -33,6 +33,7 @@ void Ratatoskr::turn(int angle) {
 
     if(angle > 0){
         while(current_angle < target - threshold){
+            Serial.println(current_angle);
             m_motor_left.spin_cw(TURN_PWM);
             m_motor_right.spin_cw(TURN_PWM);
             t_now = micros();
