@@ -57,6 +57,9 @@ public:
     // Get current angle in deg (around z axis)
     float getAngle(time_t t_now, time_t t_last);
 
+    // Calc offsets
+    void calibrateGyro();
+
 private:
     uint8_t m_addr;
     float m_angle;

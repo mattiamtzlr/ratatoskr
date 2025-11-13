@@ -12,9 +12,9 @@ static constexpr float GYRO_SCALE_500_DEG = 65.5f;
 static constexpr float GYRO_SCALE_1000_DEG = 32.8f;
 static constexpr float GYRO_SCALE_2000_DEG = 16.4f;
 
-const float X_OFFSET = 32.85f;
-const float Y_OFFSET = -1.96f;
-const float Z_OFFSET = 0.2f;
+float X_OFFSET = 0;
+float Y_OFFSET = 0;
+float Z_OFFSET = 0;
 
 std::map<AccelSensitivity, float> rangeToScaleAccel = {
         {ACCEL_RANGE_2G, ACCEL_SCALE_2G},
@@ -43,6 +43,8 @@ bool MPU6050::begin(){
     if (device_id != 0x68) {
         return false;
     }
+    calibrateGyro();
+    Serial.println("Gyro is ready");
     return true;
 }
 
@@ -84,7 +86,9 @@ void MPU6050::readBytes(uint8_t reg, uint8_t count, uint8_t* dest){
 
     if (received == count) {
         for (int i = 0; i < count; i++) {
-            dest[i] = Wire.read();
+            if(Wire.available()){
+                dest[i] = Wire.read();
+            }
         }
     }
 }
@@ -146,8 +150,29 @@ Vector3D MPU6050::readScaledGyro(){
     return scaled_and_unbiased;
 }
 
+void MPU6050::calibrateGyro(){
+    float x_values = 0;
+    float y_values = 0;
+    float z_values = 0;
+    
+    for(int i = 0; i < 1000; i++){
+        Vector3D vec = readScaledGyro();
+        x_values += vec.x;
+        y_values += vec.y;
+        z_values += vec.z;
+
+        delay(1);
+    }
+    X_OFFSET = (float)x_values/1000;
+    Y_OFFSET = (float)y_values/1000;
+    Z_OFFSET = (float)z_values/1000;
+}
+
 float MPU6050::getAngle(time_t t_now, time_t t_last){
     Vector3D velocities = readScaledGyro();
-    m_angle += (float)((velocities.z)*(t_now - t_last)*1e-6f);
+    float change = (float)((velocities.z)*(t_now - t_last)*1e-6f);
+    if(abs(change) > 0.1){
+        m_angle += change;
+    }
     return m_angle;
 }
