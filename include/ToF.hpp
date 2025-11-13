@@ -15,7 +15,7 @@ enum SensorPosition {
 class ToF {
    public:
     // Constructor performs initialization
-    ToF(SensorPosition position, uint8_t i2c_address, int8_t xshut_pin);
+    ToF(SensorPosition position, uint8_t i2c_address, uint8_t xshut_pin);
 
     // Start continuous ranging
     void start(TwoWire *wire = &Wire);
