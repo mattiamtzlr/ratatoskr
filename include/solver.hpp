@@ -1,14 +1,9 @@
 #pragma once
 
-#include <algorithm>
-#include <array>
 #include <deque>
-#include <iostream>
 #include <set>
-#include <string>
 #include <vector>
 
-#include "API.hpp"
 #include "maze.hpp"
 #include "mouse.hpp"
 #include "util.hpp"
