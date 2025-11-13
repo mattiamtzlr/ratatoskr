@@ -21,13 +21,11 @@ class Solver {
 
 
     void set_wall(Position pos, Direction d);
-    void bfs_recompute();
+    void bfs();
 
     std::vector<std::pair<int, int>> compute_blue_route();
 
     void face(Direction target_dir);
-
-    void move_forward();
 
     // Sense & log
     void detect_and_set_walls();

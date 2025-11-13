@@ -15,11 +15,6 @@ void Solver::face(Direction target_dir) {
     }
 }
 
-void Solver::move_forward() {
-    m_mouse.moveForward();
-    m_maze.visited.insert({m_mouse.getPosition().x, m_mouse.getPosition().y});
-};
-
 // detect_walls & log
 void Solver::detect_and_set_walls() {
     if (m_mouse.wallFront())
@@ -33,7 +28,7 @@ void Solver::detect_and_set_walls() {
 }
 
 // Flood-fill bfs_recompute
-void Solver::bfs_recompute() {
+void Solver::bfs() {
     m_maze.reset_distances();
     std::deque<Position> q;
 
@@ -60,7 +55,7 @@ void Solver::solve() {
     m_maze.visited.insert({m_mouse.getPosition().x, m_mouse.getPosition().y});
     while (!m_maze.at_target(m_mouse.getPosition())) {
         detect_and_set_walls();
-        bfs_recompute();
+        bfs();
         m_mouse.update_visuals(m_maze);
         Direction best_dir = NORTH;
         int best_val = UBOUND_DIST;
@@ -72,6 +67,8 @@ void Solver::solve() {
             }
         }
         face(best_dir);
-        move_forward();
+        m_mouse.moveForward();
+        m_maze.visited.insert(
+            {m_mouse.getPosition().x, m_mouse.getPosition().y});
     }
 }
