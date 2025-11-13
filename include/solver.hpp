@@ -26,7 +26,6 @@ class Solver {
     const int INF = height * width + 1;
 
 
-    std::vector<std::pair<int, int>> goals;
     std::set<std::pair<int, int>> visited;
 
     void set_wall(Position pos, Direction d);
