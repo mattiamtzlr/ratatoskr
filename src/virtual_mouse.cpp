@@ -17,6 +17,7 @@ void VirtualMouse::turn(int angle) {
         API::turnRight();
     // TODO: Some sort of logging indicating that turning non-90 is not possible
     // in MMS
+    // NOTE: YES IT IS THERE IS API::TURN45DEGREES
 }
 
 bool VirtualMouse::wallFront() {
@@ -53,39 +54,28 @@ void VirtualMouse::update_visuals(Maze& maze) {
             else
                 API::setText(x, y, "");
 
-    std::vector<std::pair<int, int>> route;
-    std::set<std::pair<int, int>> seen;
+    std::vector<Position> route;
+    std::set<Position> seen;
 
     Position pos = getPosition();
 
     while (!maze.at_target(pos)) {
-        Direction best_d = NORTH;
         int best_v = maze.maze_height() * maze.maze_width() + 1;
 
-        for (Direction d : {NORTH, EAST, SOUTH, WEST}) {
-            Position neighbor = get_neighbor(pos, d);
-            if (!maze.in_bounds(neighbor) || maze.exists_wall(pos, d)) {
-                continue;
-            }
+        for (Position neighbor : maze.valid_neighbors(pos)) {
             if (maze.get_distance(neighbor) < best_v) {
                 best_v = maze.get_distance(neighbor);
-                best_d = d;
+                pos = neighbor;
             }
         }
-        pos.x += dx(best_d);
-        pos.y += dy(best_d);
-
-        std::pair<int, int> coords = std::make_pair(pos.x, pos.y);
-        if (seen.count(coords)) break;
-        seen.insert(coords);
-        route.emplace_back(coords.first, coords.second);
+        if (seen.count(pos)) break;
+        seen.insert(pos);
+        route.emplace_back(pos);
     }
     API::clearAllColor();
-    for (auto& p : maze.visited) API::setColor(p.first, p.second, 'G');
-    for (auto& p : route) API::setColor(p.first, p.second, 'B');
+    for (auto& p : maze.visited) API::setColor(p.x, p.y, 'G');
+    for (auto& p : route) API::setColor(p.x, p.y, 'B');
 }
-
-
 
 bool VirtualMouse::wasReset() { return API::wasReset(); }
 void VirtualMouse::VirtualMouse::ackReset() { return API::ackReset(); }

@@ -1,9 +1,5 @@
 #pragma once
 
-#include <deque>
-#include <set>
-#include <vector>
-
 #include "maze.hpp"
 #include "mouse.hpp"
 #include "util.hpp"
@@ -18,16 +14,8 @@ class Solver {
 
     int UBOUND_DIST;
 
-
-
-    void set_wall(Position pos, Direction d);
     void bfs();
-
-    std::vector<std::pair<int, int>> compute_blue_route();
-
     void face(Direction target_dir);
-
-    // Sense & log
     void detect_and_set_walls();
 
    public:

@@ -1,5 +1,7 @@
 #include "solver.hpp"
 
+#include <deque>
+
 Solver::Solver(Mouse &mouse, Maze &maze) : m_mouse(mouse), m_maze(maze) {
     width = m_maze.maze_width();
     height = m_maze.maze_height();
@@ -52,7 +54,7 @@ void Solver::bfs() {
 
 void Solver::solve() {
     m_maze.set_border_walls();
-    m_maze.visited.insert({m_mouse.getPosition().x, m_mouse.getPosition().y});
+    m_maze.visited.insert(m_mouse.getPosition());
     while (!m_maze.at_target(m_mouse.getPosition())) {
         detect_and_set_walls();
         bfs();
@@ -68,7 +70,6 @@ void Solver::solve() {
         }
         face(best_dir);
         m_mouse.moveForward();
-        m_maze.visited.insert(
-            {m_mouse.getPosition().x, m_mouse.getPosition().y});
+        m_maze.visited.insert(m_mouse.getPosition());
     }
 }
