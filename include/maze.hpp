@@ -16,11 +16,7 @@ class Maze {
     int m_distances[MAZE_HEIGHT][MAZE_WIDTH] = {};
 
    public:
-    Position targets[4] = {
-        {7, 7},
-        {8, 7},
-        {7, 8},
-        {8, 8}};  // TODO: Make this settable in the constructor
+    std::vector<Position> targets;
     std::set<Position> visited = {};
     std::vector<Position> valid_neighbors(Position mouse_pos);
     void set_border_walls();

@@ -46,7 +46,7 @@ int Maze::maze_height() { return MAZE_HEIGHT; }
 int Maze::maze_width() { return MAZE_WIDTH; }
 
 bool Maze::at_target(Position pos) {
-    for (int i = 0; i < 4; i++) {
+    for (int i = 0; i < targets.size(); i++) {
         if (targets[i].x == pos.x && targets[i].y == pos.y) {
             return true;
         }
