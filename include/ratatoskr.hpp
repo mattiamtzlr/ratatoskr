@@ -3,7 +3,6 @@
 
 #include "gear_motor.hpp"
 #include "gyro.hpp"
-#include "led_matrix.hpp"
 #include "maze.hpp"
 #include "mouse.hpp"
 #include "tof.hpp"
@@ -18,7 +17,6 @@ class Ratatoskr : public Mouse {
     ToF &m_tof_front_right;
     ToF &m_tof_right;
     MPU6050 &m_gyro;
-       /* LEDMatrix &m_screen;*/
 
    public:
     Ratatoskr(GearMotor &motor_left, GearMotor &motor_right, ToF &tof_left,
