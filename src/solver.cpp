@@ -6,13 +6,6 @@ Solver::Solver(Mouse &mouse, Maze &maze) : m_mouse(mouse), m_maze(maze) {
     UBOUND_DIST = height * width + 1;
 }
 
-void Solver::set_wall(Position pos, Direction d) {
-    m_maze.set_wall(pos, d);
-    Position front_neighbor = get_neighbor(pos, d);
-    if (m_maze.in_bounds(front_neighbor))
-        m_maze.set_wall(front_neighbor, rotate_half(d));
-};
-
 void Solver::face(Direction target_dir) {
     int diff = (target_dir - m_mouse.getDirection() + 4) % 4;
     if (diff == 3) {
@@ -30,11 +23,11 @@ void Solver::move_forward() {
 // detect_walls & log
 void Solver::detect_and_set_walls() {
     if (m_mouse.wallFront())
-        set_wall(m_mouse.getPosition(), m_mouse.getDirection());
+        m_maze.set_wall(m_mouse.getPosition(), m_mouse.getDirection());
     if (m_mouse.wallLeft())
-        set_wall(m_mouse.getPosition(), rotate_left(m_mouse.getDirection()));
+        m_maze.set_wall(m_mouse.getPosition(), rotate_left(m_mouse.getDirection()));
     if (m_mouse.wallRight())
-        set_wall(m_mouse.getPosition(), rotate_right(m_mouse.getDirection()));
+        m_maze.set_wall(m_mouse.getPosition(), rotate_right(m_mouse.getDirection()));
 }
 
 // Flood-fill bfs_recompute
@@ -67,7 +60,6 @@ void Solver::solve() {
     // Start
     m_maze.set_border_walls();
     m_maze.visited.insert({m_mouse.getPosition().x, m_mouse.getPosition().y});
-    Direction heading = m_mouse.getDirection();
     // Popluate the maze from the starting position
     // Run
     while (!m_maze.at_target(m_mouse.getPosition())) {

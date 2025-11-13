@@ -102,16 +102,6 @@ bool Ratatoskr::wallLeft() {
     return (distance_left > 0) && (distance_left < SIDE_WALL_MM);
 }
 void Ratatoskr::update_visuals(Maze& maze) {}
-void Ratatoskr::setWall(int x, int y, char direction) {}
-void Ratatoskr::clearWall(int x, int y, char direction) {}
-
-void Ratatoskr::setColor(int x, int y, char color) {}
-void Ratatoskr::clearColor(int x, int y) {}
-void Ratatoskr::clearAllColor() {}
-
-void Ratatoskr::setText(int x, int y, const std::string &text) {}
-void Ratatoskr::clearText(int x, int y) {}
-void Ratatoskr::clearAllText() {}
 
 bool Ratatoskr::wasReset() { return false; }
 void Ratatoskr::ackReset() {}

@@ -26,7 +26,7 @@ class Ratatoskr : public Mouse {
               ToF &tof_right /*, MPU6050 &gyro, LEDMatrix &screen*/);
 
     // static const float PERIOD;  // TODO: we compute this by recording 360/T
-    static const u_int8_t TURN_PWM = 150;  // TODO: we set this arbitrarily 
+    static const u_int8_t TURN_PWM = 150;  // TODO: we set this arbitrarily
 
     // static const float TIME_PER_CELL;  // TODO: how long rat goes 16 cm
 
@@ -46,16 +46,6 @@ class Ratatoskr : public Mouse {
     virtual bool wallRight();
     virtual bool wallLeft();
 
-    virtual void setWall(int x, int y, char direction);
-    virtual void clearWall(int x, int y, char direction);
-
-    virtual void setColor(int x, int y, char color);
-    virtual void clearColor(int x, int y);
-    virtual void clearAllColor();
-
-    virtual void setText(int x, int y, const std::string &text);
-    virtual void clearText(int x, int y);
-    virtual void clearAllText();
     virtual void update_visuals(Maze &maze);
 
     virtual bool wasReset();

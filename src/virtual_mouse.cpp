@@ -48,10 +48,10 @@ void VirtualMouse::update_visuals(Maze& maze) {
         for (int y = 0; y < maze.maze_height(); ++y)
             if (maze.get_distance(Position(x, y)) <
                 maze.maze_height() * maze.maze_width() + 1)
-                setText(x, y,
-                        std::to_string(maze.get_distance(Position(x, y))));
+                API::setText(x, y,
+                             std::to_string(maze.get_distance(Position(x, y))));
             else
-                setText(x, y, "");
+                API::setText(x, y, "");
 
     std::vector<std::pair<int, int>> route;
     std::set<std::pair<int, int>> seen;
@@ -80,28 +80,12 @@ void VirtualMouse::update_visuals(Maze& maze) {
         seen.insert(coords);
         route.emplace_back(coords.first, coords.second);
     }
-    clearAllColor();
-    for (auto& p : maze.visited) setColor(p.first, p.second, 'G');
-    for (auto& p : route) setColor(p.first, p.second, 'B');
-}
-void VirtualMouse::setWall(int x, int y, char direction) {
-    API::setWall(x, y, direction);
-}
-void VirtualMouse::clearWall(int x, int y, char direction) {
-    API::clearWall(x, y, direction);
+    API::clearAllColor();
+    for (auto& p : maze.visited) API::setColor(p.first, p.second, 'G');
+    for (auto& p : route) API::setColor(p.first, p.second, 'B');
 }
 
-void VirtualMouse::setColor(int x, int y, char color) {
-    API::setColor(x, y, color);
-}
-void VirtualMouse::clearColor(int x, int y) { API::clearColor(x, y); }
-void VirtualMouse::clearAllColor() { API::clearAllColor(); }
 
-void VirtualMouse::setText(int x, int y, const std::string& text) {
-    API::setText(x, y, text);
-}
-void VirtualMouse::clearText(int x, int y) { API::clearText(x, y); }
-void VirtualMouse::clearAllText() { API::clearAllText(); }
 
 bool VirtualMouse::wasReset() { return API::wasReset(); }
 void VirtualMouse::VirtualMouse::ackReset() { return API::ackReset(); }
