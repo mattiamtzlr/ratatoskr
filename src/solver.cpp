@@ -1,8 +1,11 @@
 #include "solver.hpp"
 
+#include <iostream>
+
 Solver::Solver(Mouse &mouse, Maze &maze) : m_mouse(mouse), m_maze(maze) {
-    width = m_mouse.mazeWidth();
-    height = m_mouse.mazeHeight();
+    width = m_maze.maze_width();
+    height = m_maze.maze_height();
+    INF = height * width + 1;
 }
 
 void Solver::set_wall(Position pos, Direction d) {
@@ -27,11 +30,11 @@ void Solver::bfs_recompute() {
         q.pop_front();
         for (Direction d : {NORTH, EAST, SOUTH, WEST}) {
             Position neighbor = get_neighbor(pos, d);
-            if (!m_maze.in_bounds(neighbor)) continue;
-            if (m_maze.exists_wall(pos, d)) continue;
-            int nd = m_maze.get_distance(pos) + 1;
-            if (nd < m_maze.get_distance(neighbor)) {
-                m_maze.set_distance(neighbor, nd);
+            if (!m_maze.in_bounds(neighbor) || m_maze.exists_wall(pos, d))
+                continue;
+            int new_distance = m_maze.get_distance(pos) + 1;
+            if (new_distance < m_maze.get_distance(neighbor)) {
+                m_maze.set_distance(neighbor, new_distance);
                 q.emplace_back(neighbor);
             }
         }
@@ -47,44 +50,6 @@ void Solver::update_text() {
                 m_mouse.setText(x, y, "");
 }
 
-// Blue route preview
-std::vector<std::pair<int, int>> Solver::compute_blue_route(int sx, int sy) {
-    std::vector<std::pair<int, int>> route;
-    std::set<std::pair<int, int>> seen;
-
-    Position pos = Position(sx, sy);
-
-    while (!m_maze.at_target(m_mouse.getPosition())) {
-        Direction best_d = NORTH;
-        int best_v = INF;
-
-        for (Direction d : {NORTH, EAST, SOUTH, WEST}) {
-            Position neighbor = get_neighbor(pos, d);
-            if (!m_maze.in_bounds(neighbor)) continue;
-            if (m_maze.exists_wall(pos, d)) continue;
-            if (m_maze.get_distance(neighbor) < best_v) {
-                best_v = m_maze.get_distance(neighbor);
-                best_d = d;
-            }
-        }
-        pos.x += dx(best_d);
-        pos.y += dy(best_d);
-        std::pair<int, int> coords = std::make_pair(x, y);
-        if (seen.count(coords)) break;
-        seen.insert(coords);
-        route.emplace_back(x, y);
-    }
-    return route;
-};
-
-// Paint overlays
-void Solver::paint_colors(const std::set<std::pair<int, int>> &visited,
-                          const std::vector<std::pair<int, int>> &blue) {
-    m_mouse.clearAllColor();
-    for (auto &p : visited) m_mouse.setColor(p.first, p.second, 'G');
-    for (auto &p : blue) m_mouse.setColor(p.first, p.second, 'B');
-};
-
 void Solver::face(Direction target_dir) {
     int diff = (target_dir - m_mouse.getDirection() + 4) % 4;
     if (diff == 3) {
@@ -97,8 +62,12 @@ void Solver::face(Direction target_dir) {
 }
 
 void Solver::move_forward() {
-    Direction h = m_mouse.getDirection();
-    m_mouse.moveForward(1);
+    if (m_maze.exists_wall(m_mouse.getPosition(), m_mouse.getDirection())) {
+        face(rotate_right(m_mouse.getDirection()));
+        move_forward();
+        return;
+    }
+    m_mouse.moveForward();
     visited.insert({m_mouse.getPosition().x, m_mouse.getPosition().y});
 };
 
@@ -125,10 +94,11 @@ void Solver::solve() {
     */
 
     // Start
-    visited.insert({x, y});
+    visited.insert({m_mouse.getPosition().x, m_mouse.getPosition().y});
     bfs_recompute();
     update_text();
-    paint_colors(visited, compute_blue_route(x, y));
+    paint_colors(visited, compute_blue_route(m_mouse.getPosition().x,
+                                             m_mouse.getPosition().y));
 
     Direction heading = m_mouse.getDirection();
     // Popluate the maze from the starting position
@@ -142,9 +112,9 @@ void Solver::solve() {
         for (Direction k : {NORTH, EAST, SOUTH, WEST}) {
             Position neighbor = get_neighbor(m_mouse.getPosition(), k);
 
-            if (!m_maze.in_bounds(neighbor)) continue;
-
-            if (m_maze.exists_wall(m_mouse.getPosition(), k)) continue;
+            if (!m_maze.in_bounds(neighbor) ||
+                m_maze.exists_wall(m_mouse.getPosition(), k))
+                continue;
 
             if (m_maze.get_distance(neighbor) < best_val) {
                 best_val = m_maze.get_distance(neighbor);
@@ -162,12 +132,45 @@ void Solver::solve() {
     }
 }
 
-/* keep wrappers as-is */
-void Solver::setWall(int x, int y, char direction) {
-    m_maze.set_wall(Position(x, y), cardinalCharToDir[direction]);
-}
-void Solver::clearWall(int x, int y, char direction) {
-    m_maze.clear_wall(Position(x, y), cardinalCharToDir[direction]);
-}
-int Solver::mazeWidth() { return m_maze.maze_width(); }
-int Solver::mazeHeight() { return m_maze.maze_height(); }
+// Blue route preview
+std::vector<std::pair<int, int>> Solver::compute_blue_route(int sx, int sy) {
+    std::vector<std::pair<int, int>> route;
+    std::set<std::pair<int, int>> seen;
+
+    Position pos = Position(sx, sy);
+
+    while (!m_maze.at_target(pos)) {
+        Direction best_d = NORTH;
+        int best_v = INF;
+
+        for (Direction d : {NORTH, EAST, SOUTH, WEST}) {
+            Position neighbor = get_neighbor(pos, d);
+            if (!m_maze.in_bounds(neighbor)) {
+                continue;
+            }
+            if (m_maze.exists_wall(pos, d)) {
+                continue;
+            }
+            if (m_maze.get_distance(neighbor) < best_v) {
+                best_v = m_maze.get_distance(neighbor);
+                best_d = d;
+            }
+        }
+        pos.x += dx(best_d);
+        pos.y += dy(best_d);
+
+        std::pair<int, int> coords = std::make_pair(pos.x, pos.y);
+        if (seen.count(coords)) break;
+        seen.insert(coords);
+        route.emplace_back(coords.first, coords.second);
+    }
+    return route;
+};
+
+// Paint overlays
+void Solver::paint_colors(const std::set<std::pair<int, int>> &visited,
+                          const std::vector<std::pair<int, int>> &blue) {
+    m_mouse.clearAllColor();
+    for (auto &p : visited) m_mouse.setColor(p.first, p.second, 'G');
+    for (auto &p : blue) m_mouse.setColor(p.first, p.second, 'B');
+};

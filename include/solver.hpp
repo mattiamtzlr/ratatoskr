@@ -15,10 +15,8 @@ class Solver {
 
     int width;
     int height;
-    int x = 0;
-    int y = 0;
 
-    const int INF = height * width + 1;
+    int INF;
 
 
     std::set<std::pair<int, int>> visited;
@@ -43,10 +41,4 @@ class Solver {
    public:
     void solve();
     Solver(Mouse &mouse, Maze &maze);
-
-    void setWall(int x, int y, char direction);
-    void clearWall(int x, int y, char direction);
-
-    int mazeWidth();
-    int mazeHeight();
 };

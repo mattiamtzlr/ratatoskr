@@ -14,8 +14,8 @@ static std::map<char, Direction> cardinalCharToDir = {
     {'n', NORTH}, {'e', EAST}, {'s', SOUTH}, {'w', WEST}};
 
 struct Position {
-    size_t x;
-    size_t y;
+    int x;
+    int y;
     Position(size_t x, size_t y) : x(x), y(y) {}
 };
 
