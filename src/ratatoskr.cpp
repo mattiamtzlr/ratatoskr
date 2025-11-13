@@ -101,6 +101,7 @@ bool Ratatoskr::wallLeft() {
     uint16_t distance_left = m_tof_left.read();
     return (distance_left > 0) && (distance_left < SIDE_WALL_MM);
 }
+void Ratatoskr::update_visuals(Maze& maze) {}
 void Ratatoskr::setWall(int x, int y, char direction) {}
 void Ratatoskr::clearWall(int x, int y, char direction) {}
 

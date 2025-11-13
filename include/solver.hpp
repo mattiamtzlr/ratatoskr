@@ -16,20 +16,14 @@ class Solver {
     int width;
     int height;
 
-    int INF;
+    int UBOUND_DIST;
 
 
-    std::set<std::pair<int, int>> visited;
 
     void set_wall(Position pos, Direction d);
     void bfs_recompute();
-    void update_text();
 
-    std::vector<std::pair<int, int>> compute_blue_route(int sx, int sy);
-
-    // Paint overlays
-    void paint_colors(const std::set<std::pair<int, int>> &visited,
-                      const std::vector<std::pair<int, int>> &blue);
+    std::vector<std::pair<int, int>> compute_blue_route();
 
     void face(Direction target_dir);
 

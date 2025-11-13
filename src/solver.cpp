@@ -1,11 +1,9 @@
 #include "solver.hpp"
 
-#include <iostream>
-
 Solver::Solver(Mouse &mouse, Maze &maze) : m_mouse(mouse), m_maze(maze) {
     width = m_maze.maze_width();
     height = m_maze.maze_height();
-    INF = height * width + 1;
+    UBOUND_DIST = height * width + 1;
 }
 
 void Solver::set_wall(Position pos, Direction d) {
@@ -15,7 +13,31 @@ void Solver::set_wall(Position pos, Direction d) {
         m_maze.set_wall(front_neighbor, rotate_half(d));
 };
 
-// Flood-fill bfs_recompute (and paint numbers)
+void Solver::face(Direction target_dir) {
+    int diff = (target_dir - m_mouse.getDirection() + 4) % 4;
+    if (diff == 3) {
+        m_mouse.turnLeft();
+    } else {
+        for (int i = 0; i < diff; i++) m_mouse.turnRight();
+    }
+}
+
+void Solver::move_forward() {
+    m_mouse.moveForward();
+    m_maze.visited.insert({m_mouse.getPosition().x, m_mouse.getPosition().y});
+};
+
+// detect_walls & log
+void Solver::detect_and_set_walls() {
+    if (m_mouse.wallFront())
+        set_wall(m_mouse.getPosition(), m_mouse.getDirection());
+    if (m_mouse.wallLeft())
+        set_wall(m_mouse.getPosition(), rotate_left(m_mouse.getDirection()));
+    if (m_mouse.wallRight())
+        set_wall(m_mouse.getPosition(), rotate_right(m_mouse.getDirection()));
+}
+
+// Flood-fill bfs_recompute
 void Solver::bfs_recompute() {
     m_maze.reset_distances();
     std::deque<Position> q;
@@ -40,137 +62,31 @@ void Solver::bfs_recompute() {
         }
     }
 };
-void Solver::update_text() {
-    for (int x = 0; x < width; ++x)
-        for (int y = 0; y < height; ++y)
-            if (m_maze.get_distance(Position(x, y)) < INF)
-                m_mouse.setText(
-                    x, y, std::to_string(m_maze.get_distance(Position(x, y))));
-            else
-                m_mouse.setText(x, y, "");
-}
-
-void Solver::face(Direction target_dir) {
-    int diff = (target_dir - m_mouse.getDirection() + 4) % 4;
-    if (diff == 3) {
-        m_mouse.turnLeft();
-    } else {
-        for (int i = 0; i < diff; i++) {
-            m_mouse.turnRight();
-        }
-    }
-}
-
-void Solver::move_forward() {
-    if (m_maze.exists_wall(m_mouse.getPosition(), m_mouse.getDirection())) {
-        face(rotate_right(m_mouse.getDirection()));
-        move_forward();
-        return;
-    }
-    m_mouse.moveForward();
-    visited.insert({m_mouse.getPosition().x, m_mouse.getPosition().y});
-};
-
-// detect_walls & log
-void Solver::detect_and_set_walls() {
-    Direction forward = m_mouse.getDirection();
-    Position pos = m_mouse.getPosition();
-
-    if (m_mouse.wallFront()) set_wall(pos, forward);
-    if (m_mouse.wallLeft()) set_wall(pos, rotate_left(forward));
-    if (m_mouse.wallRight()) set_wall(pos, rotate_right(forward));
-}
 
 void Solver::solve() {
-    /* =====> DO THIS IN THE MAZE CONSTRUCTOR
-    for (int x = 0; x < width; ++x) {
-        set_wall(x, 0, SOUTH, true);
-        set_wall(x, height - 1, NORTH, true);
-    }
-    for (int y = 0; y < height; ++y) {
-        set_wall(0, y, WEST, true);
-        set_wall(width - 1, y, EAST, true);
-    }
-    */
-
     // Start
-    visited.insert({m_mouse.getPosition().x, m_mouse.getPosition().y});
-    bfs_recompute();
-    update_text();
-    paint_colors(visited, compute_blue_route(m_mouse.getPosition().x,
-                                             m_mouse.getPosition().y));
-
+    m_maze.set_border_walls();
+    m_maze.visited.insert({m_mouse.getPosition().x, m_mouse.getPosition().y});
     Direction heading = m_mouse.getDirection();
     // Popluate the maze from the starting position
-    detect_and_set_walls();
-    bfs_recompute();
-    update_text();
     // Run
     while (!m_maze.at_target(m_mouse.getPosition())) {
+        detect_and_set_walls();
+        bfs_recompute();
+        m_mouse.update_visuals(m_maze);
         Direction best_dir = NORTH;
-        int best_val = INF;
+        int best_val = UBOUND_DIST;
         for (Direction k : {NORTH, EAST, SOUTH, WEST}) {
             Position neighbor = get_neighbor(m_mouse.getPosition(), k);
-
             if (!m_maze.in_bounds(neighbor) ||
                 m_maze.exists_wall(m_mouse.getPosition(), k))
                 continue;
-
             if (m_maze.get_distance(neighbor) < best_val) {
                 best_val = m_maze.get_distance(neighbor);
                 best_dir = k;
             }
         }
-
         face(best_dir);
         move_forward();
-        paint_colors(visited, compute_blue_route(m_mouse.getPosition().x,
-                                                 m_mouse.getPosition().y));
-        detect_and_set_walls();
-        bfs_recompute();
-        update_text();
     }
 }
-
-// Blue route preview
-std::vector<std::pair<int, int>> Solver::compute_blue_route(int sx, int sy) {
-    std::vector<std::pair<int, int>> route;
-    std::set<std::pair<int, int>> seen;
-
-    Position pos = Position(sx, sy);
-
-    while (!m_maze.at_target(pos)) {
-        Direction best_d = NORTH;
-        int best_v = INF;
-
-        for (Direction d : {NORTH, EAST, SOUTH, WEST}) {
-            Position neighbor = get_neighbor(pos, d);
-            if (!m_maze.in_bounds(neighbor)) {
-                continue;
-            }
-            if (m_maze.exists_wall(pos, d)) {
-                continue;
-            }
-            if (m_maze.get_distance(neighbor) < best_v) {
-                best_v = m_maze.get_distance(neighbor);
-                best_d = d;
-            }
-        }
-        pos.x += dx(best_d);
-        pos.y += dy(best_d);
-
-        std::pair<int, int> coords = std::make_pair(pos.x, pos.y);
-        if (seen.count(coords)) break;
-        seen.insert(coords);
-        route.emplace_back(coords.first, coords.second);
-    }
-    return route;
-};
-
-// Paint overlays
-void Solver::paint_colors(const std::set<std::pair<int, int>> &visited,
-                          const std::vector<std::pair<int, int>> &blue) {
-    m_mouse.clearAllColor();
-    for (auto &p : visited) m_mouse.setColor(p.first, p.second, 'G');
-    for (auto &p : blue) m_mouse.setColor(p.first, p.second, 'B');
-};

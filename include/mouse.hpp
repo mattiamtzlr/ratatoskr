@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
-
+#include <set>
+#include "maze.hpp"
 #include "util.hpp"
 
 class Mouse {
@@ -41,4 +42,5 @@ class Mouse {
 
     virtual bool wasReset() = 0;
     virtual void ackReset() = 0;
+    virtual void update_visuals(Maze &maze) = 0;
 };

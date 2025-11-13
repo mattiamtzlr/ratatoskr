@@ -1,5 +1,16 @@
 #include "maze.hpp"
 
+
+void Maze::set_border_walls() {
+    for (int x = 0; x < MAZE_WIDTH; ++x) {
+        set_wall(Position(x, 0), SOUTH);
+        set_wall(Position(x, MAZE_HEIGHT - 1), NORTH);
+    }
+    for (int y = 0; y < MAZE_HEIGHT; ++y) {
+        set_wall(Position(0, y), WEST);
+        set_wall(Position(MAZE_WIDTH - 1, y), EAST);
+    }
+}
 void Maze::set_wall(Position pos, Direction d) {
     m_wall_storage[pos.x][pos.y] |= (0b1 << d);
 }
@@ -15,6 +26,7 @@ void Maze::reset_distances() {
         for (int y = 0; y < MAZE_HEIGHT; ++y)
             m_distances[x][y] = MAZE_WIDTH * MAZE_HEIGHT + 1;
 }
+
 int Maze::maze_height() { return MAZE_HEIGHT; }
 
 int Maze::maze_width() { return MAZE_WIDTH; }
@@ -39,11 +51,13 @@ bool Maze::in_bounds(Position pos) {
 
 bool Maze::exists_wall(Position pos, Direction dir) {
     // the following should turn non-zero to true and zero to false.
-    return (bool) (get_walls(pos) & 0b1 << dir); }
+    return (bool)(get_walls(pos) & 0b1 << dir);
+}
 
 bool Maze::is_dead_end(Position pos) {
     for (Direction d : {NORTH, EAST, SOUTH, WEST}) {
-        if (!exists_wall(pos, d) && (get_distance(get_neighbor(pos, d)) < get_distance(pos))) {
+        if (!exists_wall(pos, d) &&
+            (get_distance(get_neighbor(pos, d)) < get_distance(pos))) {
             return false;
         }
     }

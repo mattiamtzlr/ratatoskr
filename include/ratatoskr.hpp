@@ -56,6 +56,7 @@ class Ratatoskr : public Mouse {
     virtual void setText(int x, int y, const std::string &text);
     virtual void clearText(int x, int y);
     virtual void clearAllText();
+    virtual void update_visuals(Maze &maze);
 
     virtual bool wasReset();
     virtual void ackReset();

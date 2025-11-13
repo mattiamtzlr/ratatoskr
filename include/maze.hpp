@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstddef>
+#include <set>
 
 #include "util.hpp"
 
@@ -18,6 +19,8 @@ class Maze {
         {8, 7},
         {7, 8},
         {8, 8}};  // TODO: Make this settable in the constructor
+    std::set<std::pair<int, int>> visited = {};
+    void set_border_walls();
     void reset_distances();
     void set_wall(Position pos, Direction d);
     void clear_wall(Position pos, Direction d);
