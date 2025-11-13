@@ -1,5 +1,15 @@
 #include "maze.hpp"
 
+std::vector<Position> Maze::valid_neighbors(Position mouse_pos) {
+    std::vector<Position> neigh;
+    for (Direction k : {NORTH, EAST, SOUTH, WEST}) {
+        Position neighbor = get_neighbor(mouse_pos, k);
+        if (in_bounds(neighbor) && !exists_wall(mouse_pos, k)) {
+            neigh.push_back(neighbor);
+        }
+    }
+    return neigh;
+}
 
 void Maze::set_border_walls() {
     for (int x = 0; x < MAZE_WIDTH; ++x) {
@@ -15,7 +25,8 @@ void Maze::set_wall(Position pos, Direction d) {
     m_wall_storage[pos.x][pos.y] |= (0b1 << d);
     Position front_neighbor = get_neighbor(pos, d);
     if (in_bounds(front_neighbor))
-         m_wall_storage[front_neighbor.x][front_neighbor.y] |= (0b1 << rotate_half(d));
+        m_wall_storage[front_neighbor.x][front_neighbor.y] |=
+            (0b1 << rotate_half(d));
 }
 
 void Maze::clear_wall(Position pos, Direction d) {

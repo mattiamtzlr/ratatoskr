@@ -1,7 +1,9 @@
 #pragma once
 
+#include <array>
 #include <cstddef>
 #include <set>
+#include <vector>
 
 #include "util.hpp"
 
@@ -20,6 +22,7 @@ class Maze {
         {7, 8},
         {8, 8}};  // TODO: Make this settable in the constructor
     std::set<std::pair<int, int>> visited = {};
+    std::vector<Position> valid_neighbors(Position mouse_pos);
     void set_border_walls();
     void reset_distances();
     void set_wall(Position pos, Direction d);

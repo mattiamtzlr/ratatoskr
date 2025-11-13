@@ -12,3 +12,15 @@ int dy(Direction d) { return d == NORTH ? 1 : (d == SOUTH ? -1 : 0); };
 Position get_neighbor(Position pos, Direction d) {
     return Position(pos.x + dx(d), pos.y + dy(d));
 }
+Direction dir_for_neighbor(Position pos_n, Position pos_m) {
+    if (pos_n.x > pos_m.x)
+        return EAST;
+    else if (pos_n.x < pos_m.x)
+        return WEST;
+
+    else if (pos_n.y > pos_m.y)
+        return NORTH;
+
+    else
+        return SOUTH;
+}

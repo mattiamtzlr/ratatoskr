@@ -24,6 +24,7 @@ Direction rotate_right(Direction dir);
 Direction rotate_left(Direction dir);
 
 Direction rotate_half(Direction dir);
+Direction dir_for_neighbor(Position pos_n, Position pos_m);
 
 int dx(Direction d);
 int dy(Direction d);
