@@ -3,10 +3,22 @@
 #include "esp_bt.h"
 #include "ratatoskr.hpp"
 
-ToF tof_left = ToF(LEFT, 0x29);
-ToF tof_left_front = ToF(FRONT_LEFT, 0x28);
-ToF tof_right_front = ToF(FRONT_RIGHT, 0x27);
-ToF tof_right = ToF(RIGHT, 0x26);
+#define TOF_LEFT_XSHUT          23    
+#define TOF_FRONT_LEFT_XSHUT    19
+#define TOF_FRONT_RIGHT_XSHUT   18  
+#define TOF_RIGHT_XSHUT         15
+
+// I2C addresses for the ToF sensors
+const uint8_t TOF_LEFT        = 0x30;
+const uint8_t TOF_FRONT_LEFT  = 0x31;
+const uint8_t TOF_FRONT_RIGHT = 0x32;
+const uint8_t TOF_RIGHT       = 0x33;
+
+ToF tof_left = ToF(LEFT, TOF_LEFT, TOF_LEFT_XSHUT);
+ToF tof_left_front = ToF(FRONT_LEFT, TOF_FRONT_LEFT,TOF_FRONT_LEFT_XSHUT);
+ToF tof_right_front = ToF(FRONT_RIGHT, TOF_FRONT_RIGHT, TOF_FRONT_RIGHT_XSHUT);
+ToF tof_right = ToF(RIGHT, TOF_RIGHT, TOF_RIGHT_XSHUT);
+
 MPU6050 gyro = MPU6050();
 
 /* left motor, pins in order of ESP => motor A resp. 1 */

@@ -1,9 +1,106 @@
 #include "ratatoskr.hpp"
 #define PERIOD 868.75
 #define TIME_PER_CELL 250.0
+
+// PID Controller Class
+class SystemPID {
+public:
+    SystemPID()
+        : distanceKp(0.25), distanceKi(0.1), distanceKd(0.00),
+          encoderKp(0.75), encoderKi(0.0), encoderKd(0.0),
+          distancePrevError(0), encoderPrevError(0),
+          distanceIntegral(0), encoderIntegral(0),
+          basePWM_forward(Ratatoskr::FORWARD_PWM) {}
+
+    void update(float dt, float leftDistance, float rightDistance, 
+                float leftEncoder, float rightEncoder) {
+        // Constants
+        const float targetPosition = 0.0;
+        
+        // Handle missing sensor readings
+        if (leftDistance == 0 && rightDistance == 0) {
+            // No walls detected; skip lateral correction
+            leftDistance = 0;
+            rightDistance = 0;
+        } else {
+            // Simulate missing distances
+            if (leftDistance == 0) {
+                leftDistance = 75.0;  // Assume centered if left wall missing
+            }
+            if (rightDistance == 0) {
+                rightDistance = 75.0;  // Assume centered if right wall missing
+            }
+        }
+
+        // Lateral position error (positive = too far right, negative = too far left)
+        float leftConstrained = constrain(leftDistance, 0, 80);
+        float rightConstrained = constrain(rightDistance, 0, 80);
+        float currentPosition = leftConstrained - rightConstrained;
+        
+        // PID for lateral control
+        float distanceError = targetPosition - currentPosition;
+        distanceIntegral += distanceError * dt;
+        float distanceDerivative = (distanceError - distancePrevError) / dt;
+        distancePrevError = distanceError;
+        
+        float side_correction = distanceKp * distanceError + 
+                               distanceKi * distanceIntegral + 
+                               distanceKd * distanceDerivative;
+
+        // PID for encoder synchronization (keep wheels matched) (think of plane wings)
+        float targetEncoder = 0.0;
+        float currentEncoder = leftEncoder - rightEncoder;
+        float encoderError = targetEncoder - currentEncoder;
+        encoderIntegral += encoderError * dt;
+        float encoderDerivative = (encoderError - encoderPrevError) / dt;
+        
+        float encoderCorrection = encoderKp * encoderError + 
+                                 encoderKi * encoderIntegral + 
+                                 encoderKd * encoderDerivative;
+        encoderPrevError = encoderError;
+
+        // Disable lateral correction if both walls are far or absent
+        // if ((leftDistance >= 40 || leftDistance == 0) && 
+        //     (rightDistance >= 40 || rightDistance == 0)) {
+        //     side_correction = 0;
+        // }
+
+        // Calculate final PWM values
+        corrected_left_PWM = basePWM_forward + side_correction + encoderCorrection;
+        corrected_right_PWM = basePWM_forward - side_correction - encoderCorrection;
+        Serial.println("corrections: side enc " + String(encoderCorrection));
+        // Constrain to valid PWM range
+        corrected_left_PWM = constrain(corrected_left_PWM, 40, 255);
+        corrected_right_PWM = constrain(corrected_right_PWM, 40, 255);
+    }
+
+    void reset() {
+        distancePrevError = 0;
+        encoderPrevError = 0;
+        distanceIntegral = 0;
+        encoderIntegral = 0;
+    }
+
+    float getLeftPWM() { return corrected_left_PWM; }
+    float getRightPWM() { return corrected_right_PWM; }
+
+private:
+    // PID coefficients
+    double distanceKp, distanceKi, distanceKd;
+    double encoderKp, encoderKi, encoderKd;
+    
+    // PID state variables
+    double distancePrevError, distanceIntegral;
+    double encoderPrevError, encoderIntegral;
+    
+    double basePWM_forward;
+    float corrected_left_PWM;
+    float corrected_right_PWM;
+};
+
 Ratatoskr::Ratatoskr(GearMotor &motor_left, GearMotor &motor_right,
                      ToF &tof_left, ToF &tof_front_left, ToF &tof_front_right,
-                     ToF &tof_right , MPU6050 &gyro/*, LEDMatrix &screen*/)
+                     ToF &tof_right, MPU6050 &gyro)
     : Mouse(),
       m_motor_left(motor_left),
       m_motor_right(motor_right),
@@ -11,17 +108,11 @@ Ratatoskr::Ratatoskr(GearMotor &motor_left, GearMotor &motor_right,
       m_tof_front_left(tof_front_left),
       m_tof_front_right(tof_front_right),
       m_tof_right(tof_right),
-      m_gyro(gyro)/*
-       m_screen(screen)*/
-{}
+      m_gyro(gyro) {}
 
 //===============================[ CONTROL ]====================================
 /**
  * turn @angle radians in counterclockwise direction
- *
- * due to the structure of the drivetrain, one wheel moves forwards when
- * the motor is driven ccw and the other moves backwards when its motor is
- * driven ccw, idem for cw
  */
 void Ratatoskr::turn(int angle) {
     float threshold = 0.5f;
@@ -53,33 +144,65 @@ void Ratatoskr::turn(int angle) {
 }
 
 /**
- * move @distance [one cell (16 cm)] forwards
+ * move @distance [one cell (16 cm)] forwards with PID control
  */
 void Ratatoskr::moveForward(int distance) {
-    // TODO: PID on encoders + wall following; for now, spin both forward
-    // briefly.
-    Mouse::moveForward(distance);  // Don't remove this, this updates the
-                                   // position of the mouse in the maze!
-    float time_forward = distance * TIME_PER_CELL;
-    u_int8_t pwm_left = FORWARD_PWM;
-    u_int8_t pwm_right = FORWARD_PWM;
-
-    for (int i = 0; i < 20; i++) {
-        if (m_motor_left.get_rpm() > m_motor_right.get_rpm()) {
-            pwm_right += 10;
-            pwm_left -= 10;
+    Mouse::moveForward(distance);  // Update position in maze
+    
+    // Calculate target encoder counts for desired distance
+    // Assuming encoder counts per cm - you'll need to calibrate this
+    const float ENCODER_COUNTS_PER_CM = 10.0;  // TODO: Calibrate this value
+    const float CM_PER_CELL = 16.0;
+    long target_counts = (long)(distance * CM_PER_CELL * ENCODER_COUNTS_PER_CM);
+    
+    // Reset encoder counts at start
+    m_motor_left.reset_encoder_count();
+    m_motor_right.reset_encoder_count();
+    
+    // PID controller instance
+    SystemPID pid;
+    
+    // Control loop parameters
+    const float dt = 0.02;  // 20ms update rate
+    const int loop_delay_ms = 20;
+    
+    // Main control loop - run until target distance reached
+    while (true) {
+        Serial.println("encoders: L " + String(m_motor_left.get_encoder_count()) + " R " + String(m_motor_right.get_encoder_count()));
+        // Read current encoder values
+        long left_encoder = m_motor_left.get_encoder_count();
+        long right_encoder = m_motor_right.get_encoder_count();
+        
+        // Check if we've reached the target distance
+        long avg_encoder = (left_encoder + right_encoder) / 2;
+        if (avg_encoder >= target_counts) {
+            break;
         }
-        if (m_motor_left.get_rpm() < m_motor_right.get_rpm()) {
-            pwm_right -= 10;
-            pwm_left += 10;
-        }
-        m_motor_left.spin_ccw(pwm_left);
-        m_motor_right.spin_cw(pwm_right);
-        // timing/odometry goes here
-        delay(time_forward / 20);
+        
+        // Read ToF sensor distances (in mm)
+        uint16_t left_distance = m_tof_left.read();
+        uint16_t right_distance = m_tof_right.read();
+        
+        // Update PID controller
+        pid.update(dt, left_distance, right_distance, 
+                   left_encoder, right_encoder);
+        
+        // Get corrected PWM values
+        float left_pwm = pid.getLeftPWM();
+        float right_pwm = pid.getRightPWM();
+        
+        // Apply motor commands
+        m_motor_left.spin_ccw((int)left_pwm);
+        m_motor_right.spin_cw((int)right_pwm);
+        
+        // Wait for next control cycle
+        delay(loop_delay_ms);
     }
+    
+    // Stop motors when target reached
     stop();
 }
+
 /**
  * SLAM THE BRAKES!
  */
@@ -89,7 +212,6 @@ void Ratatoskr::stop() {
 }
 
 //===============================[ SENSING ]====================================
-// Below 15 cm (or 10)
 /**
  * Front wall if either front-left or front-right ToF sees something closer
  * than FRONT_WALL_MM. Ignores zero readings (sensor not ready).
