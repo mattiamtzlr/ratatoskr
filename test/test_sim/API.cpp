@@ -53,6 +53,21 @@ void API::moveForward(int distance) {
         throw;
     }
 }
+void API::moveForwardHalf(int num_half_steps) {
+    std::cout << "moveForwardHalf ";
+    // Don't print distance argument unless explicitly specified, for
+    // backwards compatibility with older versions of the simulator
+    if (num_half_steps != 1) {
+        std::cout << num_half_steps;
+    }
+    std::cout << std::endl;
+    std::string response;
+    std::cin >> response;
+    if (response != "ack") {
+        std::cerr << response << std::endl;
+        throw;
+    }
+}
 
 void API::turnRight() {
     std::cout << "turnRight" << std::endl;
