@@ -55,6 +55,7 @@ void Solver::bfs() {
 void Solver::solve() {
     m_maze.set_border_walls();
     m_maze.visited.insert(m_mouse.getPosition());
+
     while (!m_maze.at_target(m_mouse.getPosition())) {
         detect_and_set_walls();
         bfs();

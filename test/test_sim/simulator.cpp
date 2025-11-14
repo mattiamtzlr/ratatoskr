@@ -1,6 +1,8 @@
 #include <iostream>
-#include "virtual_mouse.hpp"
+
+#include "API.hpp"
 #include "solver.hpp"
+#include "virtual_mouse.hpp"
 
 int main(int argc, char* argv[]) {
     VirtualMouse mouse;
@@ -12,11 +14,11 @@ int main(int argc, char* argv[]) {
     maze.targets.push_back(Position(8, 7));
     maze.targets.push_back(Position(8, 8));
 
-    solver.solve(); // Run from start to target
+    solver.solve();  // Run from start to target
+
 
     maze.targets.clear();
     maze.targets.push_back(Position(0, 0));
 
-    solver.solve(); // Run from target to start
-
+    solver.solve();  // Run from target to start
 }

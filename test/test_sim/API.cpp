@@ -65,6 +65,17 @@ void API::turnLeft() {
     std::string ack;
     std::cin >> ack;
 }
+void API::turnRight45() {
+    std::cout << "turnRight45" << std::endl;
+    std::string ack;
+    std::cin >> ack;
+}
+
+void API::turnLeft45() {
+    std::cout << "turnLeft45" << std::endl;
+    std::string ack;
+    std::cin >> ack;
+}
 
 void API::setWall(int x, int y, char direction) {
     std::cout << "setWall " << x << " " << y << " " << direction << std::endl;

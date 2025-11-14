@@ -16,6 +16,8 @@ public:
     static void moveForward(int distance = 1);
     static void turnRight();
     static void turnLeft();
+    static void turnRight45();
+    static void turnLeft45();
 
     static void setWall(int x, int y, char direction);
     static void clearWall(int x, int y, char direction);
