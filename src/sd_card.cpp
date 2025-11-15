@@ -1,4 +1,4 @@
-#include "../include/sd_card.hpp"
+#include "sd_card.hpp"
 #include <cstdint>
 
 /* TODO: find some way to have useful file names, maybe with an increasing ID

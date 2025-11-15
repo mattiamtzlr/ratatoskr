@@ -1,5 +1,6 @@
 #pragma once
-
+#include "util.hpp"
+#include <Arduino.h>
 #include <Wire.h>
 
 // Defalut address for MPU6050

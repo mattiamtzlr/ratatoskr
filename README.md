@@ -25,3 +25,23 @@ To open the serial monitor run `pio device monitor` from the command-line in the
 
 > [!WARNING]
 > Before doing anything for the first time, run `pio run --target compiledb` from the command-line in the root directory to generate `compile_commands.json` which tells `clangd` how to compile everything.
+
+## Software
+
+### Class Hierarchy
+`gear_motor` - Class that controls the N20 Motor. Requires interrupt GPIO and PWM pins.
+`gyro` - Class that handles interactions with the 6050 Gyroscope. Requires I2C pins.
+
+`tof` - Class that handles interactions with the ToF Sensors. Requires I2C and GPIO pins.
+
+`led_matrix` - [Deprecated] Class that controls the 8x8 LED Matrix. 
+
+`sd_card` - [Deprecated] Class that handles interactions with the SD Card. 
+
+`maze` - Class representation of the discovered part of the labyrinth. This class contains an array representation to track the walls as well as one for the distances to target. Further it maintains the targets and the visited coordinates.
+
+`mouse` - Abstract class that outlines the interface a mouse (that can interact with the solver) should expose.
+
+`ratatoskr`
+`virtual_mouse`
+`solver`

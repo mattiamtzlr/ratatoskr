@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "util.hpp"
 #include <Adafruit_GFX.h>
 #include <cstdint>
 
