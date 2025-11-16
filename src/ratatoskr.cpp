@@ -5,70 +5,71 @@
 
 // PID Controller Class
 class SystemPID {
-public:
+   public:
     SystemPID()
-        : distanceKp(0.25), distanceKi(0.1), distanceKd(0.00),
-          encoderKp(0.75), encoderKi(0.0), encoderKd(0.0),
-          distancePrevError(0), encoderPrevError(0),
-          distanceIntegral(0), encoderIntegral(0),
+        : distanceKp(0.25),
+          distanceKi(0.1),
+          distanceKd(0.00),
+          encoderKp(0.75),
+          encoderKi(0.0),
+          encoderKd(0.0),
+          distancePrevError(0),
+          encoderPrevError(0),
+          distanceIntegral(0),
+          encoderIntegral(0),
           basePWM_forward(Ratatoskr::FORWARD_PWM) {}
 
-    void update(float dt, float leftDistance, float rightDistance, 
+    void update(float dt, float leftDistance, float rightDistance,
                 float leftEncoder, float rightEncoder) {
         // Constants
         const float targetPosition = 0.0;
-        
-        // Handle missing sensor readings
-        if (leftDistance == 0 && rightDistance == 0) {
-            // No walls detected; skip lateral correction
-            leftDistance = 0;
-            rightDistance = 0;
-        } else {
-            // Simulate missing distances
-            if (leftDistance == 0) {
-                leftDistance = 75.0;  // Assume centered if left wall missing
-            }
-            if (rightDistance == 0) {
-                rightDistance = 75.0;  // Assume centered if right wall missing
-            }
-        }
 
-        // Lateral position error (positive = too far right, negative = too far left)
+        leftDistance =
+            (leftDistance == 0 && rightDistance > 0) ? 0.75 : leftDistance;
+
+        rightDistance =
+            (rightDistance == 0 && leftDistance > 0) ? 0.75 : rightDistance;
+
+        // Lateral position error (positive = too far right, negative = too far
+        // left)
         float leftConstrained = constrain(leftDistance, 0, 80);
         float rightConstrained = constrain(rightDistance, 0, 80);
         float currentPosition = leftConstrained - rightConstrained;
-        
+
         // PID for lateral control
         float distanceError = targetPosition - currentPosition;
         distanceIntegral += distanceError * dt;
         float distanceDerivative = (distanceError - distancePrevError) / dt;
         distancePrevError = distanceError;
-        
-        float side_correction = distanceKp * distanceError + 
-                               distanceKi * distanceIntegral + 
-                               distanceKd * distanceDerivative;
 
-        // PID for encoder synchronization (keep wheels matched) (think of plane wings)
+        float side_correction = distanceKp * distanceError +
+                                distanceKi * distanceIntegral +
+                                distanceKd * distanceDerivative;
+
+        // PID for encoder synchronization (keep wheels matched) (think of plane
+        // wings)
         float targetEncoder = 0.0;
         float currentEncoder = leftEncoder - rightEncoder;
         float encoderError = targetEncoder - currentEncoder;
         encoderIntegral += encoderError * dt;
         float encoderDerivative = (encoderError - encoderPrevError) / dt;
-        
-        float encoderCorrection = encoderKp * encoderError + 
-                                 encoderKi * encoderIntegral + 
-                                 encoderKd * encoderDerivative;
+
+        float encoderCorrection = encoderKp * encoderError +
+                                  encoderKi * encoderIntegral +
+                                  encoderKd * encoderDerivative;
         encoderPrevError = encoderError;
 
         // Disable lateral correction if both walls are far or absent
-        // if ((leftDistance >= 40 || leftDistance == 0) && 
+        // if ((leftDistance >= 40 || leftDistance == 0) &&
         //     (rightDistance >= 40 || rightDistance == 0)) {
         //     side_correction = 0;
         // }
 
         // Calculate final PWM values
-        corrected_left_PWM = basePWM_forward + side_correction + encoderCorrection;
-        corrected_right_PWM = basePWM_forward - side_correction - encoderCorrection;
+        corrected_left_PWM =
+            basePWM_forward + side_correction + encoderCorrection;
+        corrected_right_PWM =
+            basePWM_forward - side_correction - encoderCorrection;
         Serial.println("corrections: side enc " + String(encoderCorrection));
         // Constrain to valid PWM range
         corrected_left_PWM = constrain(corrected_left_PWM, 40, 255);
@@ -85,15 +86,15 @@ public:
     float getLeftPWM() { return corrected_left_PWM; }
     float getRightPWM() { return corrected_right_PWM; }
 
-private:
+   private:
     // PID coefficients
     double distanceKp, distanceKi, distanceKd;
     double encoderKp, encoderKi, encoderKd;
-    
+
     // PID state variables
     double distancePrevError, distanceIntegral;
     double encoderPrevError, encoderIntegral;
-    
+
     double basePWM_forward;
     float corrected_left_PWM;
     float corrected_right_PWM;
@@ -123,8 +124,8 @@ void Ratatoskr::turn(int angle) {
     float target = current_angle + angle;
     t_last = t_now;
 
-    if(angle > 0){
-        while(current_angle < target - threshold){
+    if (angle > 0) {
+        while (current_angle < target - threshold) {
             Serial.println(current_angle);
             m_motor_left.spin_cw(TURN_PWM);
             m_motor_right.spin_cw(TURN_PWM);
@@ -133,7 +134,7 @@ void Ratatoskr::turn(int angle) {
             t_last = t_now;
         }
     } else {
-        while(current_angle > target + threshold){
+        while (current_angle > target + threshold) {
             m_motor_left.spin_ccw(TURN_PWM);
             m_motor_right.spin_ccw(TURN_PWM);
             t_now = micros();
@@ -149,57 +150,63 @@ void Ratatoskr::turn(int angle) {
  */
 void Ratatoskr::moveForward(int distance) {
     Mouse::moveForward(distance);  // Update position in maze
-    
+
     // Calculate target encoder counts for desired distance
     // Assuming encoder counts per cm - you'll need to calibrate this
     const float ENCODER_COUNTS_PER_CM = 10.0;  // TODO: Calibrate this value
     const float CM_PER_CELL = 16.0;
     long target_counts = (long)(distance * CM_PER_CELL * ENCODER_COUNTS_PER_CM);
-    
+
     // Reset encoder counts at start
     m_motor_left.reset_encoder_count();
     m_motor_right.reset_encoder_count();
-    
+
     // PID controller instance
     SystemPID pid;
-    
+
     // Control loop parameters
     const float dt = 0.02;  // 20ms update rate
     const int loop_delay_ms = 20;
-    
+
+    m_motor_left.spin_ccw(50);  // INITIAL PWM
+    m_motor_right.spin_cw(50);
+    delay(loop_delay_ms);
+
     // Main control loop - run until target distance reached
     while (true) {
-        Serial.println("encoders: L " + String(m_motor_left.get_encoder_count()) + " R " + String(m_motor_right.get_encoder_count()));
+        Serial.println("encoders: L " +
+                       String(m_motor_left.get_encoder_count()) + " R " +
+                       String(m_motor_right.get_encoder_count()));
         // Read current encoder values
         long left_encoder = m_motor_left.get_encoder_count();
         long right_encoder = m_motor_right.get_encoder_count();
-        
+
         // Check if we've reached the target distance
         long avg_encoder = (left_encoder + right_encoder) / 2;
         if (avg_encoder >= target_counts) {
             break;
         }
-        
+
         // Read ToF sensor distances (in mm)
         uint16_t left_distance = m_tof_left.read();
         uint16_t right_distance = m_tof_right.read();
-        
+
         // Update PID controller
-        pid.update(dt, left_distance, right_distance, 
-                   left_encoder, right_encoder);
-        
+        pid.update(dt, left_distance, right_distance, left_encoder,
+                   right_encoder);
+
         // Get corrected PWM values
         float left_pwm = pid.getLeftPWM();
         float right_pwm = pid.getRightPWM();
-        
+
         // Apply motor commands
         m_motor_left.spin_ccw((int)left_pwm);
         m_motor_right.spin_cw((int)right_pwm);
-        
+
         // Wait for next control cycle
         delay(loop_delay_ms);
     }
-    
+
     // Stop motors when target reached
     stop();
 }
@@ -248,7 +255,7 @@ bool Ratatoskr::wallLeft() {
     uint16_t distance_left = m_tof_left.read();
     return (distance_left > 0) && (distance_left < SIDE_WALL_MM);
 }
-void Ratatoskr::update_visuals(Maze& maze) {}
+void Ratatoskr::update_visuals(Maze &maze) {}
 
 bool Ratatoskr::wasReset() { return false; }
 void Ratatoskr::ackReset() {}
