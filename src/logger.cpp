@@ -2,11 +2,12 @@
 
 #include <Arduino.h>
 
-Logger::Logger(int start_index) { m_head_index = start_index; }
+void Logger::begin(int start_index) { m_head_index = start_index; }
 
 void Logger::log(std::string msg) {
     DatabaseError_t result =
-        nvsDB.putPair(std::to_string(m_head_index++).c_str(), msg.c_str());
+        nvsDB.putPair(std::to_string(m_head_index).c_str(), msg.c_str());
+    m_head_index++;
 }
 void Logger::export_logs(void) {
     int index = 0;

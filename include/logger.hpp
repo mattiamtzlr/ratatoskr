@@ -10,7 +10,7 @@ class Logger {
     int m_head_index = 0;
 
    public:
-    Logger(int start_index);
+    void begin(int start_index);
     void log(std::string msg);
     void export_logs(void);
 };
