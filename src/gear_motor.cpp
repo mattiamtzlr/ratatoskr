@@ -17,7 +17,7 @@ GearMotor::GearMotor(int in1, int in2, int encoder_pin_1, int encoder_pin_2,
       ENCODER_PIN_1(encoder_pin_1),
       ENCODER_PIN_2(encoder_pin_2) {
     m_encoder_t_diff = 1;
-    m_actual_rpm = 0;
+    m_delta_time = 0;
     m_desired_rpm = 0;
     m_t_last_i = 0;
 }
@@ -30,9 +30,11 @@ void IRAM_ATTR GearMotor::encoder_interrupt() {
     // https://www.adafruit.com/product/4640
     int t_curr_i = micros();
     if (m_t_last_i < t_curr_i) {
-        m_actual_rpm = t_curr_i - m_t_last_i;
+        m_delta_time = t_curr_i - m_t_last_i;
     }
     m_t_last_i = t_curr_i;
+    // Count encoder ticks
+    m_encoder_count++;
 }
 
 /**
@@ -40,7 +42,7 @@ void IRAM_ATTR GearMotor::encoder_interrupt() {
  */
 int GearMotor::get_rpm() {
     // did not wrap around
-    float revolutions = m_actual_rpm;  // us
+    float revolutions = m_delta_time;  // us
     revolutions = 1.0 / revolutions;   // rev per us
     revolutions *= 1000000;            // rev per sec
     revolutions *= 60;                 // rev per min
@@ -76,9 +78,25 @@ void GearMotor::spin_ccw(int rpm) {
 }
 
 /**
- * Stop motor by forcing brake
+ * Stop motor stopping acceleration
  */
-void GearMotor::stop() {
+void GearMotor::coast() {
     analogWrite(IN1, 0);
     analogWrite(IN2, 0);
+}
+
+/**
+ * Stop motor by forcing brake
+ * ! DON'T RUN THIS FOR TOO LONG !
+ */
+void GearMotor::brake() {
+    analogWrite(IN1, 255);
+    analogWrite(IN2, 255);
+}
+long GearMotor::get_encoder_count() {
+    return m_encoder_count;
+}
+
+void GearMotor::reset_encoder_count() {
+    m_encoder_count = 0;
 }

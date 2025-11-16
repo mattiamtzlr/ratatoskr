@@ -1,5 +1,6 @@
 #pragma once
 #include <Arduino.h>
+
 #include "util.hpp"
 
 // TODO: This is no longer the one we use : [Adafruit DRV8871 DC Motor Driver
@@ -11,10 +12,15 @@ class GearMotor {
 
     void spin_cw(int speed);
     void spin_ccw(int speed);
-    void stop();
+    void brake();
+    void coast();
     int get_rpm();
     void encoder_interrupt();
     static void isr_trampoline(void *obj_isr);
+
+    // Encoder cumulative count utilities
+    long get_encoder_count();
+    void reset_encoder_count();
 
    private:
     void set_rpm(int pin, int speed);
@@ -31,7 +37,8 @@ class GearMotor {
     const int ENCODER_PIN_1;
     const int ENCODER_PIN_2;
     int m_desired_rpm;
-    volatile int m_actual_rpm;
+    volatile int m_delta_time;
     volatile int m_t_last_i;
     volatile int m_encoder_t_diff;
+    volatile long m_encoder_count = 0;
 };
