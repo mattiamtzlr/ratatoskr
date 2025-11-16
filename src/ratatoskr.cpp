@@ -12,7 +12,7 @@ class SystemPID {
           distanceKi(0.1),
           distanceKd(0.00),
           encoderKp(0.75),
-          encoderKi(0.0),
+          encoderKi(0.4),
           encoderKd(0.0),
           distancePrevError(0),
           encoderPrevError(0),
@@ -115,15 +115,15 @@ Ratatoskr::Ratatoskr(GearMotor &motor_left, GearMotor &motor_right,
 
 //===============================[ CONTROL ]====================================
 /**
- * turn @angle radians in counterclockwise direction
+ * turn @angle degrees in counterclockwise direction
  */
 void Ratatoskr::turn(int angle) {
     float threshold = 0.5f;
     unsigned long t_now = micros();
-    unsigned long t_last = 0;
+    unsigned long t_last = t_now; // avoid huge first dt
+    // baseline angle in degrees
     float current_angle = m_gyro.getAngle(t_now, t_last);
-    float target = current_angle + angle;
-    t_last = t_now;
+    float target = current_angle + (float)angle;
 
     if (angle > 0) {
         while (current_angle < target - threshold) {
@@ -153,7 +153,6 @@ void Ratatoskr::moveForward(int distance) {
     Mouse::moveForward(distance);  // Update position in maze
 
     // Calculate target encoder counts for desired distance
-    // Assuming encoder counts per cm - you'll need to calibrate this
     const float ENCODER_COUNTS_PER_CM = 10.0;  // TODO: Calibrate this value
     const float CM_PER_CELL = 16.0;
     long target_counts = (long)(distance * CM_PER_CELL * ENCODER_COUNTS_PER_CM);
@@ -169,9 +168,6 @@ void Ratatoskr::moveForward(int distance) {
     const float dt = 0.02;  // 20ms update rate
     const int loop_delay_ms = 20;
 
-    m_motor_left.spin_ccw(50);  // INITIAL PWM
-    m_motor_right.spin_cw(50);
-    delay(loop_delay_ms);
 
     // Main control loop - run until target distance reached
     while (true) {

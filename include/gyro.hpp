@@ -55,7 +55,7 @@ public:
     Vector3D readScaledAccel(); // Returns G's
 
     // Get current angle in deg (around z axis)
-    float getAngle(time_t t_now, time_t t_last);
+    float getAngle(unsigned long t_now, unsigned long t_last);
 
     // Calc offsets
     void calibrateGyro();

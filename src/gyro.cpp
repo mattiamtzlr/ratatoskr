@@ -1,5 +1,7 @@
 #include "gyro.hpp"
 
+#include <math.h>
+
 // Scale convertions for Accel
 static constexpr float ACCEL_SCALE_2G = 16384.0f;
 static constexpr float ACCEL_SCALE_4G = 8192.0f;
@@ -16,52 +18,70 @@ float X_OFFSET = 0;
 float Y_OFFSET = 0;
 float Z_OFFSET = 0;
 
+
 std::map<AccelSensitivity, float> rangeToScaleAccel = {
-        {ACCEL_RANGE_2G, ACCEL_SCALE_2G},
-        {ACCEL_RANGE_4G, ACCEL_SCALE_4G},
-        {ACCEL_RANGE_8G, ACCEL_SCALE_8G},
-        {ACCEL_RANGE_16G, ACCEL_SCALE_16G},
+    {ACCEL_RANGE_2G, ACCEL_SCALE_2G},
+    {ACCEL_RANGE_4G, ACCEL_SCALE_4G},
+    {ACCEL_RANGE_8G, ACCEL_SCALE_8G},
+    {ACCEL_RANGE_16G, ACCEL_SCALE_16G},
 };
+
 
 std::map<GyroSensitivity, float> rangeToScaleGyro = {
-        {GYRO_RANGE_250_DEG, GYRO_SCALE_250_DEG},
-        {GYRO_RANGE_500_DEG, GYRO_SCALE_500_DEG},
-        {GYRO_RANGE_1000_DEG, GYRO_SCALE_1000_DEG},
-        {GYRO_RANGE_2000_DEG, GYRO_SCALE_2000_DEG},
+    {GYRO_RANGE_250_DEG, GYRO_SCALE_250_DEG},
+    {GYRO_RANGE_500_DEG, GYRO_SCALE_500_DEG},
+    {GYRO_RANGE_1000_DEG, GYRO_SCALE_1000_DEG},
+    {GYRO_RANGE_2000_DEG, GYRO_SCALE_2000_DEG},
 };
 
 
-MPU6050::MPU6050(uint8_t addr) : m_addr(addr), m_accelScale(ACCEL_RANGE_16G), m_gyroScale(GYRO_SCALE_250_DEG), m_angle(0){}
+MPU6050::MPU6050(uint8_t addr)
+    : m_addr(addr),
+      m_accelScale(ACCEL_SCALE_16G),
+      m_gyroScale(GYRO_SCALE_250_DEG),
+      m_angle(0) {}
 
-bool MPU6050::begin(){
+
+bool MPU6050::begin() {
     // Wake up the MPU-6050
     writeByte(MPU6050_REG_PWR_MGMT_1, 0x00);
-    
+    delay(10);
     // Who Am I check
     uint8_t device_id = readByte(MPU6050_REG_WHO_AM_I);
-    
+    delay(10);
     if (device_id != 0x68) {
         return false;
     }
+    delay(10);
     calibrateGyro();
+    delay(10);
     Serial.println("Gyro is ready");
     return true;
 }
 
-void MPU6050::setAccelSensitivity(AccelSensitivity range){
+
+void MPU6050::setAccelSensitivity(AccelSensitivity range) {
     m_accelScale = rangeToScaleAccel[range];
-
-    writeByte(MPU6050_REG_ACCEL_CONFIG, range);
+    // AFS_SEL are bits 3-4 in ACCEL_CONFIG
+    uint8_t cfg = readByte(MPU6050_REG_ACCEL_CONFIG);
+    cfg &= ~0x18;  // clear bits 3 and 4
+    cfg |= (uint8_t(range) & 0x03) << 3;
+    writeByte(MPU6050_REG_ACCEL_CONFIG, cfg);
 }
 
-void MPU6050::setGyroSensitivity(GyroSensitivity range){
+
+void MPU6050::setGyroSensitivity(GyroSensitivity range) {
     m_gyroScale = rangeToScaleGyro[range];
-
-    writeByte(MPU6050_REG_GYRO_CONFIG, range);
+    // FS_SEL are bits 3-4 in GYRO_CONFIG
+    uint8_t cfg = readByte(MPU6050_REG_GYRO_CONFIG);
+    cfg &= ~0x18;  // clear bits 3 and 4
+    cfg |= (uint8_t(range) & 0x03) << 3;
+    writeByte(MPU6050_REG_GYRO_CONFIG, cfg);
 }
 
-uint8_t MPU6050::readByte(uint8_t reg){
-    uint8_t data;
+
+uint8_t MPU6050::readByte(uint8_t reg) {
+    uint8_t data = 0;
 
     Wire.beginTransmission(m_addr);
     Wire.write(reg);
@@ -69,7 +89,7 @@ uint8_t MPU6050::readByte(uint8_t reg){
 
     Wire.requestFrom(m_addr, 1);
 
-    if(Wire.available()){
+    if (Wire.available()) {
         data = Wire.read();
     }
 
@@ -77,7 +97,7 @@ uint8_t MPU6050::readByte(uint8_t reg){
 }
 
 
-void MPU6050::readBytes(uint8_t reg, uint8_t count, uint8_t* dest){
+void MPU6050::readBytes(uint8_t reg, uint8_t count, uint8_t* dest) {
     Wire.beginTransmission(m_addr);
     Wire.write(reg);
     Wire.endTransmission(false);
@@ -86,76 +106,79 @@ void MPU6050::readBytes(uint8_t reg, uint8_t count, uint8_t* dest){
 
     if (received == count) {
         for (int i = 0; i < count; i++) {
-            if(Wire.available()){
+            if (Wire.available()) {
                 dest[i] = Wire.read();
             }
         }
     }
 }
 
-void MPU6050::writeByte(uint8_t reg, uint8_t data){
+
+void MPU6050::writeByte(uint8_t reg, uint8_t data) {
     Wire.beginTransmission(m_addr);
     Wire.write(reg);
     Wire.write(data);
     Wire.endTransmission(true);
 }
 
-Vector3D MPU6050::rawToScaled(int16_t x, int16_t y, int16_t z, float scale){
-    Vector3D vec = {(float)x/scale, (float)y/scale, (float)z/scale};
+
+Vector3D MPU6050::rawToScaled(int16_t x, int16_t y, int16_t z, float scale) {
+    Vector3D vec = {(float)x / scale, (float)y / scale, (float)z / scale};
     return vec;
 }
 
-Vector3D MPU6050::readRawAccel(){
+
+Vector3D MPU6050::readRawAccel() {
     // 3 Mesurements of 2 bytes each
     const int BYTES_TO_READ = 6;
     uint8_t raw_data[BYTES_TO_READ];
 
     readBytes(MPU6050_REG_ACCEL_XOUT_H, BYTES_TO_READ, raw_data);
-    uint16_t x = uint16_t(raw_data[0] << 8 | raw_data[1]);
-    uint16_t y = uint16_t(raw_data[2] << 8 | raw_data[3]);
-    uint16_t z = uint16_t(raw_data[4] << 8 | raw_data[5]);
-    
+    int16_t x = int16_t((raw_data[0] << 8) | raw_data[1]);
+    int16_t y = int16_t((raw_data[2] << 8) | raw_data[3]);
+    int16_t z = int16_t((raw_data[4] << 8) | raw_data[5]);
+
     Vector3D res = {(float)x, (float)y, (float)z};
     return res;
 }
 
-Vector3D MPU6050::readRawGyro(){
+
+Vector3D MPU6050::readRawGyro() {
     // 3 Mesurements of 2 bytes each
     const int BYTES_TO_READ = 6;
     uint8_t raw_data[BYTES_TO_READ];
 
     readBytes(MPU6050_REG_GYRO_XOUT_H, BYTES_TO_READ, raw_data);
-    uint16_t x = uint16_t(raw_data[0] << 8 | raw_data[1]);
-    uint16_t y = uint16_t(raw_data[2] << 8 | raw_data[3]);
-    uint16_t z = uint16_t(raw_data[4] << 8 | raw_data[5]);
-    
+    int16_t x = int16_t((raw_data[0] << 8) | raw_data[1]);
+    int16_t y = int16_t((raw_data[2] << 8) | raw_data[3]);
+    int16_t z = int16_t((raw_data[4] << 8) | raw_data[5]);
+
     Vector3D res = {(float)x, (float)y, (float)z};
     return res;
 }
 
-Vector3D MPU6050::readScaledAccel(){
+
+Vector3D MPU6050::readScaledAccel() {
     Vector3D raw = readRawAccel();
     return rawToScaled(raw.x, raw.y, raw.z, m_accelScale);
 }
 
-Vector3D MPU6050::readScaledGyro(){
+
+Vector3D MPU6050::readScaledGyro() {
     Vector3D raw = readRawGyro();
     Vector3D scaled = rawToScaled(raw.x, raw.y, raw.z, m_gyroScale);
-    Vector3D scaled_and_unbiased = 
-        {
-            scaled.x - X_OFFSET,
-            scaled.y - Y_OFFSET,
-            scaled.z - Z_OFFSET
-        };
+    Vector3D scaled_and_unbiased = {scaled.x - X_OFFSET, scaled.y - Y_OFFSET,
+                                    scaled.z - Z_OFFSET};
     return scaled_and_unbiased;
 }
 
-void MPU6050::calibrateGyro(){
+
+void MPU6050::calibrateGyro() {
     float x_values = 0;
     float y_values = 0;
     float z_values = 0;
-    
-    for(int i = 0; i < 1000; i++){
+
+    for (int i = 0; i < 1000; i++) {
         Vector3D vec = readScaledGyro();
         x_values += vec.x;
         y_values += vec.y;
@@ -163,15 +186,17 @@ void MPU6050::calibrateGyro(){
 
         delay(1);
     }
-    X_OFFSET = (float)x_values/1000;
-    Y_OFFSET = (float)y_values/1000;
-    Z_OFFSET = (float)z_values/1000;
+    X_OFFSET = (float)x_values / 1000;
+    Y_OFFSET = (float)y_values / 1000;
+    Z_OFFSET = (float)z_values / 1000;
 }
 
-float MPU6050::getAngle(time_t t_now, time_t t_last){
+
+float MPU6050::getAngle(unsigned long t_now, unsigned long t_last) {
     Vector3D velocities = readScaledGyro();
-    float change = (float)((velocities.z)*(t_now - t_last)*1e-6f);
-    if(abs(change) > 0.1){
+    float dt = (float)(t_now - t_last) * 1e-6f;
+    float change = velocities.z * dt;  // degrees
+    if (fabsf(velocities.z) > 0.1f && dt > 0.0f) {
         m_angle += change;
     }
     return m_angle;
