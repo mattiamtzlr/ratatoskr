@@ -52,9 +52,9 @@ bool MPU6050::begin() {
     if (device_id != 0x68) {
         return false;
     }
-    delay(10);
-    calibrateGyro();
-    delay(10);
+    // delay(1000);
+    // calibrateGyro(); doesnt even work here
+    // delay(1000);
     Serial.println("Gyro is ready");
     return true;
 }
@@ -177,18 +177,47 @@ void MPU6050::calibrateGyro() {
     float x_values = 0;
     float y_values = 0;
     float z_values = 0;
+    unsigned long count = 0;
+    delay(10);
+    Serial.println("[MPU6050] Starting gyro calibration. Press Enter to stop...");
+    while (count < 2500) {
+        if (Serial.available()) {
+            char c = Serial.read();
+            if (c == '\n' || c == '\r') {
+                break;
+            }
+        }
 
-    for (int i = 0; i < 1000; i++) {
         Vector3D vec = readScaledGyro();
         x_values += vec.x;
         y_values += vec.y;
         z_values += vec.z;
+        count++;
 
         delay(1);
     }
-    X_OFFSET = (float)x_values / 1000;
-    Y_OFFSET = (float)y_values / 1000;
-    Z_OFFSET = (float)z_values / 1000;
+
+    if (count == 0) {
+        X_OFFSET = 0.0f;
+        Y_OFFSET = 0.0f;
+        Z_OFFSET = 0.0f;
+        Serial.println("[MPU6050] Calibration aborted: no samples collected.");
+        return;
+    }
+
+    X_OFFSET = (float)x_values / (float)count;
+    Y_OFFSET = (float)y_values / (float)count;
+    Z_OFFSET = (float)z_values / (float)count;
+
+    Serial.print("[MPU6050] Calibration done with ");
+    Serial.print(count);
+    Serial.println(" samples.");
+    Serial.print("Offsets (deg/s) X: ");
+    Serial.print(X_OFFSET);
+    Serial.print(" Y: ");
+    Serial.print(Y_OFFSET);
+    Serial.print(" Z: ");
+    Serial.println(Z_OFFSET);
 }
 
 

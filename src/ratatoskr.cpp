@@ -71,7 +71,7 @@ class SystemPID {
             basePWM_forward + side_correction + encoderCorrection;
         corrected_right_PWM =
             basePWM_forward - side_correction - encoderCorrection;
-        Serial.println("corrections: side enc " + String(encoderCorrection));
+        // Serial.println("corrections: side enc " + String(encoderCorrection));
         // Constrain to valid PWM range
         corrected_left_PWM = constrain(corrected_left_PWM, 40, 255);
         corrected_right_PWM = constrain(corrected_right_PWM, 40, 255);
@@ -155,7 +155,7 @@ void Ratatoskr::moveForward(int distance) {
     // Calculate target encoder counts for desired distance
     const float ENCODER_COUNTS_PER_CM = 10.0;  // TODO: Calibrate this value
     const float CM_PER_CELL = 16.0;
-    long target_counts = (long)(distance * CM_PER_CELL * ENCODER_COUNTS_PER_CM);
+    long target_counts = (long)(distance * CM_PER_CELL * ENCODER_COUNTS_PER_CM); // delete CM_PER_CELL if distance is in cm
 
     // Reset encoder counts at start
     m_motor_left.reset_encoder_count();
@@ -171,9 +171,9 @@ void Ratatoskr::moveForward(int distance) {
 
     // Main control loop - run until target distance reached
     while (true) {
-        Serial.println("encoders: L " +
-                       String(m_motor_left.get_encoder_count()) + " R " +
-                       String(m_motor_right.get_encoder_count()));
+        // Serial.println("encoders: L " +
+        //                String(m_motor_left.get_encoder_count()) + " R " +
+        //                String(m_motor_right.get_encoder_count()));
         // Read current encoder values
         long left_encoder = m_motor_left.get_encoder_count();
         long right_encoder = m_motor_right.get_encoder_count();

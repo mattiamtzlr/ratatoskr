@@ -2,10 +2,6 @@
 #include "ratatoskr.hpp"
 #include "pins.hpp"
 
-#define TOF_LEFT_XSHUT          23    
-#define TOF_FRONT_LEFT_XSHUT    19
-#define TOF_FRONT_RIGHT_XSHUT   18  
-#define TOF_RIGHT_XSHUT         15
 
 // I2C addresses for the ToF sensors
 const uint8_t TOF_LEFT        = 0x30;
@@ -35,9 +31,13 @@ void disableWireless() {
 void setup() {
     Serial.begin(115200);
 
+    delay(1000);
     Wire.begin();
     disableWireless();
+
     gyro.begin();
+    
+    gyro.calibrateGyro();
 
     pinMode(MOTOR_L_IN1, OUTPUT);
     pinMode(MOTOR_L_IN2, OUTPUT);
@@ -55,7 +55,7 @@ void setup() {
 }
 
 void loop() {
-    rat.moveForward(2);
+    // rat.moveForward(2);
     delay(2000);
     rat.turn(90);
     delay(2000);
