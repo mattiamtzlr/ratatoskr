@@ -4,6 +4,8 @@
 #include "ToF.hpp"
 #include "gear_motor.hpp"
 #include "gyro.hpp"
+#include "led_matrix.hpp"
+#include "logger.hpp"
 #include "maze.hpp"
 #include "mouse.hpp"
 #include "util.hpp"
@@ -19,10 +21,10 @@ class Ratatoskr : public Mouse {
     ToF &m_tof_right;
     MPU6050 &m_gyro;
 
-   public:
-    Ratatoskr(GearMotor &motor_left, GearMotor &motor_right, ToF &tof_left,
-              ToF &tof_front_left, ToF &tof_front_right,
-              ToF &tof_right , MPU6050 &gyro/*, LEDMatrix &screen*/);
+       public
+       : Ratatoskr(GearMotor &motor_left, GearMotor &motor_right, ToF &tof_left,
+                   ToF &tof_front_left, ToF &tof_front_right,
+                   ToF &tof_right, MPU6050 &gyro/*, LEDMatrix &screen*/);
 
     // static const float PERIOD;  // TODO: we compute this by recording 360/T
     static const u_int8_t TURN_PWM = 150;  // TODO: we set this arbitrarily
@@ -58,7 +60,9 @@ class Ratatoskr : public Mouse {
     virtual bool wallLeft();
 
     virtual void update_visuals(Maze &maze);
+    virtual void log(std::string msg);
 
     virtual bool wasReset();
     virtual void ackReset();
+    Logger logs;
 };

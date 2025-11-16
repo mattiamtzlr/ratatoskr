@@ -31,6 +31,7 @@ class Mouse {
     virtual bool wallLeft() = 0;
 
     virtual void update_visuals(Maze &maze) = 0;
+    virtual void log(std::string msg) = 0;
 
     virtual bool wasReset() = 0;
     virtual void ackReset() = 0;
