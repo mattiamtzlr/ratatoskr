@@ -5,3 +5,5 @@ compile_commands.json
 *.gcode
 *.bgcode
 out
+CAD/3D_print/tmp.3mf
+CAD/lasercut/tmp.lbrn2
