@@ -9,6 +9,9 @@ void Logger::log(std::string msg) {
         nvsDB.putPair(std::to_string(m_head_index).c_str(), msg.c_str());
     m_head_index++;
 }
+
+void Logger::clear() { nvsDB.eraseAll(); }
+
 void Logger::export_logs(void) {
     int index = 0;
     Serial.print(m_head_index);
