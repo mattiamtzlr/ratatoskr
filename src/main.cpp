@@ -1,16 +1,15 @@
 #include "esp_bt.h"
-#include "ratatoskr.hpp"
 #include "pins.hpp"
-
+#include "ratatoskr.hpp"
 
 // I2C addresses for the ToF sensors
-const uint8_t TOF_LEFT        = 0x30;
-const uint8_t TOF_FRONT_LEFT  = 0x31;
+const uint8_t TOF_LEFT = 0x30;
+const uint8_t TOF_FRONT_LEFT = 0x31;
 const uint8_t TOF_FRONT_RIGHT = 0x32;
-const uint8_t TOF_RIGHT       = 0x33;
+const uint8_t TOF_RIGHT = 0x33;
 
 ToF tof_left = ToF(LEFT, TOF_LEFT, TOF_LEFT_XSHUT);
-ToF tof_left_front = ToF(FRONT_LEFT, TOF_FRONT_LEFT,TOF_FRONT_LEFT_XSHUT);
+ToF tof_left_front = ToF(FRONT_LEFT, TOF_FRONT_LEFT, TOF_FRONT_LEFT_XSHUT);
 ToF tof_right_front = ToF(FRONT_RIGHT, TOF_FRONT_RIGHT, TOF_FRONT_RIGHT_XSHUT);
 ToF tof_right = ToF(RIGHT, TOF_RIGHT, TOF_RIGHT_XSHUT);
 
@@ -36,7 +35,7 @@ void setup() {
     disableWireless();
 
     gyro.begin();
-    
+
     gyro.calibrateGyro();
 
     pinMode(MOTOR_L_IN1, OUTPUT);

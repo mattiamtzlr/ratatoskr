@@ -7,7 +7,6 @@
 #include "maze.hpp"
 #include "mouse.hpp"
 #include "util.hpp"
-#define PI 3.14159265
 
 class Ratatoskr : public Mouse {
    private:
