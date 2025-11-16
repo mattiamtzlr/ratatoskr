@@ -78,13 +78,21 @@ void GearMotor::spin_ccw(int rpm) {
 }
 
 /**
- * Stop motor by forcing brake
+ * Stop motor stopping acceleration
  */
-void GearMotor::stop() {
+void GearMotor::coast() {
     analogWrite(IN1, 0);
     analogWrite(IN2, 0);
 }
 
+/**
+ * Stop motor by forcing brake
+ * ! DON'T RUN THIS FOR TOO LONG !
+ */
+void GearMotor::brake() {
+    analogWrite(IN1, 255);
+    analogWrite(IN2, 255);
+}
 long GearMotor::get_encoder_count() {
     return m_encoder_count;
 }

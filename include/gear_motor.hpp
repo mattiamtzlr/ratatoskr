@@ -1,5 +1,6 @@
 #pragma once
 #include <Arduino.h>
+
 #include "util.hpp"
 
 // TODO: This is no longer the one we use : [Adafruit DRV8871 DC Motor Driver
@@ -11,7 +12,8 @@ class GearMotor {
 
     void spin_cw(int speed);
     void spin_ccw(int speed);
-    void stop();
+    void brake();
+    void coast();
     int get_rpm();
     void encoder_interrupt();
     static void isr_trampoline(void *obj_isr);
