@@ -12,10 +12,11 @@ void setup() {
     delay(100);
 
     // Setup XSHUT pins
-    pinMode(TOF_RIGHT_XSHUT,        OUTPUT);  
-    pinMode(TOF_FRONT_RIGHT_XSHUT,  OUTPUT); 
-    pinMode(TOF_FRONT_LEFT_XSHUT,   OUTPUT);  
+    pinMode(TOF_RIGHT_XSHUT,        OUTPUT);
+    pinMode(TOF_FRONT_RIGHT_XSHUT,  OUTPUT);
+    pinMode(TOF_FRONT_LEFT_XSHUT,   OUTPUT);
     pinMode(TOF_LEFT_XSHUT,         OUTPUT);   
+
 
     delay(100);
 
@@ -25,11 +26,12 @@ void setup() {
     ToF tof_right       = ToF(RIGHT,        ADDR_RIGHT,         TOF_RIGHT_XSHUT);
 
 
-
-
+    Serial.println("Starting ToF continuous readings...");
     tof_left.start();
+    delay(100);
     while (!tof_left.dataReady()) {
         delay(10);
+        Serial.println("Waiting for ToF left...");
     }
     Serial.println(tof_left.dataReady() ? "ToF left ready" : "ToF Left not ready");
     
@@ -53,7 +55,11 @@ void setup() {
 
 
     while (true){
-        Serial.println(tof_left.read());
+        Serial.print("Left: "); Serial.println(tof_left.read());
+        Serial.print("Front Left: "); Serial.println(tof_front_left.read());
+        Serial.print("Front Right: "); Serial.println(tof_front_right.read());
+        Serial.print("Right: "); Serial.println(tof_right.read());
+        Serial.println("-----");
         delay(100);
     }
 
@@ -61,5 +67,3 @@ void setup() {
 
 void loop() {
 }
-
-void loop() {}

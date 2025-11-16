@@ -4,22 +4,24 @@
 ToF::ToF(SensorPosition position, uint8_t i2c_address, uint8_t xshut_pin)
     : position(position), i2c_address(i2c_address), xshut_pin(xshut_pin) {
 
+        // Bring this sensor out of reset (XSHUT HIGH) and give it time to boot
         digitalWrite(xshut_pin, HIGH);
-        delay(1000); // give time to boot
+        delay(1000);
 
         if (!m_sensor.init()) {
             Serial.printf("VL53L1X at pin %d failed to init\n", xshut_pin);
-            return ;
+            return;
         }
+
+        // Assign the unique I2C address for this sensor and keep it enabled
         m_sensor.setAddress(i2c_address);
         delay(100);
-        digitalWrite(xshut_pin, LOW);
-        delay(100);
-        
+
         Serial.printf("VL53L1X at pin %d initialized\n", xshut_pin);
 }
 // Is this needed?
 void ToF::start() {
+    // Wire.begin() is called in setup(); just start continuous ranging here.
     m_sensor.startContinuous(TIMING_BUDGET);
 }
 
