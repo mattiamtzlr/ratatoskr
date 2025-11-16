@@ -1,5 +1,6 @@
+#include "ToF.hpp"
+
 #include <Arduino.h>
-#include "tof.hpp"
 
 ToF::ToF(SensorPosition position, uint8_t i2c_address, uint8_t xshut_pin)
     : position(position), i2c_address(i2c_address), xshut_pin(xshut_pin) {

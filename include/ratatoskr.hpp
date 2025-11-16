@@ -1,11 +1,11 @@
 #pragma once
 #include <Arduino.h>
 
+#include "ToF.hpp"
 #include "gear_motor.hpp"
 #include "gyro.hpp"
 #include "maze.hpp"
 #include "mouse.hpp"
-#include "tof.hpp"
 #include "util.hpp"
 
 class Ratatoskr : public Mouse {
