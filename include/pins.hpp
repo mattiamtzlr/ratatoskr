@@ -1,3 +1,4 @@
+#pragma once
 #include <cstdint>
 // ToF
 constexpr uint8_t TOF_LEFT_XSHUT        = 0x15;
@@ -6,8 +7,10 @@ constexpr uint8_t TOF_FRONT_RIGHT_XSHUT = 0x19;
 constexpr uint8_t TOF_RIGHT_XSHUT       = 0x23;
 
 // I2C
+#if (defined SDA && defined SCL)
 constexpr uint8_t SDA = 0x21;
 constexpr uint8_t SCL = 0x22;
+#endif
 
 // Motor / Encoder
 

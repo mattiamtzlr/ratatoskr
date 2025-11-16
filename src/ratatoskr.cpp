@@ -1,4 +1,5 @@
 #include "ratatoskr.hpp"
+#include "pins.hpp"
 #define PERIOD 868.75
 #define TIME_PER_CELL 250.0
 
@@ -207,8 +208,17 @@ void Ratatoskr::moveForward(int distance) {
  * SLAM THE BRAKES!
  */
 void Ratatoskr::stop() {
-    m_motor_left.stop();
-    m_motor_right.stop();
+    /*m_motor_left.stop();
+    m_motor_right.stop();*/
+    analogWrite(MOTOR_L_IN1, 255);
+    analogWrite(MOTOR_L_IN2, 255);
+    analogWrite(MOTOR_R_IN1, 255);
+    analogWrite(MOTOR_R_IN2, 255);
+    delay(100);
+    analogWrite(MOTOR_L_IN1, 0);
+    analogWrite(MOTOR_L_IN2, 0);
+    analogWrite(MOTOR_R_IN1, 0);
+    analogWrite(MOTOR_R_IN2, 0);
 }
 
 //===============================[ SENSING ]====================================
