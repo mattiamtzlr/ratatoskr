@@ -12,8 +12,8 @@ class SystemPID {
           distanceKi(0.1),
           distanceKd(0.00),
           encoderKp(0.75),
-          encoderKi(0.4),
-          encoderKd(0.0),
+          encoderKi(0.80),
+          encoderKd(0.10),
           distancePrevError(0),
           encoderPrevError(0),
           distanceIntegral(0),
@@ -113,6 +113,44 @@ Ratatoskr::Ratatoskr(GearMotor &motor_left, GearMotor &motor_right,
       m_tof_right(tof_right),
       m_gyro(gyro) {}
 
+void Ratatoskr::calibrateEncoders() {
+    stop();
+    m_motor_left.reset_encoder_count();
+    m_motor_right.reset_encoder_count();
+
+    Serial.println("=== Encoder calibration mode ===");
+    Serial.println("Move the mouse manually. Press Enter in Serial Monitor when done.\n");
+
+    unsigned long last_print = 0;
+    while (true) {
+        long left_encoder = m_motor_left.get_encoder_count();
+        long right_encoder = m_motor_right.get_encoder_count();
+
+        unsigned long now = millis();
+        if (now - last_print >= 100) {
+            last_print = now;
+            Serial.print("Ticks L=");
+            Serial.print(left_encoder);
+            Serial.print(" R=");
+            Serial.println(right_encoder);
+        }
+
+        if (Serial.available() > 0) {
+            int c = Serial.read();
+            if (c == '\n' || c == '\r') {
+                Serial.println("\nCalibration finished.");
+                Serial.print("Final ticks L=");
+                Serial.print(left_encoder);
+                Serial.print(" R=");
+                Serial.println(right_encoder);
+                break;
+            }
+        }
+
+        delay(10);
+    }
+}
+
 //===============================[ CONTROL ]====================================
 /**
  * turn @angle degrees in counterclockwise direction
@@ -153,9 +191,8 @@ void Ratatoskr::moveForward(int distance) {
     Mouse::moveForward(distance);  // Update position in maze
 
     // Calculate target encoder counts for desired distance
-    const float ENCODER_COUNTS_PER_CM = 10.0;  // TODO: Calibrate this value
-    const float CM_PER_CELL = 16.0;
-    long target_counts = (long)(distance * CM_PER_CELL * ENCODER_COUNTS_PER_CM); // delete CM_PER_CELL if distance is in cm
+    // long target_counts = (long)(distance * MM_PER_CELL * ENCODER_COUNTS_PER_MM); // delete MM_PER_CELL if distance is in mm
+    long target_counts = (long)(distance * ENCODER_COUNTS_PER_MM); // i want distance in mm
 
     // Reset encoder counts at start
     m_motor_left.reset_encoder_count();

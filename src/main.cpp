@@ -55,8 +55,11 @@ void setup() {
 }
 
 void loop() {
-    // rat.moveForward(2);
+    // rat.calibrateEncoders();
+    // while (true) {
+    //     delay(1000);
+    // }
     delay(2000);
-    rat.turn(90);
-    delay(2000);
+    rat.moveForward(1000);
+    delay(5000);
 }
