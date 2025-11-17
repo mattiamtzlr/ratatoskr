@@ -11,7 +11,7 @@ enum Direction {
 enum MODE {
     RUN,
     DUMP_LOG
-}
+};
 
 static std::map<Direction, char>
     dirToCardinalChar = {{NORTH, 'n'}, {EAST, 'e'}, {SOUTH, 's'}, {WEST, 'w'}};
