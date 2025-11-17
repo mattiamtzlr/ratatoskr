@@ -24,11 +24,11 @@ void Logger::log(std::string msg) {
 
 void Logger::clear() {
     nvsDB.eraseAll();
-    nvsDB.putPair("0", "0");
+    nvsDB.putPair("0", "1");
 }
 
 void Logger::export_logs(void) {
-    int index = 0;
+    int index = 1;
     int num_entries = get_count();
 
     Serial.print(num_entries);
