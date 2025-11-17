@@ -1,9 +1,9 @@
 #pragma once
 #include <Arduino.h>
 
+#include "ToF.hpp"
 #include "gear_motor.hpp"
 #include "gyro.hpp"
-#include "led_matrix.hpp"
 #include "maze.hpp"
 #include "mouse.hpp"
 #include "ToF.hpp"
@@ -32,6 +32,16 @@ class Ratatoskr : public Mouse {
 
     static const u_int8_t FORWARD_PWM = 170;  // TODO: we set this arbiturarily
 
+    static const u_int8_t WIDTH_MM  = 68;
+    static const u_int8_t WHEEL_DIAMETER_MM = 27; // So one revolution is 27*pi mm = 84.82 mm
+    // So encooder counts per mm = counts per rev / (WHEEL_DIAMETER_MM * pi)
+    static constexpr float ENCODER_COUNTS_PER_MM = 200.0f / (WHEEL_DIAMETER_MM * PI);
+    static constexpr float MM_PER_CELL = 160.0;
+
+
+
+    
+
     inline void stop();
 
     static const uint16_t FRONT_WALL_MM =
@@ -41,6 +51,8 @@ class Ratatoskr : public Mouse {
 
     virtual void moveForward(int distance = 1);
     virtual void turn(int angle);
+
+    void calibrateEncoders();
 
     virtual bool wallFront();
     virtual bool wallRight();

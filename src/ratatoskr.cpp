@@ -1,9 +1,10 @@
 #include "ratatoskr.hpp"
-#define PERIOD 868.75
-#define TIME_PER_CELL 250.0
+
+#include "pid.hpp"
+
 Ratatoskr::Ratatoskr(GearMotor &motor_left, GearMotor &motor_right,
                      ToF &tof_left, ToF &tof_front_left, ToF &tof_front_right,
-                     ToF &tof_right , MPU6050 &gyro/*, LEDMatrix &screen*/)
+                     ToF &tof_right, MPU6050 &gyro)
     : Mouse(),
       m_motor_left(motor_left),
       m_motor_right(motor_right),
@@ -16,64 +17,118 @@ Ratatoskr::Ratatoskr(GearMotor &motor_left, GearMotor &motor_right,
 
 //===============================[ CONTROL ]====================================
 /**
- * turn @angle radians in counterclockwise direction
- *
- * due to the structure of the drivetrain, one wheel moves forwards when
- * the motor is driven ccw and the other moves backwards when its motor is
- * driven ccw, idem for cw
+ * turn @angle degrees in counterclockwise direction
  */
 void Ratatoskr::turn(int angle) {
-    // TODO: use gyro to close the loop; for now, differential spin.
-    float time_to_turn = PERIOD * std::abs(angle) / 360;  // relation using angle
-    if (angle > 0) {  // move right wheel forward, left wheel back
-        m_motor_left.spin_cw(TURN_PWM);
-        m_motor_right.spin_cw(TURN_PWM);
-    } else {
-        m_motor_left.spin_ccw(TURN_PWM);
-        m_motor_right.spin_ccw(TURN_PWM);
+    float threshold = 0.5f;
+    unsigned long t_now = micros();
+    unsigned long t_last = t_now;  // avoid huge first dt
+    // baseline angle in degrees
+    float current_angle = m_gyro.getAngle(t_now, t_last);
+    float target = current_angle + (float)angle;
+
+    while (current_angle < target - threshold) {
+        if (angle > 0) {
+            m_motor_left.spin_cw(TURN_PWM);
+            m_motor_right.spin_cw(TURN_PWM);
+        } else {
+            m_motor_left.spin_ccw(TURN_PWM);
+            m_motor_right.spin_ccw(TURN_PWM);
+        }
+        t_now = micros();
+        current_angle = m_gyro.getAngle(t_now, t_last);
+        t_last = t_now;
     }
-    delay(time_to_turn);
+
     stop();
 }
 
 /**
- * move @distance [one cell (16 cm)] forwards
+ * move @distance [one cell (16 cm)] forwards with PID control
  */
 void Ratatoskr::moveForward(int distance) {
-    // TODO: PID on encoders + wall following; for now, spin both forward
-    // briefly.
-    Mouse::moveForward(distance);  // Don't remove this, this updates the
-                                   // position of the mouse in the maze!
-    float time_forward = distance * TIME_PER_CELL;
-    u_int8_t pwm_left = FORWARD_PWM;
-    u_int8_t pwm_right = FORWARD_PWM;
+    Mouse::moveForward(distance);  // Update position in maze
 
-    for (int i = 0; i < 20; i++) {
-        if (m_motor_left.get_rpm() > m_motor_right.get_rpm()) {
-            pwm_right += 10;
-            pwm_left -= 10;
-        }
-        if (m_motor_left.get_rpm() < m_motor_right.get_rpm()) {
-            pwm_right -= 10;
-            pwm_left += 10;
-        }
+    // Calculate target encoder counts for desired distance
+    // long target_counts = (long)(distance * MM_PER_CELL *
+    // ENCODER_COUNTS_PER_MM); // delete MM_PER_CELL if distance is in mm
+    long target_counts =
+        (long)(distance * ENCODER_COUNTS_PER_MM);  // i want distance in mm
+
+    // Reset encoder counts at start
+    m_motor_left.reset_encoder_count();
+    m_motor_right.reset_encoder_count();
+
+    // Control loop parameters
+    const float time_step = 0.02;  // 20ms update rate
+    const int loop_delay = 20;
+    long left_encoder = 0;
+    long right_encoder = 0;
+    uint16_t left_tof = 0;
+    uint16_t right_tof = 0;
+    float target_distance = .0;
+    float target_encoder = .0;
+
+    // Initial pwm values
+    float pwm_left = FORWARD_PWM;
+    float pwm_right = FORWARD_PWM;
+    m_motor_left.spin_ccw(pwm_left);
+    m_motor_right.spin_cw(pwm_right);
+
+    // PID controller instance
+    PID pid_distance(time_step, 0.25, 0.1, 0.00, 50, 240);
+    PID pid_encoders(time_step, 0.75, 0.8, 0.1, 50, 240);
+
+    // Main control loop - run until target distance reached
+    while ((left_encoder + right_encoder) / 2 < target_counts) {
+        // Read current encoder values
+        left_encoder = m_motor_left.get_encoder_count();
+        right_encoder = m_motor_right.get_encoder_count();
+
+        // Clamp and adjust tof readings
+        left_tof = constrain(m_tof_left.read(), 0, 80);  // TODO: Magic nums
+        right_tof = constrain(m_tof_right.read(), 0, 80);
+        float left_dist = (left_tof == 0 && right_tof > 0) ? 0.75 : left_tof;
+        float right_dist = (right_tof == 0 && left_tof > 0) ? 0.75 : right_tof;
+
+        // Prepare errors
+        float tof_error = target_distance - (left_dist - right_dist);
+        float encoder_error = target_encoder - (left_encoder - right_encoder);
+
+        // Update PID controller
+        float tof_correction = pid_distance.update(tof_error);
+        float encoder_correction = pid_encoders.update(encoder_error);
+
+        // Calculate new PWM
+        pwm_left = FORWARD_PWM + tof_correction + encoder_correction;
+        pwm_right = FORWARD_PWM - tof_correction - encoder_correction;
+
+        pwm_left = constrain(pwm_left, 70, 240);
+        pwm_right = constrain(pwm_right, 70, 240);
+
+        // Apply motor commands
         m_motor_left.spin_ccw(pwm_left);
         m_motor_right.spin_cw(pwm_right);
-        // timing/odometry goes here
-        delay(time_forward / 20);
+        // Wait for next control cycle
+        delay(loop_delay);
     }
+
+    // Stop motors when target reached
     stop();
 }
+
 /**
  * SLAM THE BRAKES!
  */
 void Ratatoskr::stop() {
-    m_motor_left.stop();
-    m_motor_right.stop();
+    m_motor_left.brake();
+    m_motor_right.brake();
+    delay(100);
+    m_motor_left.coast();
+    m_motor_right.coast();
 }
 
 //===============================[ SENSING ]====================================
-// Below 15 cm (or 10)
 /**
  * Front wall if either front-left or front-right ToF sees something closer
  * than FRONT_WALL_MM. Ignores zero readings (sensor not ready).
@@ -100,7 +155,7 @@ bool Ratatoskr::wallLeft() {
     uint16_t distance_left = m_tof_left.read();
     return (distance_left > 0) && (distance_left < SIDE_WALL_MM);
 }
-void Ratatoskr::update_visuals(Maze& maze) {}
+void Ratatoskr::update_visuals(Maze &maze) {}
 
 bool Ratatoskr::wasReset() { return false; }
 void Ratatoskr::ackReset() {}
