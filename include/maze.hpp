@@ -18,6 +18,7 @@ class Maze {
    public:
     std::vector<Position> targets;
     std::set<Position> visited = {};
+    std::set<Position> diags = {};
     std::vector<Position> valid_neighbors(Position mouse_pos);
     void set_border_walls();
     void reset_distances();
@@ -32,4 +33,7 @@ class Maze {
     bool in_bounds(Position pos);
     bool exists_wall(Position pos, Direction dir);
     bool is_dead_end(Position pos);
+    bool can_move_diag(Position pos, DiagDirection dir);
+    std::vector<Position> valid_diag_neighbors(Position mouse_pos);
+    std::vector<std::vector<Position>> find_diagonal_paths(int min_length = 2);
 };
