@@ -1,4 +1,5 @@
 #include "ratatoskr.hpp"
+#include <string>
 
 #include "pid.hpp"
 
@@ -19,9 +20,8 @@ void Ratatoskr::calibrateEncoders() {
     m_motor_left.reset_encoder_count();
     m_motor_right.reset_encoder_count();
 
-    Serial.println("=== Encoder calibration mode ===");
-    Serial.println(
-        "Move the mouse manually. Press Enter in Serial Monitor when done.\n");
+    log("=== Encoder calibration mode ===");
+    log("Move the mouse manually. Press Enter in Serial Monitor when done.");
 
     unsigned long last_print = 0;
     while (true) {
@@ -31,20 +31,14 @@ void Ratatoskr::calibrateEncoders() {
         unsigned long now = millis();
         if (now - last_print >= 100) {
             last_print = now;
-            Serial.print("Ticks L=");
-            Serial.print(left_encoder);
-            Serial.print(" R=");
-            Serial.println(right_encoder);
-        }
+            log("Ticks L = " + std::to_string(left_encoder) + " R = " + std::to_string(right_encoder));
+        } 
 
         if (Serial.available() > 0) {
             int c = Serial.read();
             if (c == '\n' || c == '\r') {
-                Serial.println("\nCalibration finished.");
-                Serial.print("Final ticks L=");
-                Serial.print(left_encoder);
-                Serial.print(" R=");
-                Serial.println(right_encoder);
+                log("\nCalibration finished.");
+                log("Final ticks L = " + std::to_string(left_encoder) + " R = " + std::to_string(right_encoder) + "\n");
                 break;
             }
         }
@@ -205,7 +199,10 @@ bool Ratatoskr::wallLeft() {
     return (distance_left > 0) && (distance_left < SIDE_WALL_MM);
 }
 void Ratatoskr::update_visuals(Maze &maze) {}
-void Ratatoskr::log(std::string msg) { logs.log(msg); }
 
 bool Ratatoskr::wasReset() { return false; }
 void Ratatoskr::ackReset() {}
+
+void Ratatoskr::log(std::string msg) {
+    Logger::log(msg);
+}

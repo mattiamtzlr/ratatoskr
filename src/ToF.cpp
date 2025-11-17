@@ -9,16 +9,17 @@ ToF::ToF(SensorPosition position, uint8_t i2c_address, uint8_t xshut_pin)
         digitalWrite(xshut_pin, HIGH);
         delay(5);
         if (!m_sensor.init(i2c_address)) {
-            Serial.printf("VL53L1X at pin %d failed to init\n", xshut_pin);
-            return ;
+            log("VL53L1X at pin" + std::to_string(xshut_pin) + "failed to init");
+            return;
         }
+
 
         // Bring this sensor out of reset (XSHUT HIGH) and give it time to boot
         digitalWrite(xshut_pin, HIGH);
         delay(1000);
 
         if (!m_sensor.init()) {
-            Serial.printf("VL53L1X at pin %d failed to init\n", xshut_pin);
+            log("VL53L1X at pin" + std::to_string(xshut_pin) + "failed to init");
             return;
         }
 
@@ -26,7 +27,7 @@ ToF::ToF(SensorPosition position, uint8_t i2c_address, uint8_t xshut_pin)
         m_sensor.setAddress(i2c_address);
         delay(100);
 
-        Serial.printf("VL53L1X at pin %d initialized\n", xshut_pin);
+        log("VL53L1X at pin" + std::to_string(xshut_pin) + "initialized");
 }
 
 

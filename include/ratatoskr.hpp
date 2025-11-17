@@ -10,7 +10,7 @@
 #include "mouse.hpp"
 #include "util.hpp"
 
-class Ratatoskr : public Mouse {
+class Ratatoskr : public Mouse, public Logger {
    private:
     GearMotor &m_motor_left;
     GearMotor &m_motor_right;
@@ -43,9 +43,6 @@ class Ratatoskr : public Mouse {
 
     static constexpr float MM_PER_CELL = 160.0;
 
-
-
-
     inline void stop();
 
     // front considered blocked if any front ToF < this
@@ -68,5 +65,4 @@ class Ratatoskr : public Mouse {
 
     virtual bool wasReset();
     virtual void ackReset();
-    Logger logs;
 };

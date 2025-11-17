@@ -20,7 +20,7 @@ void Logger::log(std::string msg) {
     increment_count();
 }
 
-void Logger::clear() {
+void Logger::clear_logs() {
     nvsDB.eraseAll();
     nvsDB.putPair("0", "1");
 }

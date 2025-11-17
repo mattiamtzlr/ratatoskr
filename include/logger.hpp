@@ -6,11 +6,11 @@
 static NVSDatabase nvsDB("logs");
 class Logger {
    private:
-    void increment_count();
-    int get_count();
+    static void increment_count();
+    static int get_count();
 
    public:
-    void clear();
-    void log(std::string msg);
-    void export_logs(void);
+    static void clear_logs();
+    static void log(std::string msg);
+    static void export_logs(void);
 };

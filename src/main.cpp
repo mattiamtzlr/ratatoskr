@@ -81,7 +81,7 @@ void setup() {
         }
         case DUMP_LOG: {
             while (!Serial.available());
-            rat.logs.export_logs();
+            rat.export_logs();
             break;
         }
     }
