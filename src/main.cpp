@@ -10,7 +10,7 @@ const uint8_t TOF_FRONT_LEFT_ADDRESS = 0x31;
 const uint8_t TOF_FRONT_RIGHT_ADDRESS = 0x32;
 const uint8_t TOF_RIGHT_ADDRESS = 0x33;
 
-const MODE mode = RUN;  // TODO: Right now you have to change this by hand.
+const MODE mode = TESTING;  // TODO: Right now you have to change this by hand.
 
 ToF tof_left = ToF(LEFT, TOF_LEFT_ADDRESS, TOF_LEFT_XSHUT);
 ToF tof_front_left =
@@ -55,6 +55,7 @@ void setup() {
 
     Wire.begin();
     Serial.begin(115200);
+    gyro.calibrateGyro();
     gyro.begin();
     delay(1000);
 

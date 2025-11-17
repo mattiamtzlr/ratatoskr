@@ -96,6 +96,7 @@ void Ratatoskr::moveForward(int distance) {
     // Control loop parameters
     const float time_step = 0.02;  // 20ms update rate
     const int loop_delay = 20;
+
     long left_encoder = 0;
     long right_encoder = 0;
     uint16_t left_tof = 0;
@@ -106,8 +107,8 @@ void Ratatoskr::moveForward(int distance) {
     // Initial pwm values
     float pwm_left = FORWARD_PWM;
     float pwm_right = FORWARD_PWM;
-    m_motor_left.spin_ccw(pwm_left);
-    m_motor_right.spin_cw(pwm_right);
+    // m_motor_left.spin_ccw(pwm_left);
+    // m_motor_right.spin_cw(pwm_right);
 
     // PID controller instance
     PID pid_distance(time_step, 0.25, 0.1, 0.00, 50, 240);
