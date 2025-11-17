@@ -1,10 +1,11 @@
 #include <Arduino.h>
+#include <cstdint>
 
 #include "esp32-hal-ledc.h"
+#include "oled.hpp"
 #include "pins.hpp"
 #include "ratatoskr.hpp"
 #include "solver.hpp"
-#include "oled.hpp"
 
 // I2C addresses for the ToF sensors
 const uint8_t TOF_LEFT_ADDRESS = 0x30;
@@ -23,6 +24,8 @@ ToF tof_right = ToF(RIGHT, TOF_RIGHT_ADDRESS, TOF_RIGHT_XSHUT);
 
 MPU6050 gyro = MPU6050();
 
+OLED oled = OLED();
+
 // encoder_sign is the last argument (default = 1). Determines the direction
 GearMotor motor_left(MOTOR_L_IN1, MOTOR_L_IN2, 0, 1,  // PWM channels
                      ENC_L_OUT1, ENC_L_OUT2,
@@ -38,15 +41,9 @@ GearMotor motor_right(MOTOR_R_IN1, MOTOR_R_IN2, 2, 3,  // PWM channels
 
 Maze maze;
 Ratatoskr rat(motor_left, motor_right, tof_left, tof_front_left,
-              tof_front_right, tof_right, gyro);
+              tof_front_right, tof_right, gyro, oled);
 Solver solver(rat, maze);
 
-#define OLED_RESET 4
-#define OLED_ADDR 0x3C
-#define OLED_WIDTH 128
-#define OLED_HEIGHT 64
-
-Adafruit_SSD1306 oled(OLED_WIDTH, OLED_HEIGHT, &Wire, OLED_RESET);
 
 void setup() {
     // ToF XSHUT pins
@@ -55,10 +52,15 @@ void setup() {
     pinMode(TOF_RIGHT_XSHUT, OUTPUT);
     pinMode(TOF_FRONT_RIGHT_XSHUT, OUTPUT); 
 
+
     Wire.begin();
+    delay(500);
     Serial.begin(115200);
+    delay(500);
     gyro.begin();
-    delay(1000);
+    delay(500);
+    oled.begin();
+    delay(500);
 
     tof_left.begin();
     tof_front_left.begin();

@@ -5,7 +5,7 @@ using namespace Config;
 
 Ratatoskr::Ratatoskr(GearMotor &motor_left, GearMotor &motor_right,
                      ToF &tof_left, ToF &tof_front_left, ToF &tof_front_right,
-                     ToF &tof_right, MPU6050 &gyro)
+                     ToF &tof_right, MPU6050 &gyro, OLED &oled)
     : Mouse(),
       m_motor_left(motor_left),
       m_motor_right(motor_right),
@@ -13,7 +13,8 @@ Ratatoskr::Ratatoskr(GearMotor &motor_left, GearMotor &motor_right,
       m_tof_front_left(tof_front_left),
       m_tof_front_right(tof_front_right),
       m_tof_right(tof_right),
-      m_gyro(gyro) {}
+      m_gyro(gyro),
+      m_oled(oled) {}
 
 /* ===============================[ MOVEMENT
  * ]==================================== */
