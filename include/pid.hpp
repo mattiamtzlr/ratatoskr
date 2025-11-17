@@ -1,33 +1,26 @@
-#include <utility>
-
 // PID Controller Class
 class PID {
    public:
-    PID();
+    PID(float time_step, float k_p, float k_i, float k_d, float lower,
+        float upper);
 
-    std::pair<int, int> update(float time_step, float leftDistance,
-                               float rightDistance, float leftEncoder,
-                               float rightEncoder);
-
+    float update(float error);
     void reset();
+    // Bounds
+    const float UPPER_BOUND;
+    const float LOWER_BOUND;
+    const float TIME_STEP;
 
    private:
-    // PID coefficients
-    double distanceKp;
-    double distanceKi;
-    double distanceKd;
+    // Coefficients
+    float k_p;
+    float k_i;
+    float k_d;
 
-    double encoderKp;
-    double encoderKi;
-    double encoderKd;
+    // State Variables
+    float previous_error;
+    float integral;
 
-    // PID state variables
-    double distancePrevError;
-    double distanceIntegral;
-    double encoderPrevError;
-    double encoderIntegral;
-
-    double basePWM_forward;
-    int corrected_left_PWM;
-    int corrected_right_PWM;
+    // Output
+    float corrected_signal;
 };

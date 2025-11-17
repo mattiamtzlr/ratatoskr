@@ -32,12 +32,11 @@ void setup() {
 
     delay(1000);
     Wire.begin();
+    /*
     disableWireless();
-
     gyro.begin();
-
     gyro.calibrateGyro();
-
+    */
     pinMode(MOTOR_L_IN1, OUTPUT);
     pinMode(MOTOR_L_IN2, OUTPUT);
     pinMode(ENC_L_OUT1, INPUT);

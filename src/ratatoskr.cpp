@@ -1,9 +1,6 @@
 #include "ratatoskr.hpp"
 
 #include "pid.hpp"
-#include "pins.hpp"
-#define PERIOD 868.75
-#define TIME_PER_CELL 250.0
 
 Ratatoskr::Ratatoskr(GearMotor &motor_left, GearMotor &motor_right,
                      ToF &tof_left, ToF &tof_front_left, ToF &tof_front_right,
@@ -100,15 +97,25 @@ void Ratatoskr::moveForward(int distance) {
     m_motor_left.reset_encoder_count();
     m_motor_right.reset_encoder_count();
 
-    // PID controller instance
-    PID pid;
-
     // Control loop parameters
     const float time_step = 0.02;  // 20ms update rate
     const int loop_delay = 20;
     long left_encoder = 0;
     long right_encoder = 0;
-    std::pair<int, int> corrected_pwm = {};
+    uint16_t left_tof = 0;
+    uint16_t right_tof = 0;
+    float target_distance = .0;
+    float target_encoder = .0;
+
+    // Initial pwm values
+    float pwm_left = FORWARD_PWM;
+    float pwm_right = FORWARD_PWM;
+    m_motor_left.spin_ccw(pwm_left);
+    m_motor_right.spin_cw(pwm_right);
+
+    // PID controller instance
+    PID pid_distance(time_step, 0.25, 0.1, 0.00, 50, 240);
+    PID pid_encoders(time_step, 0.75, 0.8, 0.1, 50, 240);
 
     // Main control loop - run until target distance reached
     while ((left_encoder + right_encoder) / 2 < target_counts) {
@@ -116,15 +123,30 @@ void Ratatoskr::moveForward(int distance) {
         left_encoder = m_motor_left.get_encoder_count();
         right_encoder = m_motor_right.get_encoder_count();
 
+        // Clamp and adjust tof readings
+        left_tof = constrain(m_tof_left.read(), 0, 80);  // TODO: Magic nums
+        right_tof = constrain(m_tof_right.read(), 0, 80);
+        float left_dist = (left_tof == 0 && right_tof > 0) ? 0.75 : left_tof;
+        float right_dist = (right_tof == 0 && left_tof > 0) ? 0.75 : right_tof;
+
+        // Prepare errors
+        float tof_error = target_distance - (left_dist - right_dist);
+        float encoder_error = target_encoder - (left_encoder - right_encoder);
+
         // Update PID controller
-        corrected_pwm =
-            pid.update(time_step, m_tof_left.read(), m_tof_right.read(),
-                       left_encoder, right_encoder);
+        float tof_correction = pid_distance.update(tof_error);
+        float encoder_correction = pid_encoders.update(encoder_error);
+
+        // Calculate new PWM
+        pwm_left = FORWARD_PWM + tof_correction + encoder_correction;
+        pwm_right = FORWARD_PWM - tof_correction - encoder_correction;
+
+        pwm_left = constrain(pwm_left, 70, 240);
+        pwm_right = constrain(pwm_right, 70, 240);
 
         // Apply motor commands
-        m_motor_left.spin_ccw(corrected_pwm.first);
-        m_motor_right.spin_cw(corrected_pwm.second);
-
+        m_motor_left.spin_ccw(pwm_left);
+        m_motor_right.spin_cw(pwm_right);
         // Wait for next control cycle
         delay(loop_delay);
     }
