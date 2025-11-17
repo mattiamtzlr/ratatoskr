@@ -92,8 +92,6 @@ bool Maze::can_move_diag(Position pos, DiagDirection dir){
             path1_clear = !exists_wall(pos, NORTH) && 
                           !exists_wall(get_neighbor(pos, NORTH), EAST);
             
-            path2_clear = !exists_wall(pos, EAST) &&
-                          !exists_wall(get_neighbor(pos, EAST), NORTH);
             break;
 
         case SOUTH_EAST:
@@ -102,9 +100,6 @@ bool Maze::can_move_diag(Position pos, DiagDirection dir){
 
             path1_clear = !exists_wall(pos, SOUTH) &&
                           !exists_wall(get_neighbor(pos, SOUTH), EAST);
-
-            path2_clear = !exists_wall(pos, EAST) &&
-                          !exists_wall(get_neighbor(pos, EAST), SOUTH);
             break;
 
         case SOUTH_WEST:
@@ -113,9 +108,6 @@ bool Maze::can_move_diag(Position pos, DiagDirection dir){
 
             path1_clear = !exists_wall(pos, SOUTH) &&
                           !exists_wall(get_neighbor(pos, SOUTH), WEST);
-
-            path2_clear = !exists_wall(pos, WEST) &&
-                          !exists_wall(get_neighbor(pos, WEST), SOUTH);
             break;
 
         case NORTH_WEST:
@@ -124,13 +116,10 @@ bool Maze::can_move_diag(Position pos, DiagDirection dir){
 
             path1_clear = !exists_wall(pos, NORTH) &&
                           !exists_wall(get_neighbor(pos, NORTH), WEST);
-
-            path2_clear = !exists_wall(pos, WEST) &&
-                          !exists_wall(get_neighbor(pos, WEST), NORTH);
             break;
     }
 
-    return path1_clear || path2_clear;
+    return path1_clear;
 }
 
 std::vector<Position> Maze::valid_diag_neighbors(Position mouse_pos) {
