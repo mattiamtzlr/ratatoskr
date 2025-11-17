@@ -8,6 +8,13 @@ enum Direction {
     WEST = 3,
 };
 
+enum DiagDirection{
+    NORTH_EAST = 0,
+    SOUTH_EAST = 1,
+    NORTH_WEST = 2,
+    SOUTH_WEST = 3,
+};
+
 static std::map<Direction, char> dirToCardinalChar = {
     {NORTH, 'n'}, {EAST, 'e'}, {SOUTH, 's'}, {WEST, 'w'}};
 static std::map<char, Direction> cardinalCharToDir = {
@@ -33,3 +40,4 @@ int dx(Direction d);
 int dy(Direction d);
 
 Position get_neighbor(Position pos, Direction d);
+Position get_diag_neighbor(Position pos, DiagDirection d);
