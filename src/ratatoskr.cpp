@@ -1,105 +1,6 @@
 #include "ratatoskr.hpp"
-#include "pins.hpp"
 
-#define PERIOD 868.75
-#define TIME_PER_CELL 250.0
-
-// PID Controller Class
-class SystemPID {
-   public:
-    SystemPID()
-        : distanceKp(0.35),
-          distanceKi(0.2),
-          distanceKd(0.10),
-          encoderKp(0.75),
-          encoderKi(0.80),
-          encoderKd(0.10),
-          distancePrevError(0),
-          encoderPrevError(0),
-          distanceIntegral(0),
-          encoderIntegral(0),
-          basePWM_forward(Ratatoskr::FORWARD_PWM) {}
-
-    void update(float dt, float leftDistance, float rightDistance,
-                float leftEncoder, float rightEncoder) {
-        // Constants
-        const float targetPosition = 0.0;
-
-        leftDistance =
-            (leftDistance == 0 && rightDistance > 0) ? 0.75 : leftDistance;
-
-        rightDistance =
-            (rightDistance == 0 && leftDistance > 0) ? 0.75 : rightDistance;
-
-        // Lateral position error (positive = too far right, negative = too far
-        // left)
-        float leftConstrained = constrain(leftDistance, 0, 80);
-        float rightConstrained = constrain(rightDistance, 0, 80);
-        float currentPosition = leftConstrained - rightConstrained;
-
-        // PID for lateral control
-        float distanceError = targetPosition - currentPosition;
-        distanceIntegral += distanceError * dt;
-        float distanceDerivative = (distanceError - distancePrevError) / dt;
-        distancePrevError = distanceError;
-
-        float side_correction = distanceKp * distanceError +
-                                distanceKi * distanceIntegral +
-                                distanceKd * distanceDerivative;
-
-        // PID for encoder synchronization (keep wheels matched) (think of plane
-        // wings)
-        float targetEncoder = 0.0;
-        float currentEncoder = leftEncoder - rightEncoder;
-        float encoderError = targetEncoder - currentEncoder;
-        encoderIntegral += encoderError * dt;
-        float encoderDerivative = (encoderError - encoderPrevError) / dt;
-
-        float encoderCorrection = encoderKp * encoderError +
-                                  encoderKi * encoderIntegral +
-                                  encoderKd * encoderDerivative;
-        encoderPrevError = encoderError;
-
-        // Disable lateral correction if both walls are far or absent
-        // if ((leftDistance >= 40 || leftDistance == 0) &&
-        //     (rightDistance >= 40 || rightDistance == 0)) {
-        //     side_correction = 0;
-        // }
-
-        // Calculate final PWM values
-        corrected_left_PWM =
-            basePWM_forward + side_correction + encoderCorrection;
-        corrected_right_PWM =
-            basePWM_forward - side_correction - encoderCorrection;
-        // Serial.println("corrections: side enc " + String(encoderCorrection));
-        // Constrain to valid PWM range
-        corrected_left_PWM = constrain(corrected_left_PWM, 40, 255);
-        corrected_right_PWM = constrain(corrected_right_PWM, 40, 255);
-    }
-
-    void reset() {
-        distancePrevError = 0;
-        encoderPrevError = 0;
-        distanceIntegral = 0;
-        encoderIntegral = 0;
-    }
-
-    float getLeftPWM() { return corrected_left_PWM; }
-    float getRightPWM() { return corrected_right_PWM; }
-
-   private:
-    // PID coefficients
-    double distanceKp, distanceKi, distanceKd;
-    double encoderKp, encoderKi, encoderKd;
-
-    // PID state variables
-    double distancePrevError, distanceIntegral;
-    double encoderPrevError, encoderIntegral;
-
-    double basePWM_forward;
-    float corrected_left_PWM;
-    float corrected_right_PWM;
-};
+#include "pid.hpp"
 
 Ratatoskr::Ratatoskr(GearMotor &motor_left, GearMotor &motor_right,
                      ToF &tof_left, ToF &tof_front_left, ToF &tof_front_right,
@@ -158,29 +59,24 @@ void Ratatoskr::calibrateEncoders() {
 void Ratatoskr::turn(int angle) {
     float threshold = 0.5f;
     unsigned long t_now = micros();
-    unsigned long t_last = t_now; // avoid huge first dt
+    unsigned long t_last = t_now;  // avoid huge first dt
     // baseline angle in degrees
     float current_angle = m_gyro.getAngle(t_now, t_last);
     float target = current_angle + (float)angle;
 
-    if (angle > 0) {
-        while (current_angle < target - threshold) {
-            Serial.println(current_angle);
+    while (current_angle < target - threshold) {
+        if (angle > 0) {
             m_motor_left.spin_cw(TURN_PWM);
             m_motor_right.spin_cw(TURN_PWM);
-            t_now = micros();
-            current_angle = m_gyro.getAngle(t_now, t_last);
-            t_last = t_now;
-        }
-    } else {
-        while (current_angle > target + threshold) {
+        } else {
             m_motor_left.spin_ccw(TURN_PWM);
             m_motor_right.spin_ccw(TURN_PWM);
-            t_now = micros();
-            current_angle = m_gyro.getAngle(t_now, t_last);
-            t_last = t_now;
         }
+        t_now = micros();
+        current_angle = m_gyro.getAngle(t_now, t_last);
+        t_last = t_now;
     }
+
     stop();
 }
 
@@ -191,56 +87,67 @@ void Ratatoskr::moveForward(int distance) {
     Mouse::moveForward(distance);  // Update position in maze
 
     // Calculate target encoder counts for desired distance
-    // long target_counts = (long)(distance * MM_PER_CELL * ENCODER_COUNTS_PER_MM); // delete MM_PER_CELL if distance is in mm
-    long target_counts = (long)(distance * ENCODER_COUNTS_PER_MM); // i want distance in mm
+    // long target_counts = (long)(distance * MM_PER_CELL *
+    // ENCODER_COUNTS_PER_MM); // delete MM_PER_CELL if distance is in mm
+    long target_counts =
+        (long)(distance * ENCODER_COUNTS_PER_MM);  // i want distance in mm
 
     // Reset encoder counts at start
     m_motor_left.reset_encoder_count();
     m_motor_right.reset_encoder_count();
 
-    // PID controller instance
-    SystemPID pid;
-
     // Control loop parameters
-    const float dt = 0.02;  // 20ms update rate
-    const int loop_delay_ms = 20;
+    const float time_step = 0.02;  // 20ms update rate
+    const int loop_delay = 20;
+    long left_encoder = 0;
+    long right_encoder = 0;
+    uint16_t left_tof = 0;
+    uint16_t right_tof = 0;
+    float target_distance = .0;
+    float target_encoder = .0;
 
+    // Initial pwm values
+    float pwm_left = FORWARD_PWM;
+    float pwm_right = FORWARD_PWM;
+    m_motor_left.spin_ccw(pwm_left);
+    m_motor_right.spin_cw(pwm_right);
+
+    // PID controller instance
+    PID pid_distance(time_step, 0.25, 0.1, 0.00, 50, 240);
+    PID pid_encoders(time_step, 0.75, 0.8, 0.1, 50, 240);
 
     // Main control loop - run until target distance reached
-    while (true) {
-        // Serial.println("encoders: L " +
-        //                String(m_motor_left.get_encoder_count()) + " R " +
-        //                String(m_motor_right.get_encoder_count()));
+    while ((left_encoder + right_encoder) / 2 < target_counts) {
         // Read current encoder values
-        long left_encoder = m_motor_left.get_encoder_count();
-        long right_encoder = m_motor_right.get_encoder_count();
+        left_encoder = m_motor_left.get_encoder_count();
+        right_encoder = m_motor_right.get_encoder_count();
 
-        // Check if we've reached the target distance
-        long avg_encoder = (left_encoder + right_encoder) / 2;
-        if (avg_encoder >= target_counts) {
-            break;
-        }
-        // Serial.println("distance to go (mm): " +
-        //                String((target_counts - avg_encoder) / ENCODER_COUNTS_PER_MM));
+        // Clamp and adjust tof readings
+        left_tof = constrain(m_tof_left.read(), 0, 80);  // TODO: Magic nums
+        right_tof = constrain(m_tof_right.read(), 0, 80);
+        float left_dist = (left_tof == 0 && right_tof > 0) ? 0.75 : left_tof;
+        float right_dist = (right_tof == 0 && left_tof > 0) ? 0.75 : right_tof;
 
-        // Read ToF sensor distances (in mm)
-        uint16_t left_distance = m_tof_left.read();
-        uint16_t right_distance = m_tof_right.read();
+        // Prepare errors
+        float tof_error = target_distance - (left_dist - right_dist);
+        float encoder_error = target_encoder - (left_encoder - right_encoder);
 
         // Update PID controller
-        pid.update(dt, left_distance, right_distance, left_encoder,
-                   right_encoder);
+        float tof_correction = pid_distance.update(tof_error);
+        float encoder_correction = pid_encoders.update(encoder_error);
 
-        // Get corrected PWM values
-        float left_pwm = pid.getLeftPWM();
-        float right_pwm = pid.getRightPWM();
+        // Calculate new PWM
+        pwm_left = FORWARD_PWM + tof_correction + encoder_correction;
+        pwm_right = FORWARD_PWM - tof_correction - encoder_correction;
+
+        pwm_left = constrain(pwm_left, 70, 240);
+        pwm_right = constrain(pwm_right, 70, 240);
 
         // Apply motor commands
-        m_motor_left.spin_ccw((int)left_pwm);
-        m_motor_right.spin_cw((int)right_pwm);
-
+        m_motor_left.spin_ccw(pwm_left);
+        m_motor_right.spin_cw(pwm_right);
         // Wait for next control cycle
-        delay(loop_delay_ms);
+        delay(loop_delay);
     }
 
     // Stop motors when target reached
