@@ -60,12 +60,17 @@ void setup() {
     tof_left_front.start();
     tof_right.start();
     tof_right_front.start();
+    while (!tof_left.dataReady() || !tof_left_front.dataReady() ||
+           !tof_right_front.dataReady() || !tof_right.dataReady());
 
-    // Push target to maze
-    maze.targets.push_back(Position(7, 7));
-    maze.targets.push_back(Position(7, 8));
-    maze.targets.push_back(Position(8, 7));
-    maze.targets.push_back(Position(8, 8));
+    switch (mode) {
+        case RUN: {
+            // Push target to maze
+            maze.targets.push_back(Position(7, 7));
+            maze.targets.push_back(Position(7, 8));
+            maze.targets.push_back(Position(8, 7));
+            maze.targets.push_back(Position(8, 8));
+            solver.solve();  // Run from start to target
 
     solver.solve();  // Run from start to target
 

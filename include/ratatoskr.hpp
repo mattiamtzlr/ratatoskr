@@ -22,9 +22,9 @@ class Ratatoskr : public Mouse {
 
    public:
     Ratatoskr(GearMotor &motor_left, GearMotor &motor_right, ToF &tof_left,
-              ToF &tof_front_left, ToF &tof_front_right,
-              ToF &tof_right , MPU6050 &gyro/*, LEDMatrix &screen*/);
-
+              ToF &tof_front_left, ToF &tof_front_right, ToF &tof_right,
+              MPU6050 &gyro /*, LEDMatrix &screen*/);
+    Logger logs;
     // static const float PERIOD;  // TODO: we compute this by recording 360/T
     static const u_int8_t TURN_PWM = 150;  // TODO: we set this arbitrarily
 
@@ -42,10 +42,6 @@ class Ratatoskr : public Mouse {
         200.0f / (WHEEL_DIAMETER_MM * PI);
 
     static constexpr float MM_PER_CELL = 160.0;
-
-
-
-    
 
     inline void stop();
 
