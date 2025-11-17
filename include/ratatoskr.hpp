@@ -43,6 +43,9 @@ class Ratatoskr : public Mouse {
 
     static constexpr float MM_PER_CELL = 160.0;
 
+
+
+
     inline void stop();
 
     // front considered blocked if any front ToF < this
