@@ -4,7 +4,7 @@
 #include "NVSDatabase.hpp"
 
 static NVSDatabase nvsDB("logs");
-class Logger {
+class Loggable {
    private:
     static void increment_count();
     static int get_count();

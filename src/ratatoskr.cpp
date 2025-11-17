@@ -204,5 +204,5 @@ bool Ratatoskr::wasReset() { return false; }
 void Ratatoskr::ackReset() {}
 
 void Ratatoskr::log(std::string msg) {
-    Logger::log(msg);
+    Loggable::log(msg);
 }

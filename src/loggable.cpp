@@ -1,31 +1,31 @@
-#include "logger.hpp"
+#include "loggable.hpp"
 
 #include <Arduino.h>
 
-void Logger::increment_count() {
+void Loggable::increment_count() {
     int next_count = get_count() + 1;
     nvsDB.putPair("0", std::to_string(next_count).c_str());
 }
 
-int Logger::get_count() {
+int Loggable::get_count() {
     char value[10];
     size_t maxSize = sizeof(value);
     nvsDB.getValueOf("0", value, &maxSize);
     return atoi(value);
 }
 
-void Logger::log(std::string msg) {
+void Loggable::log(std::string msg) {
     nvsDB.putPair(std::to_string(get_count()).c_str(), msg.c_str());
     Serial.println(msg.c_str());
     increment_count();
 }
 
-void Logger::clear_logs() {
+void Loggable::clear_logs() {
     nvsDB.eraseAll();
     nvsDB.putPair("0", "1");
 }
 
-void Logger::export_logs(void) {
+void Loggable::export_logs(void) {
     int index = 1;
     int num_entries = get_count();
 

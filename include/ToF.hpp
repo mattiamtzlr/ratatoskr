@@ -1,5 +1,5 @@
 #pragma once
-#include "logger.hpp"
+#include "loggable.hpp"
 #include "util.hpp"
 #include <VL53L1X.h> 
 #include <Wire.h>
@@ -19,7 +19,7 @@ enum SensorPosition {
     RIGHT       = 3         // side-right
 };
 
-class ToF : public Logger {
+class ToF : public Loggable {
    public:
     // Constructor performs initialization
     ToF(SensorPosition position, uint8_t i2c_address, uint8_t xshut_pin);
