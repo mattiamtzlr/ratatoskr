@@ -12,6 +12,18 @@ int dy(Direction d) { return d == NORTH ? 1 : (d == SOUTH ? -1 : 0); };
 Position get_neighbor(Position pos, Direction d) {
     return Position(pos.x + dx(d), pos.y + dy(d));
 }
+
+Position get_diag_neighbor(Position pos, DiagDirection d){
+    std::map<DiagDirection, Position> dir_to_pos = {
+        {NORTH_EAST, Position(pos.x + 1, pos.y + 1)},
+        {SOUTH_EAST, Position(pos.x + 1, pos.y - 1)},
+        {NORTH_WEST, Position(pos.x - 1, pos.y + 1)},
+        {SOUTH_WEST, Position(pos.x - 1, pos.y - 1)},
+    };
+
+    return dir_to_pos.at(d);
+}
+
 Direction dir_for_neighbor(Position pos_n, Position pos_m) {
     if (pos_n.x > pos_m.x)
         return EAST;
