@@ -1,68 +1,79 @@
-#include "VL53L1X.h"
-#include "ToF.hpp"
-#include "pins.hpp"
-#include "gear_motor.hpp"
+#include <Arduino.h>
 
+#include "pins.hpp"
+#include "ratatoskr.hpp"
+#include "solver.hpp"
+
+// I2C addresses for the ToF sensors
+const uint8_t TOF_LEFT_ADDRESS = 0x30;
+const uint8_t TOF_FRONT_LEFT_ADDRESS = 0x31;
+const uint8_t TOF_FRONT_RIGHT_ADDRESS = 0x32;
+const uint8_t TOF_RIGHT_ADDRESS = 0x33;
+
+ToF tof_left = ToF(LEFT, TOF_LEFT_ADDRESS, TOF_LEFT_XSHUT);
+ToF tof_left_front =
+    ToF(FRONT_LEFT, TOF_FRONT_LEFT_ADDRESS, TOF_FRONT_LEFT_XSHUT);
+ToF tof_right_front =
+    ToF(FRONT_RIGHT, TOF_FRONT_RIGHT_ADDRESS, TOF_FRONT_RIGHT_XSHUT);
+ToF tof_right = ToF(RIGHT, TOF_RIGHT_ADDRESS, TOF_RIGHT_XSHUT);
+
+MPU6050 gyro = MPU6050();
+
+Maze maze;
+GearMotor motor_left(MOTOR_L_IN1, MOTOR_L_IN2, ENC_L_OUT1, ENC_L_OUT2, 50);
+GearMotor motor_right(MOTOR_R_IN1, MOTOR_R_IN2, ENC_R_OUT1, ENC_R_OUT2, 50);
+
+Ratatoskr rat(motor_left, motor_right, tof_left, tof_left_front,
+              tof_right_front, tof_right, gyro);
+Solver solver(rat, maze);
 
 void setup() {
-    Serial.begin(115200);
-    delay(2000);
-    Serial.println("Starting ToF sensors...");
+    // Motor pins for left
+    pinMode(MOTOR_L_IN1, OUTPUT);
+    pinMode(MOTOR_L_IN2, OUTPUT);
+    pinMode(ENC_L_OUT1, INPUT);
+    pinMode(ENC_L_OUT2, INPUT);
+    attachInterruptArg(digitalPinToInterrupt(ENC_L_OUT2),
+                       motor_left.isr_trampoline, &motor_left, RISING);
+
+    // Motor pins for right
+    pinMode(MOTOR_R_IN1, OUTPUT);
+    pinMode(MOTOR_R_IN2, OUTPUT);
+    pinMode(ENC_R_OUT1, INPUT);
+    pinMode(ENC_R_OUT2, INPUT);
+    attachInterruptArg(digitalPinToInterrupt(ENC_R_OUT2),
+                       motor_right.isr_trampoline, &motor_right, RISING);
+
+    // ToF XSHUT pins
+    pinMode(TOF_LEFT_XSHUT, OUTPUT);
+    pinMode(TOF_FRONT_LEFT_XSHUT, OUTPUT);
+    pinMode(TOF_RIGHT_XSHUT, OUTPUT);
+    pinMode(TOF_FRONT_RIGHT_XSHUT, OUTPUT);
+
     Wire.begin();
-    delay(100);
+    Serial.begin(115200);
+    gyro.begin();
+    delay(1000);
 
-    // Setup XSHUT pins
-    pinMode(TOF_RIGHT_XSHUT,        OUTPUT);
-    pinMode(TOF_FRONT_RIGHT_XSHUT,  OUTPUT);
-    pinMode(TOF_FRONT_LEFT_XSHUT,   OUTPUT);
-    pinMode(TOF_LEFT_XSHUT,         OUTPUT);   
-
-
-    delay(100);
-
-    ToF tof_left        = ToF(LEFT,         ADDR_LEFT,          TOF_LEFT_XSHUT); 
-    ToF tof_front_left  = ToF(FRONT_LEFT,   ADDR_FRONT_LEFT,    TOF_FRONT_LEFT_XSHUT);
-    ToF tof_front_right = ToF(FRONT_RIGHT,  ADDR_FRONT_RIGHT,   TOF_FRONT_RIGHT_XSHUT);
-    ToF tof_right       = ToF(RIGHT,        ADDR_RIGHT,         TOF_RIGHT_XSHUT);
-
-
-    Serial.println("Starting ToF continuous readings...");
+    // Start ToF
     tof_left.start();
-    delay(100);
-    while (!tof_left.dataReady()) {
-        delay(10);
-        Serial.println("Waiting for ToF left...");
-    }
-    Serial.println(tof_left.dataReady() ? "ToF left ready" : "ToF Left not ready");
-    
-    tof_front_left.start();
-    while (!tof_front_left.dataReady()) {
-        delay(10);
-    }
-    Serial.println(tof_front_left.dataReady() ? "ToF fl ready" : "ToF fl not ready");
-
-    tof_front_right.start();
-    while(!tof_front_right.dataReady()) {
-        delay(10);
-    }
-    Serial.println(tof_front_right.dataReady() ? "ToF fr ready" : "ToF fr not ready");
-
+    tof_left_front.start();
     tof_right.start();
-    while (!tof_right.dataReady()) {
-        delay(10);
-    }
-    Serial.println(tof_right.dataReady() ? "ToF right ready" : "ToF right not ready");
+    tof_right_front.start();
 
+    // Push target to maze
+    maze.targets.push_back(Position(7, 7));
+    maze.targets.push_back(Position(7, 8));
+    maze.targets.push_back(Position(8, 7));
+    maze.targets.push_back(Position(8, 8));
 
-    while (true){
-        Serial.print("Left: "); Serial.println(tof_left.read());
-        Serial.print("Front Left: "); Serial.println(tof_front_left.read());
-        Serial.print("Front Right: "); Serial.println(tof_front_right.read());
-        Serial.print("Right: "); Serial.println(tof_right.read());
-        Serial.println("-----");
-        delay(100);
-    }
+    solver.solve();  // Run from start to target
 
+    // Push start to maze
+    maze.targets.clear();
+    maze.targets.push_back(Position(0, 0));
+
+    solver.solve();  // Run from target to start
 }
 
 void loop() {
