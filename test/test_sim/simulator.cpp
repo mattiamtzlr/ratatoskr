@@ -21,4 +21,15 @@ int main(int argc, char* argv[]) {
     maze.targets.push_back(Position(0, 0));
 
     solver.solve();  // Run from target to start
+
+    std::vector<std::vector<Position>> diag_paths = maze.find_diagonal_paths(2);
+
+    // Color diagonals of blue
+    API::clearAllColor();
+    for (const auto& path : diag_paths) {
+        for (const Position& p : path) {
+            API::setColor(p.x, p.y, 'b');
+        }
+    }
+
 }
