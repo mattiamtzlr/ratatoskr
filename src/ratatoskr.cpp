@@ -12,46 +12,8 @@ Ratatoskr::Ratatoskr(GearMotor &motor_left, GearMotor &motor_right,
       m_tof_front_left(tof_front_left),
       m_tof_front_right(tof_front_right),
       m_tof_right(tof_right),
-      m_gyro(gyro) {}
-
-void Ratatoskr::calibrateEncoders() {
-    stop();
-    m_motor_left.reset_encoder_count();
-    m_motor_right.reset_encoder_count();
-
-    Serial.println("=== Encoder calibration mode ===");
-    Serial.println(
-        "Move the mouse manually. Press Enter in Serial Monitor when done.\n");
-
-    unsigned long last_print = 0;
-    while (true) {
-        long left_encoder = m_motor_left.get_encoder_count();
-        long right_encoder = m_motor_right.get_encoder_count();
-
-        unsigned long now = millis();
-        if (now - last_print >= 100) {
-            last_print = now;
-            Serial.print("Ticks L=");
-            Serial.print(left_encoder);
-            Serial.print(" R=");
-            Serial.println(right_encoder);
-        }
-
-        if (Serial.available() > 0) {
-            int c = Serial.read();
-            if (c == '\n' || c == '\r') {
-                Serial.println("\nCalibration finished.");
-                Serial.print("Final ticks L=");
-                Serial.print(left_encoder);
-                Serial.print(" R=");
-                Serial.println(right_encoder);
-                break;
-            }
-        }
-
-        delay(10);
-    }
-}
+      m_gyro(gyro)/*,
+      m_screen(screen)*/ {}
 
 //===============================[ CONTROL ]====================================
 /**

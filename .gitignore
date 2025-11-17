@@ -6,3 +6,5 @@ compile_commands.json
 *.bgcode
 out
 .DS_store
+CAD/3D_print/tmp.3mf
+CAD/lasercut/tmp.lbrn2
