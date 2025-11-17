@@ -16,7 +16,6 @@ int Loggable::get_count() {
 
 void Loggable::log(std::string msg) {
     nvsDB.putPair(std::to_string(get_count()).c_str(), msg.c_str());
-    Serial.println(msg.c_str());
     increment_count();
 }
 
@@ -26,7 +25,7 @@ void Loggable::clear_logs() {
 }
 
 void Loggable::export_logs(void) {
-    int index = 1;
+    int index = 0;
     int num_entries = get_count();
 
     Serial.print(num_entries);
