@@ -2,12 +2,9 @@
 
 #include <Arduino.h>
 
-void Logger::begin() { m_head_index = get_count(); }
-
 void Logger::increment_count() {
     int next_count = get_count() + 1;
     nvsDB.putPair("0", std::to_string(next_count).c_str());
-    m_head_index = next_count;
 }
 
 int Logger::get_count() {
@@ -18,7 +15,8 @@ int Logger::get_count() {
 }
 
 void Logger::log(std::string msg) {
-    nvsDB.putPair(std::to_string(m_head_index).c_str(), msg.c_str());
+    nvsDB.putPair(std::to_string(get_count()).c_str(), msg.c_str());
+    Serial.println(msg.c_str());
     increment_count();
 }
 
