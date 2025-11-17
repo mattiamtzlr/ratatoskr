@@ -20,10 +20,10 @@ class Ratatoskr : public Mouse {
     ToF &m_tof_right;
     MPU6050 &m_gyro;
 
-       public
-       : Ratatoskr(GearMotor &motor_left, GearMotor &motor_right, ToF &tof_left,
-                   ToF &tof_front_left, ToF &tof_front_right,
-                   ToF &tof_right, MPU6050 &gyro/*, LEDMatrix &screen*/);
+   public:
+    Ratatoskr(GearMotor &motor_left, GearMotor &motor_right, ToF &tof_left,
+              ToF &tof_front_left, ToF &tof_front_right,
+              ToF &tof_right , MPU6050 &gyro/*, LEDMatrix &screen*/);
 
     // static const float PERIOD;  // TODO: we compute this by recording 360/T
     static const u_int8_t TURN_PWM = 150;  // TODO: we set this arbitrarily
@@ -32,21 +32,28 @@ class Ratatoskr : public Mouse {
 
     static const u_int8_t FORWARD_PWM = 170;  // TODO: we set this arbiturarily
 
-    static const u_int8_t WIDTH_MM  = 68;
-    static const u_int8_t WHEEL_DIAMETER_MM = 27; // So one revolution is 27*pi mm = 84.82 mm
+    static const u_int8_t WIDTH_MM = 68;
+
+    // So one revolution is 27*pi mm = 84.82 mm
+    static const u_int8_t WHEEL_DIAMETER_MM = 27;
+
     // So encooder counts per mm = counts per rev / (WHEEL_DIAMETER_MM * pi)
-    static constexpr float ENCODER_COUNTS_PER_MM = 200.0f / (WHEEL_DIAMETER_MM * PI);
+    static constexpr float ENCODER_COUNTS_PER_MM =
+        200.0f / (WHEEL_DIAMETER_MM * PI);
+
     static constexpr float MM_PER_CELL = 160.0;
 
 
 
+    
 
     inline void stop();
 
-    static const uint16_t FRONT_WALL_MM =
-        110;  // front considered blocked if any front ToF < this
-    static const uint16_t SIDE_WALL_MM =
-        70;  // side considered blocked if side ToF < this
+    // front considered blocked if any front ToF < this
+    static const uint16_t FRONT_WALL_MM = 110;
+
+    // side considered blocked if side ToF < this
+    static const uint16_t SIDE_WALL_MM = 70;
 
     virtual void moveForward(int distance = 1);
     virtual void turn(int angle);
@@ -62,5 +69,4 @@ class Ratatoskr : public Mouse {
 
     virtual bool wasReset();
     virtual void ackReset();
-    Logger logs;
 };
