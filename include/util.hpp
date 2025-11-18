@@ -8,7 +8,7 @@ enum Direction {
     WEST = 3,
 };
 
-enum DiagDirection{
+enum DiagDirection {
     NORTH_EAST = 0,
     SOUTH_EAST = 1,
     NORTH_WEST = 2,
@@ -20,14 +20,22 @@ static std::map<Direction, char> dirToCardinalChar = {
 static std::map<char, Direction> cardinalCharToDir = {
     {'n', NORTH}, {'e', EAST}, {'s', SOUTH}, {'w', WEST}};
 
+static std::map<DiagDirection, Direction> diagDirFirst = {{NORTH_EAST, NORTH},
+                                                          {SOUTH_EAST, SOUTH},
+                                                          {SOUTH_WEST, SOUTH},
+                                                          {NORTH_WEST, NORTH}};
+static std::map<DiagDirection, Direction> diagDirSecond = {{NORTH_EAST, EAST},
+                                                           {SOUTH_EAST, EAST},
+                                                           {SOUTH_WEST, WEST},
+                                                           {NORTH_WEST, WEST}};
+
 struct Position {
     int x;
     int y;
     Position(size_t x, size_t y) : x(x), y(y) {}
 };
-inline bool operator<(const Position& lhs, const Position& rhs)
-{
-  return lhs.x < rhs.x || lhs.y < rhs.y;
+inline bool operator<(const Position& lhs, const Position& rhs) {
+    return lhs.x < rhs.x || lhs.y < rhs.y;
 }
 Direction rotate_right(Direction dir);
 

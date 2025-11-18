@@ -14,7 +14,6 @@ class Maze {
    private:
     int m_wall_storage[MAZE_HEIGHT][MAZE_WIDTH] = {};
     int m_distances[MAZE_HEIGHT][MAZE_WIDTH] = {};
-
    public:
     std::vector<Position> targets;
     std::set<Position> visited = {};
