@@ -3,16 +3,13 @@
 #include "util.hpp"
 #include <VL53L1X.h> 
 #include <Wire.h>
-#pragma once
+
 // Valid timing budgets: 15, 20, 33, 50, 100, 200 and 500ms! (from lib)
 constexpr uint32_t TIMING_BUDGET   = 15;  // in ms
 constexpr uint32_t TOF_CALIBRATION_DURATION_MS = 1000;
 constexpr uint32_t TOF_CALIBRATION_SAMPLE_INTERVAL_MS = 15;
-
-constexpr uint8_t ADDR_LEFT        = 0x30;
-constexpr uint8_t ADDR_FRONT_LEFT  = 0x31;
-constexpr uint8_t ADDR_FRONT_RIGHT = 0x32;
-constexpr uint8_t ADDR_RIGHT       = 0x33;  // 7-bit addresses
+constexpr uint16_t TOF_SIDE_EXPECTED_MM = 50;
+constexpr uint16_t TOF_FRONT_EXPECTED_MM = 40; 
 
 enum SensorPosition {
     LEFT        = 0,        // side-left
@@ -27,7 +24,7 @@ class ToF : public Loggable {
     ToF(SensorPosition position, uint8_t i2c_address, uint8_t xshut_pin);
 
     // Start continuous ranging
-    void start();
+    void begin();
 
     // Read current corrected distance in millimeters
     uint16_t read();
