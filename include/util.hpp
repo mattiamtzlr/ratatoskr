@@ -8,8 +8,13 @@ enum Direction {
     WEST = 3,
 };
 
-static std::map<Direction, char> dirToCardinalChar = {
-    {NORTH, 'n'}, {EAST, 'e'}, {SOUTH, 's'}, {WEST, 'w'}};
+enum MODE {
+    RUN,
+    DUMP_LOG
+};
+
+static std::map<Direction, char>
+    dirToCardinalChar = {{NORTH, 'n'}, {EAST, 'e'}, {SOUTH, 's'}, {WEST, 'w'}};
 static std::map<char, Direction> cardinalCharToDir = {
     {'n', NORTH}, {'e', EAST}, {'s', SOUTH}, {'w', WEST}};
 
@@ -18,9 +23,8 @@ struct Position {
     int y;
     Position(size_t x, size_t y) : x(x), y(y) {}
 };
-inline bool operator<(const Position& lhs, const Position& rhs)
-{
-  return lhs.x < rhs.x || lhs.y < rhs.y;
+inline bool operator<(const Position& lhs, const Position& rhs) {
+    return lhs.x < rhs.x || lhs.y < rhs.y;
 }
 Direction rotate_right(Direction dir);
 

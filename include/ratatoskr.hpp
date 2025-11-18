@@ -4,11 +4,13 @@
 #include "ToF.hpp"
 #include "gear_motor.hpp"
 #include "gyro.hpp"
+#include "led_matrix.hpp"
+#include "loggable.hpp"
 #include "maze.hpp"
 #include "mouse.hpp"
 #include "util.hpp"
 
-class Ratatoskr : public Mouse {
+class Ratatoskr : public Mouse, public Loggable {
    private:
     GearMotor &m_motor_left;
     GearMotor &m_motor_right;
@@ -59,6 +61,7 @@ class Ratatoskr : public Mouse {
     virtual bool wallLeft();
 
     virtual void update_visuals(Maze &maze);
+    virtual void log(std::string msg);
 
     virtual bool wasReset();
     virtual void ackReset();

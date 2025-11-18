@@ -55,7 +55,7 @@ bool MPU6050::begin() {
     // delay(1000);
     // calibrateGyro(); doesnt even work here
     // delay(1000);
-    Serial.println("Gyro is ready");
+    log("Gyro is ready");
     return true;
 }
 
@@ -179,7 +179,7 @@ void MPU6050::calibrateGyro() {
     float z_values = 0;
     unsigned long count = 0;
     delay(10);
-    Serial.println("[MPU6050] Starting gyro calibration. Press Enter to stop...");
+    log("[MPU6050] Starting gyro calibration. Press Enter to stop...");
     while (count < 2500) {
         if (Serial.available()) {
             char c = Serial.read();
@@ -201,7 +201,7 @@ void MPU6050::calibrateGyro() {
         X_OFFSET = 0.0f;
         Y_OFFSET = 0.0f;
         Z_OFFSET = 0.0f;
-        Serial.println("[MPU6050] Calibration aborted: no samples collected.");
+        log("[MPU6050] Calibration aborted: no samples collected.");
         return;
     }
 
@@ -209,15 +209,8 @@ void MPU6050::calibrateGyro() {
     Y_OFFSET = (float)y_values / (float)count;
     Z_OFFSET = (float)z_values / (float)count;
 
-    Serial.print("[MPU6050] Calibration done with ");
-    Serial.print(count);
-    Serial.println(" samples.");
-    Serial.print("Offsets (deg/s) X: ");
-    Serial.print(X_OFFSET);
-    Serial.print(" Y: ");
-    Serial.print(Y_OFFSET);
-    Serial.print(" Z: ");
-    Serial.println(Z_OFFSET);
+    log("[MPU6050] Calibration done with " + std::to_string(count) + " samples.");
+    log("Offsets (deg/s) X: " + std::to_string(X_OFFSET) + " Y: " + std::to_string(Y_OFFSET) + " Z: " + std::to_string(Z_OFFSET));
 }
 
 

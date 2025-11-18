@@ -1,4 +1,5 @@
 #include "ratatoskr.hpp"
+#include <string>
 
 #include "pid.hpp"
 
@@ -19,8 +20,8 @@ void Ratatoskr::calibrateEncoders() {
     m_motor_left.reset_encoder_count();
     m_motor_right.reset_encoder_count();
 
-    Serial.println("=== Encoder calibration mode ===");
-    Serial.println("Move the mouse manually. Press Enter in Serial Monitor when done.\n");
+    log("=== Encoder calibration mode ===");
+    log("Move the mouse manually. Press Enter in Serial Monitor when done.");
 
     unsigned long last_print = 0;
     while (true) {
@@ -30,20 +31,14 @@ void Ratatoskr::calibrateEncoders() {
         unsigned long now = millis();
         if (now - last_print >= 100) {
             last_print = now;
-            Serial.print("Ticks L=");
-            Serial.print(left_encoder);
-            Serial.print(" R=");
-            Serial.println(right_encoder);
-        }
+            log("Ticks L = " + std::to_string(left_encoder) + " R = " + std::to_string(right_encoder));
+        } 
 
         if (Serial.available() > 0) {
             int c = Serial.read();
             if (c == '\n' || c == '\r') {
-                Serial.println("\nCalibration finished.");
-                Serial.print("Final ticks L=");
-                Serial.print(left_encoder);
-                Serial.print(" R=");
-                Serial.println(right_encoder);
+                log("\nCalibration finished.");
+                log("Final ticks L = " + std::to_string(left_encoder) + " R = " + std::to_string(right_encoder) + "\n");
                 break;
             }
         }
@@ -57,6 +52,7 @@ void Ratatoskr::calibrateEncoders() {
  * turn @angle degrees in counterclockwise direction
  */
 void Ratatoskr::turn(int angle) {
+    log("turning");
     float threshold = 0.5f;
     unsigned long t_now = micros();
     unsigned long t_last = t_now;  // avoid huge first dt
@@ -85,6 +81,7 @@ void Ratatoskr::turn(int angle) {
  */
 void Ratatoskr::moveForward(int distance) {
     Mouse::moveForward(distance);  // Update position in maze
+    log("moving forward");
 
     // Calculate target encoder counts for desired distance
     // long target_counts = (long)(distance * MM_PER_CELL *
@@ -116,15 +113,23 @@ void Ratatoskr::moveForward(int distance) {
     PID pid_distance(time_step, 0.25, 0.1, 0.00, 50, 240);
     PID pid_encoders(time_step, 0.75, 0.8, 0.1, 50, 240);
 
+    // Steps
+    int steps = 0;
+
     // Main control loop - run until target distance reached
     while ((left_encoder + right_encoder) / 2 < target_counts) {
-        // Read current encoder values
+        // Read current values
+        left_tof = constrain(m_tof_left.read(), 0, 80);  // TODO: Magic nums
+        right_tof = constrain(m_tof_right.read(), 0, 80);
         left_encoder = m_motor_left.get_encoder_count();
         right_encoder = m_motor_right.get_encoder_count();
 
+        // Log
+        if (steps++ % 10 == 0)
+            log("ToF (l, r): " + std::to_string(left_tof) + ", " +
+                std::to_string(right_tof));
+
         // Clamp and adjust tof readings
-        left_tof = constrain(m_tof_left.read(), 0, 80);  // TODO: Magic nums
-        right_tof = constrain(m_tof_right.read(), 0, 80);
         float left_dist = (left_tof == 0 && right_tof > 0) ? 0.75 : left_tof;
         float right_dist = (right_tof == 0 && left_tof > 0) ? 0.75 : right_tof;
 
@@ -158,6 +163,7 @@ void Ratatoskr::moveForward(int distance) {
  * SLAM THE BRAKES!
  */
 void Ratatoskr::stop() {
+    log("stop");
     m_motor_left.brake();
     m_motor_right.brake();
     delay(100);
@@ -196,3 +202,7 @@ void Ratatoskr::update_visuals(Maze &maze) {}
 
 bool Ratatoskr::wasReset() { return false; }
 void Ratatoskr::ackReset() {}
+
+void Ratatoskr::log(std::string msg) {
+    Loggable::log(msg);
+}
