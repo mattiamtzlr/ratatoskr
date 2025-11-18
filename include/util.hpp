@@ -1,6 +1,9 @@
 #pragma once
 #include <map>
 
+constexpr int CELL_SIZE_MM = 180;     // 18 cm
+constexpr int WALL_TO_WALL_MM = 160;  // 16 cm
+
 enum Direction {
     NORTH = 0,
     EAST = 1,
@@ -14,8 +17,8 @@ enum MODE {
     TESTING
 };
 
-static std::map<Direction, char>
-    dirToCardinalChar = {{NORTH, 'n'}, {EAST, 'e'}, {SOUTH, 's'}, {WEST, 'w'}};
+static std::map<Direction, char> dirToCardinalChar = {
+    {NORTH, 'n'}, {EAST, 'e'}, {SOUTH, 's'}, {WEST, 'w'}};
 static std::map<char, Direction> cardinalCharToDir = {
     {'n', NORTH}, {'e', EAST}, {'s', SOUTH}, {'w', WEST}};
 
