@@ -10,8 +10,6 @@ const uint8_t TOF_FRONT_LEFT_ADDRESS = 0x31;
 const uint8_t TOF_FRONT_RIGHT_ADDRESS = 0x32;
 const uint8_t TOF_RIGHT_ADDRESS = 0x33;
 
-const MODE mode = RUN;  // TODO: Right now you have to change this by hand.
-
 ToF tof_left = ToF(LEFT, TOF_LEFT_ADDRESS, TOF_LEFT_XSHUT);
 ToF tof_left_front =
     ToF(FRONT_LEFT, TOF_FRONT_LEFT_ADDRESS, TOF_FRONT_LEFT_XSHUT);
@@ -28,7 +26,7 @@ GearMotor motor_right(MOTOR_R_IN1, MOTOR_R_IN2, ENC_R_OUT1, ENC_R_OUT2, 50);
 
 Ratatoskr rat(motor_left, motor_right, tof_left, tof_left_front,
               tof_right_front, tof_right, gyro);
-Solver solver(rat, maze);
+// Solver solver(rat, maze);
 
 void setup() {
     // Motor pins for left
@@ -63,34 +61,65 @@ void setup() {
     tof_right.begin();
     tof_right_front.begin();
 
+    int count = 0;
+    Serial.println("ToF Readings (mm):");
+    while (count++ < 500) {
+        Serial.print("Left: ");
+        Serial.print(tof_left.read());
+        Serial.print("  Front Left: ");
+        Serial.print(tof_left_front.read());
+        Serial.print("  Front Right: ");
+        Serial.print(tof_right_front.read());
+        Serial.print("  Right: ");
+        Serial.println(tof_right.read());
+        delay(50);
+    }
+
+    Serial.println("ToF now calibrated.");
+    delay(1000);
     tof_left.calibrate_sensor(TOF_SIDE_EXPECTED_MM);
     tof_left_front.calibrate_sensor(TOF_FRONT_EXPECTED_MM);
-    tof_right_front.calibrate_sensor(TOF_FRONT_EXPECTED_MM);
     tof_right.calibrate_sensor(TOF_SIDE_EXPECTED_MM);
+    tof_right_front.calibrate_sensor(TOF_FRONT_EXPECTED_MM);
+    count = 0;
+    while (count++ < 500) {
+        Serial.print("Left: ");
+        Serial.print(tof_left.read());
+        Serial.print("  Front Left: ");
+        Serial.print(tof_left_front.read());
+        Serial.print("  Front Right: ");
+        Serial.print(tof_right_front.read());
+        Serial.print("  Right: ");
+        Serial.println(tof_right.read());
+        delay(50);
+    }
 
-    switch (mode) {
-        case RUN: {
-            // Push target to maze
-            maze.targets.push_back(Position(7, 7));
-            maze.targets.push_back(Position(7, 8));
-            maze.targets.push_back(Position(8, 7));
-            maze.targets.push_back(Position(8, 8));
-
-            solver.solve();  // Run from start to target
-
-            // Push start to maze
-            maze.targets.clear();
-            maze.targets.push_back(Position(0, 0));
-
-            solver.solve();  // Run from target to start
-            break;
-        }
-        case DUMP_LOG: {
-            while (!Serial.available());
-            rat.export_logs();
-            break;
-        }
+    Serial.println("Gyro without calibration:");
+    count = 0;
+    while (count++ < 500) {
+        Vector3D g = gyro.readScaledGyro();
+        Serial.print("Gx: ");
+        Serial.print(g.x);
+        Serial.print("  Gy: ");
+        Serial.print(g.y);
+        Serial.print("  Gz: ");
+        Serial.println(g.z);
+        delay(50);
+    }
+    Serial.println("Calibrating gyro...");
+    gyro.calibrateGyro();
+    count = 0;
+    while (count++ < 500) {
+        Vector3D g = gyro.readScaledGyro();
+        Serial.print("Gx: ");
+        Serial.print(g.x);
+        Serial.print("  Gy: ");
+        Serial.print(g.y);
+        Serial.print("  Gz: ");
+        Serial.println(g.z);
+        delay(50);
     }
 }
 
-void loop() {}
+void loop() {
+}
