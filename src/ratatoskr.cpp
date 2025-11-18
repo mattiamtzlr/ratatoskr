@@ -101,18 +101,22 @@ void Ratatoskr::moveForward(int distance) {
     float target_encoder = .0;
 
     // Base PWM that ramps up over time
-    float base_pwm = 70.0;
-    const float accel_time = 500.0;  // milliseconds to reach FORWARD_PWM
-    const float decel_distance = 30.0;  // mm before target to start decelerating
-    const float pwm_increment = (FORWARD_PWM - 70.0) / (accel_time / loop_delay);
+    float base_pwm = 70.0;  // TODO: move to header
+    const float accel_time =
+        500.0;  // milliseconds to reach FORWARD_PWM  TODO: Move to header
+    const float decel_distance =
+        30.0;  // mm before target to start decelerating  TODO: Move to header
+    const float pwm_increment =
+        (FORWARD_PWM - 70.0) / (accel_time / loop_delay);
     const long decel_counts = (long)(decel_distance * ENCODER_COUNTS_PER_MM);
-    
+
     // Initial pwm values
     float pwm_left = base_pwm;
     float pwm_right = base_pwm;
 
     // PID controller instances
-    PID pid_distance(time_step, 0.25, 0.1, 0.00, 50, 240);
+    PID pid_distance(time_step, 0.25, 0.1, 0.00, 50,
+                     240);  // TODO: This is also not very clean like this
     PID pid_encoders(time_step, 0.75, 0.8, 0.1, 50, 240);
 
     // Steps
@@ -132,16 +136,20 @@ void Ratatoskr::moveForward(int distance) {
         // Log
         if (steps++ % 10 == 0) {
             log("ToF (l, r): " + std::to_string(left_tof) + ", " +
-                std::to_string(right_tof) + 
+                std::to_string(right_tof) +
                 " | Base PWM: " + std::to_string((int)base_pwm) +
                 " | Remaining: " + std::to_string(remaining_counts));
         }
 
         // Ramp up base PWM over time, or ramp down near target
+        // NOTE: It might make sense to have decel_counts be something we
+        // calculate based on percentages. e. g. have of a move_forward(x) call
+        // result in 10% speedup, 60% full speed and 30% slowdown
         if (remaining_counts < decel_counts) {
             // Deceleration phase - linearly decrease to 70
             float decel_ratio = (float)remaining_counts / (float)decel_counts;
-            base_pwm = 70.0 + (FORWARD_PWM - 70.0) * decel_ratio;
+            base_pwm = 70.0 + (FORWARD_PWM - 70.0) *
+                                  decel_ratio;  // NOTE: magic number
         } else if (base_pwm < FORWARD_PWM) {
             // Acceleration phase
             base_pwm += pwm_increment;
@@ -172,7 +180,7 @@ void Ratatoskr::moveForward(int distance) {
         // Apply motor commands
         m_motor_left.spin_ccw(pwm_left);
         m_motor_right.spin_cw(pwm_right);
-        
+
         // Wait for next control cycle
         delay(loop_delay);
     }
