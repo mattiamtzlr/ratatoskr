@@ -6,6 +6,8 @@
 #pragma once
 // Valid timing budgets: 15, 20, 33, 50, 100, 200 and 500ms! (from lib)
 constexpr uint32_t TIMING_BUDGET   = 15;  // in ms
+constexpr uint32_t TOF_CALIBRATION_DURATION_MS = 1000;
+constexpr uint32_t TOF_CALIBRATION_SAMPLE_INTERVAL_MS = 15;
 
 constexpr uint8_t ADDR_LEFT        = 0x30;
 constexpr uint8_t ADDR_FRONT_LEFT  = 0x31;
@@ -30,6 +32,8 @@ class ToF : public Loggable {
     // Read current distance in millimeters
     uint16_t read();
 
+    void calibrate_sensor(uint16_t expected_distance);
+
     bool dataReady();
     // The sensor this is
     const SensorPosition position;
@@ -38,4 +42,5 @@ class ToF : public Loggable {
 
    private:
     VL53L1X m_sensor;
+    int16_t m_offset_mm;
 };

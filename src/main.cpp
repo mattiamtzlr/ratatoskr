@@ -25,9 +25,10 @@ Maze maze;
 GearMotor motor_left(MOTOR_L_IN1, MOTOR_L_IN2, ENC_L_OUT1, ENC_L_OUT2, 50);
 GearMotor motor_right(MOTOR_R_IN1, MOTOR_R_IN2, ENC_R_OUT1, ENC_R_OUT2, 50);
 
+
 Ratatoskr rat(motor_left, motor_right, tof_left, tof_left_front,
               tof_right_front, tof_right, gyro);
-Solver solver(rat, maze);
+// Solver solver(rat, maze);
 
 void setup() {
     // Motor pins for left
@@ -57,11 +58,16 @@ void setup() {
     gyro.begin();
     delay(1000);
 
-    // Start ToF
     tof_left.start();
     tof_left_front.start();
     tof_right.start();
     tof_right_front.start();
+
+    tof_left.calibrate_sensor(50);
+    tof_left_front.calibrate_sensor(40);
+    tof_right.calibrate_sensor(50);
+    tof_right_front.calibrate_sensor(40);
+
     switch (mode) {
         case RUN: {
             // Push target to maze

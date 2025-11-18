@@ -3,7 +3,7 @@
 #include <Arduino.h>
 
 ToF::ToF(SensorPosition position, uint8_t i2c_address, uint8_t xshut_pin)
-    : position(position), i2c_address(i2c_address), xshut_pin(xshut_pin) {
+    : position(position), i2c_address(i2c_address), xshut_pin(xshut_pin), m_offset_mm(0) {
         digitalWrite(xshut_pin, LOW);
         delay(50);
         digitalWrite(xshut_pin, HIGH);
@@ -46,7 +46,35 @@ bool ToF::dataReady() {
 uint16_t ToF::read() {
     if (m_sensor.dataReady()) {
         uint16_t distance = m_sensor.read();
+        distance += m_offset_mm;
         return distance;
     }
     return -1;
+}
+
+void ToF::calibrate_sensor(uint16_t expected_distance) {
+    uint32_t start = millis();
+    uint32_t sum = 0;
+    uint32_t count = 0;
+
+    while (millis() - start < TOF_CALIBRATION_DURATION_MS) {
+        if (m_sensor.dataReady()) {
+            uint16_t distance = m_sensor.read();
+            sum += distance;
+            ++count;
+            delay(TOF_CALIBRATION_SAMPLE_INTERVAL_MS);
+        }
+    }
+
+    if (count == 0) {
+        return;
+    }
+    
+
+    uint16_t average = sum / count;
+    Serial.printf("ToF Sensor at pin %d calibration: expected %d mm, average reading %d mm\n",
+                  xshut_pin, expected_distance, average);
+    int16_t offset = static_cast<int16_t>(expected_distance) - static_cast<int16_t>(average);
+    Serial.printf("Calculated offset: %d mm\n", offset);
+    m_offset_mm = offset;
 }
