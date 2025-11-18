@@ -29,7 +29,7 @@ class ToF : public Loggable {
     // Start continuous ranging
     void start();
 
-    // Read current distance in millimeters
+    // Read current corrected distance in millimeters
     uint16_t read();
 
     void calibrate_sensor(uint16_t expected_distance);
@@ -42,5 +42,5 @@ class ToF : public Loggable {
 
    private:
     VL53L1X m_sensor;
-    int16_t m_offset_mm;
+    int16_t m_offset_mm = 0;
 };

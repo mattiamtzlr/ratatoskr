@@ -66,10 +66,8 @@ void ToF::calibrate_sensor(uint16_t expected_distance) {
         }
     }
 
-    if (count == 0) {
+    if (count == 0)
         return;
-    }
-    
 
     uint16_t average = sum / count;
     Serial.printf("ToF Sensor at pin %d calibration: expected %d mm, average reading %d mm\n",
