@@ -10,6 +10,11 @@
 constexpr int MAZE_WIDTH = 16;
 constexpr int MAZE_HEIGHT = 16;
 
+struct Edge{
+    Position target;
+    int weight;
+};
+
 class Maze {
    private:
     int m_wall_storage[MAZE_HEIGHT][MAZE_WIDTH] = {};
@@ -18,6 +23,7 @@ class Maze {
     std::vector<Position> targets;
     std::set<Position> visited = {};
     std::set<Position> diags = {};
+    std::set<Position> turns = {};
     std::vector<Position> valid_neighbors(Position mouse_pos);
     void set_border_walls();
     void reset_distances();
@@ -35,4 +41,5 @@ class Maze {
     bool can_move_diag(Position pos, DiagDirection dir);
     std::vector<Position> valid_diag_neighbors(Position mouse_pos);
     std::vector<std::vector<Position>> find_diagonal_paths(int min_length = 2);
+    std::map<Position, std::vector<Edge>> get_adj_list();
 };

@@ -1,6 +1,11 @@
 #include "maze.hpp"
 
 #include <map>
+#include <algorithm>
+#include <iostream>
+
+const int MOVE_COST = 1;
+const int TURN_COST = 5;
 
 std::vector<Position> Maze::valid_neighbors(Position mouse_pos) {
     std::vector<Position> neigh;
@@ -134,4 +139,21 @@ std::vector<std::vector<Position>> Maze::find_diagonal_paths(int min_length) {
         }
     }
     return all_paths;
+}
+
+std::map<Position, std::vector<Edge>> Maze::get_adj_list() {
+    std::map<Position, std::vector<Edge>> adj_list;
+
+    for(Position p : visited){
+        // ensure the node appears in the adjacency list even if it has no neighbors
+        for(Position neighbor : valid_neighbors(p)){
+            Edge e = {neighbor, MOVE_COST};
+            if (turns.find(p) != turns.end()) {
+                e.weight = TURN_COST;
+            }
+            adj_list[p].push_back(e);
+        }
+    }
+    
+    return adj_list;
 }
