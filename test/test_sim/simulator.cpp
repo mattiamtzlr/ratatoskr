@@ -32,4 +32,19 @@ int main(int argc, char* argv[]) {
         }
     }
 
+    maze.targets.clear();
+    maze.targets.push_back(Position(7, 7));
+    maze.targets.push_back(Position(7, 8));
+    maze.targets.push_back(Position(8, 7));
+    maze.targets.push_back(Position(8, 8));
+
+    std::vector<Position> solved = solver.dijkstra(Position(0,0));
+
+    std::cerr << "Dijkstra Path Length: " << solved.size() << std::endl;
+
+    API::clearAllColor();
+    for (const Position& p : solved) {
+        API::setColor(p.x, p.y, 'g');   
+    }
+
 }
