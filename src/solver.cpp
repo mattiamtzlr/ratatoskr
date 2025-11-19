@@ -1,6 +1,11 @@
 #include "solver.hpp"
 
 #include <deque>
+#include <queue>
+#include <tuple>
+#include <map>
+#include <algorithm>
+#include <iostream>
 
 Solver::Solver(Mouse &mouse, Maze &maze) : m_mouse(mouse), m_maze(maze) {
     width = m_maze.maze_width();
@@ -69,8 +74,107 @@ void Solver::solve() {
                 best_dir = dir_for_neighbor(neighbor, m_mouse.getPosition());
             }
         }
+        // Identify turns to use them later for finding best path in the speedrun
+        Direction curr_dir = m_mouse.getDirection();
+        Position pos_before = m_mouse.getPosition();
         face(best_dir);
         m_mouse.moveForward();
         m_maze.visited.insert(m_mouse.getPosition());
+        if (best_dir != curr_dir) {
+            m_maze.turns.insert(pos_before);
+        }
     }
+}
+
+std::vector<Position> Solver::dijkstra(Position start) {
+    std::map<Position, std::vector<Edge>> adj_list = m_maze.get_adj_list();
+
+    // distance and predecessor maps
+    std::map<Position, int> dist;
+    std::map<Position, Position> prev;
+    const int INF = UBOUND_DIST;
+
+    // initialize distances for all vertices (keys) and for all edge targets
+    for (const auto &kv : adj_list) {
+        dist[kv.first] = INF;
+        for (const Edge &e : kv.second) {
+            if (dist.find(e.target) == dist.end()) { 
+                dist[e.target] = INF;
+            }
+        }
+    }
+
+    // min-heap of (distance, position) with comparator on distance only
+    struct PQCmp {
+        bool operator()(const std::pair<int, Position> &a,
+                        const std::pair<int, Position> &b) const {
+            return a.first > b.first;
+        }
+    };
+
+    std::priority_queue<std::pair<int, Position>,
+                        std::vector<std::pair<int, Position>>,
+                        PQCmp>
+        pq;
+
+    dist[start] = 0;
+    pq.push(std::make_pair(0, start));
+
+    Position found_target = start;
+    bool found = false;
+
+    while (!pq.empty()) {
+        auto top = pq.top();
+        int d = top.first;
+        Position u = top.second;
+        std::cerr << "X: " << u.x << " Y: " << u.y << std::endl;
+        pq.pop();
+
+        // stale entry
+       if (d > dist[u]) {
+            continue;
+        }
+
+        if (m_maze.at_target(u)) {
+            found_target = u;
+            found = true;
+            break;
+        }
+
+        auto it_adj = adj_list.find(u);
+        if (it_adj == adj_list.end()){ 
+            continue;
+        }
+
+        for (const Edge &e : it_adj->second) {
+            int alt = dist[u] + e.weight;
+            if (alt < dist[e.target]) {
+                dist[e.target] = alt;
+                // update predecessor without requiring default-constructible Position
+                prev.erase(e.target);
+                prev.insert(std::make_pair(e.target, u));
+                pq.push(std::make_pair(alt, e.target));
+            }
+        }
+    }
+
+    std::vector<Position> path;
+    if (!found) {
+        return path; // no reachable target
+    }
+
+    // reconstruct path from start -> found_target
+    Position cur = found_target;
+    while (!(cur.x == start.x && cur.y == start.y)) {
+        path.push_back(cur);
+        auto it = prev.find(cur);
+        if (it == prev.end()) {
+            // predecessor missing, abort and return empty
+            return std::vector<Position>();
+        }
+        cur = it->second;
+    }
+    path.push_back(start);
+    std::reverse(path.begin(), path.end());
+    return path;
 }
