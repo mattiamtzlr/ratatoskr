@@ -1,5 +1,6 @@
 #include <Arduino.h>
 
+#include "esp32-hal-ledc.h"
 #include "pins.hpp"
 #include "ratatoskr.hpp"
 #include "solver.hpp"
@@ -22,26 +23,23 @@ ToF tof_right = ToF(RIGHT, TOF_RIGHT_ADDRESS, TOF_RIGHT_XSHUT);
 MPU6050 gyro = MPU6050();
 
 Maze maze;
-GearMotor motor_left(MOTOR_L_IN1, MOTOR_L_IN2, ENC_L_OUT1, ENC_L_OUT2, 50);
-GearMotor motor_right(MOTOR_R_IN1, MOTOR_R_IN2, ENC_R_OUT1, ENC_R_OUT2, 50);
+GearMotor motor_left(MOTOR_L_IN1, MOTOR_L_IN2, 0, 1, ENC_L_OUT1, ENC_L_OUT2, 50);
+GearMotor motor_right(MOTOR_R_IN1, MOTOR_R_IN2, 2, 3, ENC_R_OUT1, ENC_R_OUT2, 50);
 
 
 Ratatoskr rat(motor_left, motor_right, tof_left, tof_front_left,
               tof_front_right, tof_right, gyro);
 Solver solver(rat, maze);
 
+
 void setup() {
     // Motor pins for left
-    pinMode(MOTOR_L_IN1, OUTPUT);
-    pinMode(MOTOR_L_IN2, OUTPUT);
     pinMode(ENC_L_OUT1, INPUT);
     pinMode(ENC_L_OUT2, INPUT);
     attachInterruptArg(digitalPinToInterrupt(ENC_L_OUT2),
                        motor_left.isr_trampoline, &motor_left, RISING);
 
     // Motor pins for right
-    pinMode(MOTOR_R_IN1, OUTPUT);
-    pinMode(MOTOR_R_IN2, OUTPUT);
     pinMode(ENC_R_OUT1, INPUT);
     pinMode(ENC_R_OUT2, INPUT);
     attachInterruptArg(digitalPinToInterrupt(ENC_R_OUT2),
@@ -94,8 +92,23 @@ void setup() {
             break;
         }
 
-        case TESTING: break;
+        case TESTING: {
+            while(true) {
+                motor_right.spin_ccw(200);
+                motor_left.spin_ccw(200);
+                delay(500);
+                motor_right.brake();
+                motor_left.brake();
+                delay(500);
+                motor_right.spin_cw(200);
+                motor_left.spin_cw(200);
+                delay(500);
+                motor_right.brake();
+                motor_left.brake();
+                delay(500);
+            }
+        }
     }
 }
 
-void loop() {}
+void loop() {} // DO NOT USE THIS, WEIRD BEHAVIOR WITH LEDC AND PINS!!!!!

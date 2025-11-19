@@ -5,9 +5,13 @@
 
 // TODO: This is no longer the one we use : [Adafruit DRV8871 DC Motor Driver
 // Breakout Board]
+
+constexpr int MOTOR_FREQ = 20000;
+constexpr int MOTOR_RES = 8;
+
 class GearMotor {
    public:
-    GearMotor(int pin_1, int pin_2, int encoder_pin_1, int encoder_pin_2,
+    GearMotor(int pin_1, int pin_2, int ch_1, int ch_2, int encoder_pin_1, int encoder_pin_2,
               int max_pwm);
 
     void spin_cw(int speed);
@@ -23,8 +27,6 @@ class GearMotor {
     void reset_encoder_count();
 
    private:
-    void set_rpm(int pin, int speed);
-
     static constexpr int MAX_PWM =
         255;  // TODO: Change this before running on real hardware!
     static constexpr int MIN_PWM =
@@ -34,6 +36,8 @@ class GearMotor {
 
     const int IN1;
     const int IN2;
+    const int CH1;
+    const int CH2;
     const int ENCODER_PIN_1;
     const int ENCODER_PIN_2;
     int m_desired_rpm;
