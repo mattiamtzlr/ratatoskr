@@ -199,6 +199,7 @@ bool Ratatoskr::wallLeft() {
     return (distance_left > 0) && (distance_left < SIDE_WALL_MM);
 }
 void Ratatoskr::update_visuals(Maze &maze) {}
+void Ratatoskr::log(std::string msg) { logs.log(msg); }
 
 bool Ratatoskr::wasReset() { return false; }
 void Ratatoskr::ackReset() {}

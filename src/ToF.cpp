@@ -31,13 +31,13 @@ void ToF::begin() {
     log("VL53L1X at pin" + std::to_string(xshut_pin) + "initialized");
 
     m_sensor.startContinuous(TIMING_BUDGET);
-}
 
     // Discard the initial few readings
     for (int i = 0; i < 10; i++) {
         read();
     }
 }
+
 
 uint16_t ToF::read() {
     while (!m_sensor.dataReady());
