@@ -77,17 +77,13 @@ void Ratatoskr::turn(int angle) {
 }
 
 /**
- * move @distance [one cell (16 cm)] forwards with PID control
+ * move @distance mm forwards with PID control
  */
 void Ratatoskr::moveForward(int distance) {
-    Mouse::moveForward(distance);  // Update position in maze
-    log("moving forward");
+    log("moving forward " + std::to_string(distance) + "mm");
 
     // Calculate target encoder counts for desired distance
-    // long target_counts = (long)(distance * MM_PER_CELL *
-    // ENCODER_COUNTS_PER_MM); // delete MM_PER_CELL if distance is in mm
-    long target_counts =
-        (long)(distance * ENCODER_COUNTS_PER_MM);  // i want distance in mm
+    long target_counts = (long)(distance * ENCODER_COUNTS_PER_MM);
 
     // Reset encoder counts at start
     m_motor_left.reset_encoder_count();
@@ -96,6 +92,7 @@ void Ratatoskr::moveForward(int distance) {
     // Control loop parameters
     const float time_step = 0.02;  // 20ms update rate
     const int loop_delay = 20;
+
     long left_encoder = 0;
     long right_encoder = 0;
     uint16_t left_tof = 0;
@@ -103,14 +100,23 @@ void Ratatoskr::moveForward(int distance) {
     float target_distance = .0;
     float target_encoder = .0;
 
-    // Initial pwm values
-    float pwm_left = FORWARD_PWM;
-    float pwm_right = FORWARD_PWM;
-    m_motor_left.spin_ccw(pwm_left);
-    m_motor_right.spin_cw(pwm_right);
+    // Base PWM that ramps up over time
+    float base_pwm = 70.0;  // TODO: move to header
+    const float accel_time =
+        500.0;  // milliseconds to reach FORWARD_PWM  TODO: Move to header
+    const float decel_distance =
+        30.0;  // mm before target to start decelerating  TODO: Move to header
+    const float pwm_increment =
+        (FORWARD_PWM - 70.0) / (accel_time / loop_delay);
+    const long decel_counts = (long)(decel_distance * ENCODER_COUNTS_PER_MM);
 
-    // PID controller instance
-    PID pid_distance(time_step, 0.25, 0.1, 0.00, 50, 240);
+    // Initial pwm values
+    float pwm_left = base_pwm;
+    float pwm_right = base_pwm;
+
+    // PID controller instances
+    PID pid_distance(time_step, 0.25, 0.1, 0.00, 50,
+                     240);  // TODO: This is also not very clean like this
     PID pid_encoders(time_step, 0.75, 0.8, 0.1, 50, 240);
 
     // Steps
@@ -119,15 +125,38 @@ void Ratatoskr::moveForward(int distance) {
     // Main control loop - run until target distance reached
     while ((left_encoder + right_encoder) / 2 < target_counts) {
         // Read current values
-        left_tof = constrain(m_tof_left.read(), 0, 80);  // TODO: Magic nums
+        left_tof = constrain(m_tof_left.read(), 0, 80);
         right_tof = constrain(m_tof_right.read(), 0, 80);
         left_encoder = m_motor_left.get_encoder_count();
         right_encoder = m_motor_right.get_encoder_count();
 
+        long avg_encoder = (left_encoder + right_encoder) / 2;
+        long remaining_counts = target_counts - avg_encoder;
+
         // Log
-        if (steps++ % 10 == 0)
+        if (steps++ % 10 == 0) {
             log("ToF (l, r): " + std::to_string(left_tof) + ", " +
-                std::to_string(right_tof));
+                std::to_string(right_tof) +
+                " | Base PWM: " + std::to_string((int)base_pwm) +
+                " | Remaining: " + std::to_string(remaining_counts));
+        }
+
+        // Ramp up base PWM over time, or ramp down near target
+        // NOTE: It might make sense to have decel_counts be something we
+        // calculate based on percentages. e. g. have of a move_forward(x) call
+        // result in 10% speedup, 60% full speed and 30% slowdown
+        if (remaining_counts < decel_counts) {
+            // Deceleration phase - linearly decrease to 70
+            float decel_ratio = (float)remaining_counts / (float)decel_counts;
+            base_pwm = 70.0 + (FORWARD_PWM - 70.0) *
+                                  decel_ratio;  // NOTE: magic number
+        } else if (base_pwm < FORWARD_PWM) {
+            // Acceleration phase
+            base_pwm += pwm_increment;
+            if (base_pwm > FORWARD_PWM) {
+                base_pwm = FORWARD_PWM;
+            }
+        }
 
         // Clamp and adjust tof readings
         float left_dist = (left_tof == 0 && right_tof > 0) ? 0.75 : left_tof;
@@ -137,13 +166,13 @@ void Ratatoskr::moveForward(int distance) {
         float tof_error = target_distance - (left_dist - right_dist);
         float encoder_error = target_encoder - (left_encoder - right_encoder);
 
-        // Update PID controller
+        // Update PID controllers
         float tof_correction = pid_distance.update(tof_error);
         float encoder_correction = pid_encoders.update(encoder_error);
 
         // Calculate new PWM
-        pwm_left = FORWARD_PWM + tof_correction + encoder_correction;
-        pwm_right = FORWARD_PWM - tof_correction - encoder_correction;
+        pwm_left = base_pwm + tof_correction + encoder_correction;
+        pwm_right = base_pwm - tof_correction - encoder_correction;
 
         pwm_left = constrain(pwm_left, 70, 240);
         pwm_right = constrain(pwm_right, 70, 240);
@@ -151,6 +180,7 @@ void Ratatoskr::moveForward(int distance) {
         // Apply motor commands
         m_motor_left.spin_ccw(pwm_left);
         m_motor_right.spin_cw(pwm_right);
+
         // Wait for next control cycle
         delay(loop_delay);
     }
@@ -198,6 +228,7 @@ bool Ratatoskr::wallLeft() {
     uint16_t distance_left = m_tof_left.read();
     return (distance_left > 0) && (distance_left < SIDE_WALL_MM);
 }
+
 void Ratatoskr::update_visuals(Maze &maze) {}
 
 bool Ratatoskr::wasReset() { return false; }
