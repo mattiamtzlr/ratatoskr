@@ -1,5 +1,4 @@
 #pragma once
-#include "loggable.hpp"
 #include "util.hpp"
 #include <Arduino.h>
 #include <Wire.h>
@@ -39,7 +38,7 @@ struct Vector3D {
     float z;
 };
 
-class MPU6050 : public Loggable {
+class MPU6050 {
 public:
     MPU6050(uint8_t addr = MPU6050_ADDRESS);
     

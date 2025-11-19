@@ -5,12 +5,12 @@
 #include "gear_motor.hpp"
 #include "gyro.hpp"
 #include "led_matrix.hpp"
-#include "loggable.hpp"
+#include "esp_logger.hpp"
 #include "maze.hpp"
 #include "mouse.hpp"
 #include "util.hpp"
 
-class Ratatoskr : public Mouse, public Loggable {
+class Ratatoskr : public Mouse {
    private:
     GearMotor &m_motor_left;
     GearMotor &m_motor_right;

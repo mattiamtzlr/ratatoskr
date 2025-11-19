@@ -93,8 +93,8 @@ void setup() {
         }
 
         case DUMP_LOG: {
-            Loggable::export_logs();
-            Loggable::clear_logs();
+            ESPLogger::export_logs();
+            ESPLogger::clear_logs();
             break;
         }
 

@@ -2,7 +2,7 @@
 #include <VL53L1X.h>
 #include <Wire.h>
 
-#include "loggable.hpp"
+#include "esp_logger.hpp"
 #include "util.hpp"
 
 // Valid timing budgets: 15, 20, 33, 50, 100, 200 and 500ms! (from lib)
@@ -24,7 +24,7 @@ enum SensorPosition {
     RIGHT = 3         // side-right
 };
 
-class ToF : public Loggable {
+class ToF {
    public:
     // Constructor performs initialization
     ToF(SensorPosition position, uint8_t i2c_address, uint8_t xshut_pin);

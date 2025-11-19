@@ -1,6 +1,9 @@
 #include "gyro.hpp"
+#include "esp_logger.hpp"
 
 #include <math.h>
+
+using namespace ESPLogger;
 
 // Scale convertions for Accel
 static constexpr float ACCEL_SCALE_2G = 16384.0f;
