@@ -35,7 +35,8 @@ struct Position {
     Position(size_t x, size_t y) : x(x), y(y) {}
 };
 inline bool operator<(const Position& lhs, const Position& rhs) {
-    return lhs.x < rhs.x || lhs.y < rhs.y;
+    if (lhs.x != rhs.x) return lhs.x < rhs.x;
+    return lhs.y < rhs.y;
 }
 Direction rotate_right(Direction dir);
 
