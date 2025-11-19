@@ -10,12 +10,12 @@ const uint8_t TOF_FRONT_LEFT_ADDRESS = 0x31;
 const uint8_t TOF_FRONT_RIGHT_ADDRESS = 0x32;
 const uint8_t TOF_RIGHT_ADDRESS = 0x33;
 
-const MODE mode = RUN;  // TODO: Right now you have to change this by hand.
+const MODE mode = TESTING;  // TODO: Right now you have to change this by hand.
 
 ToF tof_left = ToF(LEFT, TOF_LEFT_ADDRESS, TOF_LEFT_XSHUT);
-ToF tof_left_front =
+ToF tof_front_left =
     ToF(FRONT_LEFT, TOF_FRONT_LEFT_ADDRESS, TOF_FRONT_LEFT_XSHUT);
-ToF tof_right_front =
+ToF tof_front_right =
     ToF(FRONT_RIGHT, TOF_FRONT_RIGHT_ADDRESS, TOF_FRONT_RIGHT_XSHUT);
 ToF tof_right = ToF(RIGHT, TOF_RIGHT_ADDRESS, TOF_RIGHT_XSHUT);
 
@@ -26,8 +26,8 @@ GearMotor motor_left(MOTOR_L_IN1, MOTOR_L_IN2, ENC_L_OUT1, ENC_L_OUT2, 50);
 GearMotor motor_right(MOTOR_R_IN1, MOTOR_R_IN2, ENC_R_OUT1, ENC_R_OUT2, 50);
 
 
-Ratatoskr rat(motor_left, motor_right, tof_left, tof_left_front,
-              tof_right_front, tof_right, gyro);
+Ratatoskr rat(motor_left, motor_right, tof_left, tof_front_left,
+              tof_front_right, tof_right, gyro);
 Solver solver(rat, maze);
 
 void setup() {
@@ -59,14 +59,16 @@ void setup() {
     delay(1000);
 
     tof_left.begin();
-    tof_left_front.begin();
+    tof_front_left.begin();
     tof_right.begin();
-    tof_right_front.begin();
+    tof_front_right.begin();
 
+    #ifdef CALIBRATE
     tof_left.calibrate_sensor(TOF_SIDE_EXPECTED_MM);
-    tof_left_front.calibrate_sensor(TOF_FRONT_EXPECTED_MM);
-    tof_right_front.calibrate_sensor(TOF_FRONT_EXPECTED_MM);
+    tof_front_left.calibrate_sensor(TOF_FRONT_EXPECTED_MM);
+    tof_front_right.calibrate_sensor(TOF_FRONT_EXPECTED_MM);
     tof_right.calibrate_sensor(TOF_SIDE_EXPECTED_MM);
+    #endif
 
     switch (mode) {
         case RUN: {
@@ -85,11 +87,14 @@ void setup() {
             solver.solve();  // Run from target to start
             break;
         }
+
         case DUMP_LOG: {
             while (!Serial.available());
             rat.export_logs();
             break;
         }
+
+        case TESTING: break;
     }
 }
 

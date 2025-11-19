@@ -10,7 +10,8 @@ enum Direction {
 
 enum MODE {
     RUN,
-    DUMP_LOG
+    DUMP_LOG,
+    TESTING
 };
 
 static std::map<Direction, char>
