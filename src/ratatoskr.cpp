@@ -196,9 +196,6 @@ void Ratatoskr::stop() {
     log("stop");
     m_motor_left.brake();
     m_motor_right.brake();
-    delay(100);
-    m_motor_left.coast();
-    m_motor_right.coast();
 }
 
 //===============================[ SENSING ]====================================

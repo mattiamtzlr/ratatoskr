@@ -17,7 +17,6 @@ class GearMotor {
     void spin_cw(int speed);
     void spin_ccw(int speed);
     void brake();
-    void coast();
     int get_rpm();
     void encoder_interrupt();
     static void isr_trampoline(void *obj_isr);

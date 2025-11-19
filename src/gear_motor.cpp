@@ -73,14 +73,6 @@ void GearMotor::spin_ccw(int rpm) {
 }
 
 /**
- * Stop motor stopping acceleration
- */
-void GearMotor::coast() {
-    ledcWrite(CH1, 255);
-    ledcWrite(CH2, 255);
-}
-
-/**
  * Stop motor by forcing brake
  * ! DON'T RUN THIS FOR TOO LONG !
  */
