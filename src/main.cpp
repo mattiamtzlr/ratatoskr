@@ -55,7 +55,6 @@ void setup() {
 
     Wire.begin();
     Serial.begin(115200);
-    gyro.calibrateGyro();
     gyro.begin();
     delay(1000);
 
