@@ -1,89 +1,156 @@
 #include "gear_motor.hpp"
 
-#define GEARING 31.5
-#define ENCODERMULT 6
+#define GEARING      31.5
+#define ENCODERMULT  6
+
+// These should be defined in your config (as before):
+//   MOTOR_FREQ  - PWM frequency (e.g. 20000 for 20 kHz)
+//   MOTOR_RES   - PWM resolution (e.g. 8 for 8-bit)
 
 void IRAM_ATTR GearMotor::isr_trampoline(void *obj) {
     ((GearMotor *)obj)->encoder_interrupt();
 }
+
 /*
  * GearMotor class constructor
  */
-
-GearMotor::GearMotor(int in1, int in2, int ch1, int ch2, int encoder_pin_1, int encoder_pin_2,
-                     int max_pwm)
+GearMotor::GearMotor(int in1, int in2, int ch1, int ch2,
+                     int encoder_pin_1, int encoder_pin_2,
+                     int max_pwm,
+                     int encoder_sign)
     : IN1(in1),
       IN2(in2),
       CH1(ch1),
       CH2(ch2),
       ENCODER_PIN_1(encoder_pin_1),
-      ENCODER_PIN_2(encoder_pin_2), m_encoder_t_diff(1), m_delta_time(0), m_desired_rpm(0), m_t_last_i(0) {
+      ENCODER_PIN_2(encoder_pin_2),
+      m_encoder_count(0),
+      m_delta_time(0),
+      m_t_last_i(0),
+      max_pwm_(max_pwm),
+      m_encoder_sign(encoder_sign) {
 
-    pinMode(in1, OUTPUT);
-    pinMode(in2, OUTPUT);
-    ledcSetup(ch1, MOTOR_FREQ, MOTOR_RES);
-    ledcSetup(ch2, MOTOR_FREQ, MOTOR_RES);
-    ledcAttachPin(in1, ch1);
-    ledcAttachPin(in2, ch2);
+    // Motor pins and PWM setup (mirrors Motors::setupMotor_) 
+    pinMode(IN1, OUTPUT);
+    pinMode(IN2, OUTPUT);
+
+    ledcSetup(CH1, MOTOR_FREQ, MOTOR_RES);
+    ledcSetup(CH2, MOTOR_FREQ, MOTOR_RES);
+    ledcAttachPin(IN1, CH1);
+    ledcAttachPin(IN2, CH2);
+
+    // Start stopped
+    ledcWrite(CH1, 0);
+    ledcWrite(CH2, 0);
+
+    // Encoder pins (quadrature A/B) – interrupt will be attached on A
+    pinMode(ENCODER_PIN_1, INPUT);
+    pinMode(ENCODER_PIN_2, INPUT);
 }
 
 /**
- * executed on `ENCODER_PIN_1` input rising edge.
+ * Internal encoder ISR: executed on ENCODER_PIN_1 (channel A) rising edge.
+ * Integrates the behaviour of updateEncoderLeft/Right from encoders.cpp
+ * into the motor itself. 
  */
 void IRAM_ATTR GearMotor::encoder_interrupt() {
-    // This function is heavily inspired from
-    // https://www.adafruit.com/product/4640
-    int t_curr_i = micros();
+    uint32_t t_curr_i = micros();
     if (m_t_last_i < t_curr_i) {
         m_delta_time = t_curr_i - m_t_last_i;
     }
     m_t_last_i = t_curr_i;
-    // Count encoder ticks
-    m_encoder_count++;
+
+    // Quadrature direction logic (like encoders.cpp, but per motor)
+    int a = digitalRead(ENCODER_PIN_1);
+    int b = digitalRead(ENCODER_PIN_2);
+
+    // On a rising edge of A, A should be HIGH; direction depends on B.
+    // The sign convention can be flipped with m_encoder_sign so that
+    // one GearMotor can behave like "left" and another like "right".
+    if (a > b) {
+        // Match encoders.cpp left/right pattern, scaled by encoder_sign 
+        m_encoder_count -= m_encoder_sign;
+    } else {
+        m_encoder_count += m_encoder_sign;
+    }
 }
 
 /**
  * Get the rpm of the motor
  */
 int GearMotor::get_rpm() {
-    // did not wrap around
-    float revolutions = m_delta_time;  // us
-    revolutions = 1.0 / revolutions;   // rev per us
-    revolutions *= 1000000;            // rev per sec
-    revolutions *= 60;                 // rev per min
-    revolutions /= GEARING;            // account for gear ratio
-    revolutions /= ENCODERMULT;  // account for multiple ticks per rotation
-    return revolutions;
+    // Avoid division by zero
+    if (m_delta_time == 0) {
+        return 0;
+    }
+
+    float revolutions = static_cast<float>(m_delta_time);  // µs
+    revolutions = 1.0f / revolutions;                      // rev per µs
+    revolutions *= 1000000.0f;                             // rev per sec
+    revolutions *= 60.0f;                                  // rev per min
+    revolutions /= GEARING;                                // account for gear ratio
+    revolutions /= ENCODERMULT;                            // ticks per rotation
+
+    return static_cast<int>(revolutions);
 }
 
 /**
- * Spin motor clockwise at rpm
+ * Set signed speed (like Motors::setMotor_ but for one motor).
+ * Positive speed: CH1 active, CH2 low.
+ * Negative speed: CH2 active, CH1 low.
  */
-void GearMotor::spin_cw(int rpm) {
-    ledcWrite(CH1, 0);
-    ledcWrite(CH2, rpm);
+void GearMotor::setSpeed(int16_t speed) {
+    speed = constrain(speed, -max_pwm_, max_pwm_);
+
+    if (speed >= 0) {
+        ledcWrite(CH1, speed);
+        ledcWrite(CH2, 0);
+    } else {
+        ledcWrite(CH1, 0);
+        ledcWrite(CH2, -speed);
+    }
 }
 
 /**
- * Spin motor counter-clockwise at rpm
+ * Spin motor "clockwise" at given (PWM) speed.
  */
-void GearMotor::spin_ccw(int rpm) {
-    ledcWrite(CH2, 0);
-    ledcWrite(CH1, rpm);
+void GearMotor::spin_cw(int speed) {
+    setSpeed(abs(speed));
 }
 
 /**
- * Stop motor by forcing brake
+ * Spin motor "counter-clockwise" at given (PWM) speed.
+ */
+void GearMotor::spin_ccw(int speed) {
+    setSpeed(-abs(speed));
+}
+
+/**
+ * Stop motor by coasting (both channels low).
+ */
+void GearMotor::stop() {
+    setSpeed(0);
+}
+
+/**
+ * Active brake, similar to Motors::brake (both channels driven HIGH). 
  * ! DON'T RUN THIS FOR TOO LONG !
  */
 void GearMotor::brake() {
-    ledcWrite(CH1, 0);
-    ledcWrite(CH2, 0);
+    ledcWrite(CH1, max_pwm_);
+    ledcWrite(CH2, max_pwm_);
 }
+
+/**
+ * Get encoder tick count
+ */
 long GearMotor::get_encoder_count() {
     return m_encoder_count;
 }
 
+/**
+ * Reset encoder tick count
+ */
 void GearMotor::reset_encoder_count() {
     m_encoder_count = 0;
 }

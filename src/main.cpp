@@ -1,15 +1,14 @@
 #include <Arduino.h>
-
 #include "esp32-hal-ledc.h"
 #include "pins.hpp"
 #include "ratatoskr.hpp"
 #include "solver.hpp"
 
 // I2C addresses for the ToF sensors
-const uint8_t TOF_LEFT_ADDRESS = 0x30;
-const uint8_t TOF_FRONT_LEFT_ADDRESS = 0x31;
+const uint8_t TOF_LEFT_ADDRESS        = 0x30;
+const uint8_t TOF_FRONT_LEFT_ADDRESS  = 0x31;
 const uint8_t TOF_FRONT_RIGHT_ADDRESS = 0x32;
-const uint8_t TOF_RIGHT_ADDRESS = 0x33;
+const uint8_t TOF_RIGHT_ADDRESS       = 0x33;
 
 const MODE mode = TESTING;  // TODO: Right now you have to change this by hand.
 
@@ -22,29 +21,29 @@ ToF tof_right = ToF(RIGHT, TOF_RIGHT_ADDRESS, TOF_RIGHT_XSHUT);
 
 MPU6050 gyro = MPU6050();
 
+// encoder_sign is the last argument (default = 1). Determines the direction
+GearMotor motor_left(
+    MOTOR_L_IN1, MOTOR_L_IN2,
+    0, 1,               // PWM channels
+    ENC_L_OUT1, ENC_L_OUT2,
+    255,                // max PWM
+    +1                  // encoder_sign (I tested)
+);
+
+GearMotor motor_right(
+    MOTOR_R_IN1, MOTOR_R_IN2,
+    2, 3,               // PWM channels
+    ENC_R_OUT1, ENC_R_OUT2,
+    255,                // max PWM
+    -1                  // encoder_sign (I tested)
+);
+
 Maze maze;
-GearMotor motor_left(MOTOR_L_IN1, MOTOR_L_IN2, 0, 1, ENC_L_OUT1, ENC_L_OUT2, 50);
-GearMotor motor_right(MOTOR_R_IN1, MOTOR_R_IN2, 2, 3, ENC_R_OUT1, ENC_R_OUT2, 50);
-
-
 Ratatoskr rat(motor_left, motor_right, tof_left, tof_front_left,
               tof_front_right, tof_right, gyro);
 Solver solver(rat, maze);
 
-
 void setup() {
-    // Motor pins for left
-    pinMode(ENC_L_OUT1, INPUT);
-    pinMode(ENC_L_OUT2, INPUT);
-    attachInterruptArg(digitalPinToInterrupt(ENC_L_OUT2),
-                       motor_left.isr_trampoline, &motor_left, RISING);
-
-    // Motor pins for right
-    pinMode(ENC_R_OUT1, INPUT);
-    pinMode(ENC_R_OUT2, INPUT);
-    attachInterruptArg(digitalPinToInterrupt(ENC_R_OUT2),
-                       motor_right.isr_trampoline, &motor_right, RISING);
-
     // ToF XSHUT pins
     pinMode(TOF_LEFT_XSHUT, OUTPUT);
     pinMode(TOF_FRONT_LEFT_XSHUT, OUTPUT);
@@ -60,6 +59,23 @@ void setup() {
     tof_front_left.begin();
     tof_right.begin();
     tof_front_right.begin();
+
+    // ---- ENCODER INTERRUPT SETUP (integrated with GearMotor) ----
+    // Use ESP32's attachInterruptArg so each motor instance gets its own ISR arg
+    attachInterruptArg(
+        ENC_L_OUT1,
+        GearMotor::isr_trampoline,
+        &motor_left,
+        RISING
+    );
+
+    attachInterruptArg(
+        ENC_R_OUT1,
+        GearMotor::isr_trampoline,
+        &motor_right,
+        RISING
+    );
+    // -------------------------------------------------------------
 
     #ifdef CALIBRATE
     tof_left.calibrate_sensor(TOF_SIDE_EXPECTED_MM);
@@ -93,22 +109,48 @@ void setup() {
         }
 
         case TESTING: {
-            while(true) {
-                motor_right.spin_ccw(200);
-                motor_left.spin_ccw(200);
-                delay(500);
-                motor_right.brake();
-                motor_left.brake();
-                delay(500);
-                motor_right.spin_cw(200);
+            Serial.println("=== ENCODER DIRECTION TEST ===");
+            Serial.println("Watch Left/Right ticks for CW vs CCW.");
+
+            while (true) {
+                // ---- CW test ----
+                Serial.println("\n--- CW test (spin_cw) ---");
+                motor_left.reset_encoder_count();
+                motor_right.reset_encoder_count();
+
                 motor_left.spin_cw(200);
+                motor_right.spin_cw(200);
                 delay(500);
-                motor_right.brake();
                 motor_left.brake();
+                motor_right.brake();
+
+                Serial.print("Left  CW ticks: ");
+                Serial.println(motor_left.get_encoder_count());
+                Serial.print("Right CW ticks: ");
+                Serial.println(motor_right.get_encoder_count());
+
+                delay(1000);
+
+                // ---- CCW test ----
+                Serial.println("\n--- CCW test (spin_ccw) ---");
+                motor_left.reset_encoder_count();
+                motor_right.reset_encoder_count();
+
+                motor_left.spin_ccw(200);
+                motor_right.spin_ccw(200);
                 delay(500);
+                motor_left.brake();
+                motor_right.brake();
+
+                Serial.print("Left  CCW ticks: ");
+                Serial.println(motor_left.get_encoder_count());
+                Serial.print("Right CCW ticks: ");
+                Serial.println(motor_right.get_encoder_count());
+
+                delay(2000);
             }
         }
     }
 }
 
-void loop() {} // DO NOT USE THIS, WEIRD BEHAVIOR WITH LEDC AND PINS!!!!!
+void loop() {}  // DO NOT USE THIS, WEIRD BEHAVIOR WITH LEDC AND PINS!!!!!
