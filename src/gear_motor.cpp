@@ -92,7 +92,7 @@ int GearMotor::get_rpm() {
  * Positive speed: CH1 active, CH2 low.
  * Negative speed: CH2 active, CH1 low.
  */
-void GearMotor::setSpeed(int16_t speed) {
+void GearMotor::setSpeed(int speed) {
     speed = constrain(speed, -m_max_pwm, m_max_pwm);
 
     if (speed >= 0) {

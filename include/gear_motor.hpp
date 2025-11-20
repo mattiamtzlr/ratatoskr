@@ -29,7 +29,7 @@ public:
 
     /// Set signed speed: positive = one direction, negative = opposite.
     /// Range is constrained to [-max_pwm, +max_pwm].
-    void setSpeed(int16_t speed);
+    void setSpeed(int speed);
 
     /// Convenience: spin "clockwise" = positive speed
     void spin_cw(int speed);
