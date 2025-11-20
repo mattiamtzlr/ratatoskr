@@ -26,15 +26,17 @@ void OLED::unfreeze() { m_frozen = false; }
 
 void OLED::set_text_size(TextSize size) { m_oled.setTextSize((int)size); }
 
-void OLED::update_status_bar(String text) {
+void OLED::update_status_bar(int16_t gyro_angle, uint16_t left_rpm,
+                             uint16_t right_rpm) {
     clear();
     m_oled.setCursor(0, 15);
     m_oled.setTextWrap(false);
-    m_oled.println(text);
+    m_oled.printf("%03d | %03d | %03d", gyro_angle, left_rpm, right_rpm);
     display();
 }
 
-void OLED::update_ToFs() {
+void OLED::update_ToFs(uint16_t tof_left, uint16_t tof_front_left,
+                       uint16_t tof_front_right, uint16_t tof_right) {
     clear();
     m_oled.setCursor(0, 20);
     display();

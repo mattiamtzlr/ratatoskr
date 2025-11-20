@@ -29,7 +29,9 @@ class OLED {
     void freeze();
     void unfreeze();
 
-    void update_status_bar(String text);
-    void update_ToFs();
+    void update_status_bar(int16_t gyro_angle, uint16_t left_rpm,
+                           uint16_t right_rpm);
+    void update_ToFs(uint16_t tof_left, uint16_t tof_front_left,
+                     uint16_t tof_front_right, uint16_t tof_right);
     void idle();
 };

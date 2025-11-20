@@ -109,6 +109,7 @@ void setup() {
         }
 
         case TESTING: {
+            oled.update_status_bar(42, 337, 339);
             while (true) {
                 delay(1000);
                 // rat.turn(45);
