@@ -3,10 +3,6 @@
 #define GEARING      31.5
 #define ENCODERMULT  6
 
-// These should be defined in your config (as before):
-//   MOTOR_FREQ  - PWM frequency (e.g. 20000 for 20 kHz)
-//   MOTOR_RES   - PWM resolution (e.g. 8 for 8-bit)
-
 void IRAM_ATTR GearMotor::isr_trampoline(void *obj) {
     ((GearMotor *)obj)->encoder_interrupt();
 }
