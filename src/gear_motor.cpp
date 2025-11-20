@@ -27,7 +27,7 @@ GearMotor::GearMotor(int in1, int in2, int ch1, int ch2,
       m_encoder_count(0),
       m_delta_time(0),
       m_t_last_i(0),
-      max_pwm_(max_pwm),
+      m_max_pwm(max_pwm),
       m_encoder_sign(encoder_sign) {
 
     // Motor pins and PWM setup (mirrors Motors::setupMotor_) 
@@ -95,12 +95,12 @@ int GearMotor::get_rpm() {
 }
 
 /**
- * Set signed speed (like Motors::setMotor_ but for one motor).
+ * Set signed speed for the motor.
  * Positive speed: CH1 active, CH2 low.
  * Negative speed: CH2 active, CH1 low.
  */
 void GearMotor::setSpeed(int16_t speed) {
-    speed = constrain(speed, -max_pwm_, max_pwm_);
+    speed = constrain(speed, -m_max_pwm, m_max_pwm);
 
     if (speed >= 0) {
         ledcWrite(CH1, speed);
@@ -128,17 +128,17 @@ void GearMotor::spin_ccw(int speed) {
 /**
  * Stop motor by coasting (both channels low).
  */
-void GearMotor::stop() {
+void GearMotor::coast() {
     setSpeed(0);
 }
 
 /**
- * Active brake, similar to Motors::brake (both channels driven HIGH). 
+ * Active brake, (both channels driven HIGH). 
  * ! DON'T RUN THIS FOR TOO LONG !
  */
 void GearMotor::brake() {
-    ledcWrite(CH1, max_pwm_);
-    ledcWrite(CH2, max_pwm_);
+    ledcWrite(CH1, m_max_pwm);
+    ledcWrite(CH2, m_max_pwm);
 }
 
 /**

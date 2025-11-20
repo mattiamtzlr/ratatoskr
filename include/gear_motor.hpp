@@ -17,7 +17,7 @@ public:
      * ch1, ch2       : LEDC PWM channels for in1/in2
      * encoder_pin_1  : encoder channel A (interrupt source)
      * encoder_pin_2  : encoder channel B
-     * max_pwm        : maximum PWM value (e.g. 255 for 8-bit)
+     * max_pwm        : maximum PWM value (e.g. 255 for 8-bit), brake uses this
      * encoder_sign   : +1 or -1 to match physical encoder direction
      */
     GearMotor(int in1, int in2, int ch1, int ch2,
@@ -37,8 +37,8 @@ public:
     /// Convenience: spin "counter-clockwise" = negative speed
     void spin_ccw(int speed);
 
-    /// Stop motor (coast): both PWM channels = 0
-    void stop();
+    /// Coast motor: both PWM channels = 0
+    void coast();
 
     /// Active brake: both channels driven HIGH (max_pwm)
     /// ! DON'T RUN THIS FOR TOO LONG !
@@ -46,7 +46,7 @@ public:
 
     // --- Encoder / RPM measurement ---
 
-    /// Executed on encoder_pin_1 (channel A) rising edge (attach this as ISR).
+    /// Executed on encoder_pin_1 (channel A) rising edge.
     void IRAM_ATTR encoder_interrupt();
 
     /// Get the RPM of the motor (based on last encoder period)
@@ -59,7 +59,7 @@ public:
     void reset_encoder_count();
 
     /// Accessor for configured max PWM
-    int16_t maxPwm() const { return max_pwm_; }
+    int16_t maxPwm() const { return m_max_pwm; }
 
 private:
     // H-bridge pins and PWM channels
@@ -78,7 +78,7 @@ private:
     volatile uint32_t m_t_last_i;    // last interrupt timestamp (µs)
 
     // PWM limit
-    int16_t max_pwm_;
+    int16_t m_max_pwm;
 
     // Direction convention for this motor (+1 or -1)
     int m_encoder_sign;
