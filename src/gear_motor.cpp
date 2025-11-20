@@ -26,7 +26,7 @@ GearMotor::GearMotor(int in1, int in2, int ch1, int ch2,
       m_max_pwm(max_pwm),
       m_encoder_sign(encoder_sign) {
 
-    // Motor pins and PWM setup (mirrors Motors::setupMotor_) 
+    // Motor pins and PWM setup
     pinMode(IN1, OUTPUT);
     pinMode(IN2, OUTPUT);
 
@@ -46,8 +46,6 @@ GearMotor::GearMotor(int in1, int in2, int ch1, int ch2,
 
 /**
  * Internal encoder ISR: executed on ENCODER_PIN_1 (channel A) rising edge.
- * Integrates the behaviour of updateEncoderLeft/Right from encoders.cpp
- * into the motor itself. 
  */
 void IRAM_ATTR GearMotor::encoder_interrupt() {
     uint32_t t_curr_i = micros();
@@ -56,15 +54,14 @@ void IRAM_ATTR GearMotor::encoder_interrupt() {
     }
     m_t_last_i = t_curr_i;
 
-    // Quadrature direction logic (like encoders.cpp, but per motor)
+    // Quadrature direction logic
     int a = digitalRead(ENCODER_PIN_1);
     int b = digitalRead(ENCODER_PIN_2);
 
     // On a rising edge of A, A should be HIGH; direction depends on B.
     // The sign convention can be flipped with m_encoder_sign so that
-    // one GearMotor can behave like "left" and another like "right".
+    // one GearMotor can behave like left and another like right.
     if (a > b) {
-        // Match encoders.cpp left/right pattern, scaled by encoder_sign 
         m_encoder_count -= m_encoder_sign;
     } else {
         m_encoder_count += m_encoder_sign;
