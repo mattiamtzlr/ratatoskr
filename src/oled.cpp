@@ -9,9 +9,9 @@ void OLED::begin() {
     }
     m_oled.display();
     m_oled.setTextColor(WHITE);
-    m_oled.setFont(&FreeMonoBold9pt7b);
+    m_oled.setFont(FONT);
     m_oled.setTextWrap(false);
-    set_text_size(SMALL);
+    set_text_size(MEDIUM);
 }
 
 void OLED::clear() {
@@ -29,31 +29,22 @@ void OLED::set_text_size(TextSize size) { m_oled.setTextSize((int)size); }
 
 void OLED::update_status_bar(int16_t gyro_angle, uint16_t left_rpm,
                              uint16_t right_rpm) {
-    clear();
-    m_oled.setCursor(0, 15);
+    m_oled.setCursor(5, FONT_HEIGHT * MEDIUM);
     m_oled.printf("%03d | %03d | %03d", gyro_angle, left_rpm, right_rpm);
-    display();
 }
 
 void OLED::update_ToFs(uint16_t tof_left, uint16_t tof_front_left,
                        uint16_t tof_front_right, uint16_t tof_right) {
-    clear();
-    m_oled.setCursor(0, 20);
+    m_oled.setCursor(5, FONT_HEIGHT * MEDIUM * 2 + 5);
     m_oled.printf("    %03d %03d    ", tof_front_left, tof_front_right);
-    m_oled.printf(" %03d       %03d ", tof_left, tof_right);
-    display();
+    m_oled.println();
+    m_oled.printf(" %03d          %03d ", tof_left, tof_right);
 }
 
 void OLED::idle() {
-    clear();
-    set_text_size(LARGE);
-    m_oled.setCursor(20, 20);
+    set_text_size(HUGE);
+    m_oled.setCursor(15, FONT_HEIGHT * HUGE + 5);
     m_oled.print(">OwO<");
-    display();
-    delay(3000);
-    clear();
-    m_oled.setCursor(20, 20);
-    m_oled.print(">-w-<");
-    display();
-    delay(500);
+    /*m_oled.setCursor(20, 20);
+    m_oled.print(">-w-<");*/
 }

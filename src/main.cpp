@@ -1,11 +1,11 @@
 #include <Arduino.h>
-#include <cstdint>
 
 #include "esp32-hal-ledc.h"
 #include "oled.hpp"
 #include "pins.hpp"
 #include "ratatoskr.hpp"
 #include "solver.hpp"
+#include "util.hpp"
 
 // I2C addresses for the ToF sensors
 const uint8_t TOF_LEFT_ADDRESS = 0x30;
@@ -13,7 +13,7 @@ const uint8_t TOF_FRONT_LEFT_ADDRESS = 0x31;
 const uint8_t TOF_FRONT_RIGHT_ADDRESS = 0x32;
 const uint8_t TOF_RIGHT_ADDRESS = 0x33;
 
-const MODE mode = RUN;  // TODO: Right now you have to change this by hand.
+const MODE mode = TESTING;  // TODO: Right now you have to change this by hand.
 
 ToF tof_left = ToF(LEFT, TOF_LEFT_ADDRESS, TOF_LEFT_XSHUT);
 ToF tof_front_left =
@@ -44,14 +44,12 @@ Ratatoskr rat(motor_left, motor_right, tof_left, tof_front_left,
               tof_front_right, tof_right, gyro, oled);
 Solver solver(rat, maze);
 
-
 void setup() {
     // ToF XSHUT pins
     pinMode(TOF_LEFT_XSHUT, OUTPUT);
     pinMode(TOF_FRONT_LEFT_XSHUT, OUTPUT);
     pinMode(TOF_RIGHT_XSHUT, OUTPUT);
     pinMode(TOF_FRONT_RIGHT_XSHUT, OUTPUT); 
-
 
     Wire.begin();
     delay(500);
@@ -85,6 +83,11 @@ void setup() {
 #endif
 
     switch (mode) {
+        case DEBUG: {
+            oled.mode = DEBUG;
+            /* WARN: no break on purpose cause we want to fall through to RUN */
+        }
+
         case RUN: {
             // Push target to maze
             maze.targets.push_back(Position(2, 2));
@@ -109,7 +112,9 @@ void setup() {
         }
 
         case TESTING: {
-            oled.update_status_bar(42, 337, 339);
+            oled.mode = DEBUG;
+            rat.update_visuals(maze);
+
             while (true) {
                 delay(1000);
                 // rat.turn(45);
