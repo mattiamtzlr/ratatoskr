@@ -93,8 +93,8 @@ void setup() {
         }
 
         case DUMP_LOG: {
-            while (!Serial.available());
-            rat.export_logs();
+            Loggable::export_logs();
+            Loggable::clear_logs();
             break;
         }
 

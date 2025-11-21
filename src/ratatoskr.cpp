@@ -83,29 +83,32 @@ void Ratatoskr::turn(int angle) {
  * move @distance mm forwards with PID control
  */
 void Ratatoskr::moveForward(int distance) {
-    // log("moving forward " + std::to_string(distance) + "mm");
-    // Reset encoder counts at start
-    long target_counts = 1200;  // (long)(distance * ENCODER_COUNTS_PER_MM);
+    long target_counts = (long)(distance * ENCODER_COUNTS_PER_MM);
     int base_pwm = 200;
+
     m_motor_left.reset_encoder_count();
     m_motor_right.reset_encoder_count();
+
     long left_encoder = 0;
     long right_encoder = 0;
     long left_encoder_prev = 0;
     long right_encoder_prev = 0;
+
     uint16_t left_tof = 0;
     uint16_t right_tof = 0;
-    const int loop_delay = 20;
-    double time_step = 0.2;
+
     float pwm_left = base_pwm;
     float pwm_right = base_pwm;
+
+    const int loop_delay = 20;
+    double time_step = 0.2;
 
     int t_now = millis();
     int t_prev = t_now;
 
+    // TODO: This is also not very clean like this
     PID pid_encoders(time_step, 0.75, 0.8, 0.1, 50, 240);
-    PID pid_distance(time_step, 0.25, 0.1, 0.15, 50,
-                     240);  // TODO: This is also not very clean like this
+    PID pid_distance(time_step, 0.25, 0.1, 0.15, 50, 240);
 
     while ((left_encoder + right_encoder) / 2 < target_counts) {
         left_encoder_prev = left_encoder;
@@ -125,7 +128,6 @@ void Ratatoskr::moveForward(int distance) {
 
         t_now = millis();
         double t_diff = t_now - t_prev;
-        Serial.println(t_diff);
         t_prev = t_now;
 
         // Update PID controllers
@@ -141,72 +143,12 @@ void Ratatoskr::moveForward(int distance) {
         pwm_left = constrain(pwm_left, 70, 240);
         pwm_right = constrain(pwm_right, 70, 240);
 
-        Serial.print("left pwm: ");
-        Serial.print(pwm_left);
-        Serial.print(", right_pwm: ");
-        Serial.println(pwm_right);
-
-        Serial.print("left encoder: ");
-        Serial.print(left_encoder);
-        Serial.print(", right encoder: ");
-        Serial.println(right_encoder);
-
-        Serial.print("left tof: ");
-        Serial.print(left_tof);
-        Serial.print(", right tof: ");
-        Serial.println(right_tof);
-
         // Apply motor commands
         m_motor_left.spin_cw(pwm_left);
         m_motor_right.spin_ccw(pwm_right);
 
         delay(loop_delay);
     }
-    Serial.print("left: ");
-    Serial.print(m_motor_left.get_encoder_count());
-    Serial.print(", right: ");
-    Serial.println(m_motor_right.get_encoder_count());
-    stop();
-
-    /*
-// Calculate target encoder counts for desired distance
-
-// Control loop parameters
-
-long left_encoder = 0;
-long right_encoder = 0;
-uint16_t left_tof = 0;
-uint16_t right_tof = 0;
-float target_distance = .0;
-float target_encoder = .0;
-
-// Base PWM that ramps up over time
-float base_pwm = 70.0;  // TODO: move to header
-const float accel_time =
-    500.0;  // milliseconds to reach FORWARD_PWM  TODO: Move to header
-const float decel_distance =
-    30.0;  // mm before target to start decelerating  TODO: Move to header
-const float pwm_increment =
-    (FORWARD_PWM - 70.0) / (accel_time / loop_delay);
-const long decel_counts = (long)(decel_distance * ENCODER_COUNTS_PER_MM);
-
-    // Ramp up base PWM over time, or ramp down near target
-    // NOTE: It might make sense to have decel_counts be something we
-    // calculate based on percentages. e. g. have of a move_forward(x) call
-    // result in 10% speedup, 60% full speed and 30% slowdown
-    if (remaining_counts < decel_counts) {
-        // Deceleration phase - linearly decrease to 70
-        float decel_ratio = (float)remaining_counts / (float)decel_counts;
-        base_pwm = 70.0 + (FORWARD_PWM - 70.0) *
-                              decel_ratio;  // NOTE: magic number
-    } else if (base_pwm < FORWARD_PWM) {
-        // Acceleration phase
-        base_pwm += pwm_increment;
-        if (base_pwm > FORWARD_PWM) {
-            base_pwm = FORWARD_PWM;
-        }
-    }
-*/
 }
 
 /**
