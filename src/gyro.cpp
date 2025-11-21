@@ -55,8 +55,8 @@ bool MPU6050::begin() {
     if (device_id != 0x68) {
         return false;
     }
-    // delay(1000);
-    // calibrateGyro(); doesnt even work here
+    delay(1000);
+    calibrateGyro();
     // delay(1000);
     log("Gyro is ready");
     return true;
@@ -75,11 +75,8 @@ void MPU6050::setAccelSensitivity(AccelSensitivity range) {
 
 void MPU6050::setGyroSensitivity(GyroSensitivity range) {
     m_gyroScale = rangeToScaleGyro[range];
-    // FS_SEL are bits 3-4 in GYRO_CONFIG
-    uint8_t cfg = readByte(MPU6050_REG_GYRO_CONFIG);
-    cfg &= ~0x18;  // clear bits 3 and 4
-    cfg |= (uint8_t(range) & 0x03) << 3;
-    writeByte(MPU6050_REG_GYRO_CONFIG, cfg);
+
+    writeByte(MPU6050_REG_GYRO_CONFIG, range);
 }
 
 
@@ -184,6 +181,7 @@ void MPU6050::calibrateGyro() {
     delay(10);
     log("[MPU6050] Starting gyro calibration. Press Enter to stop...");
     while (count < 2500) {
+        Serial.println("Collecting sample " + String(count + 1) + "/2500");
         if (Serial.available()) {
             char c = Serial.read();
             if (c == '\n' || c == '\r') {
@@ -221,7 +219,7 @@ float MPU6050::getAngle(unsigned long t_now, unsigned long t_last) {
     Vector3D velocities = readScaledGyro();
     float dt = (float)(t_now - t_last) * 1e-6f;
     float change = velocities.z * dt;  // degrees
-    if (fabsf(velocities.z) > 0.1f && dt > 0.0f) {
+    if (fabsf(change) > 0.1f && dt > 0.0f) {
         m_angle += change;
     }
     return m_angle;
