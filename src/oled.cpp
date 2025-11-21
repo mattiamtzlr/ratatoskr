@@ -10,6 +10,7 @@ void OLED::begin() {
     m_oled.display();
     m_oled.setTextColor(WHITE);
     m_oled.setFont(&FreeMonoBold9pt7b);
+    m_oled.setTextWrap(false);
     set_text_size(SMALL);
 }
 
@@ -30,7 +31,6 @@ void OLED::update_status_bar(int16_t gyro_angle, uint16_t left_rpm,
                              uint16_t right_rpm) {
     clear();
     m_oled.setCursor(0, 15);
-    m_oled.setTextWrap(false);
     m_oled.printf("%03d | %03d | %03d", gyro_angle, left_rpm, right_rpm);
     display();
 }
@@ -39,6 +39,8 @@ void OLED::update_ToFs(uint16_t tof_left, uint16_t tof_front_left,
                        uint16_t tof_front_right, uint16_t tof_right) {
     clear();
     m_oled.setCursor(0, 20);
+    m_oled.printf("    %03d %03d    ", tof_front_left, tof_front_right);
+    m_oled.printf(" %03d       %03d ", tof_left, tof_right);
     display();
 }
 
