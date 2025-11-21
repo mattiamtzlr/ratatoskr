@@ -5,12 +5,22 @@
 #include <Adafruit_SSD1306.h>
 #include <GFX_fonts/Font5x5Fixed.h>
 
+#include <map>
+
+#include "faces.hpp"
 #include "util.hpp"
 
+#define SSD1306_NO_SPLASH /* this disables the splash screen */
+
 #define FONT &Font5x5Fixed
-#define FONT_HEIGHT 7 /* set manually */
+#define FONT_WIDTH 5 /* set manually */
+#define FONT_HEIGHT 5 /* set manually */
 
 enum TextSize { SMALL = 1, MEDIUM = 2, LARGE = 3, HUGE = 4 };
+enum Face { MAD, NEUTRAL, HAPPY, BLINK };
+static std::map<Face, uint8_t*> face_map = {
+    {HAPPY, happy_bits},
+};
 
 class OLED {
    private:
@@ -22,6 +32,8 @@ class OLED {
     bool m_frozen = false;
     Adafruit_SSD1306 m_oled =
         Adafruit_SSD1306(m_width, m_height, &Wire, m_reset);
+
+    unsigned long last_micros = 0;
 
    public:
     MODE mode = RUN;

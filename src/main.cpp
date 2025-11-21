@@ -112,48 +112,8 @@ void setup() {
         }
 
         case TESTING: {
-            oled.mode = DEBUG;
-            rat.update_visuals(maze);
-
             while (true) {
-                delay(1000);
-                // rat.turn(45);
-                // delay(3000);
-                // rat.turn(-90);
-                // delay(3000);
-                // rat.turn(180);
-                // delay(3000);
-                // rat.calibrateEncoders();
-                // rat.moveForward(4);
-                
-                // rat.turn(90);
-                // delay(1000);
-
-                // rat.moveForward(1);
-                // delay(1000);
-                // rat.moveForward(1);
-                // delay(1000);
-                // rat.moveForward(1);
-                // delay(1000);
-                // rat.moveForward(1);
-                // delay(1000);
-                // rat.turn(90);
-                // delay(1000);
-                // rat.moveForward(1);
-                // delay(10000);
-                rat.moveForward(1);
-                rat.moveForward(1);
-                // rat.turn(-90);
-                rat.moveForward(1);
-                // rat.moveForward(1);
-                rat.turn(180);
-                rat.moveForward(1);
-                // rat.turn(-90);
-                rat.moveForward(1);
-                // rat.turn(180);
-                // rat.moveForward(3);
-                rat.turn(180);
-                delay(10000);
+                delay(2000);
             }
         }
     }

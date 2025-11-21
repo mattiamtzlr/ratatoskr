@@ -7,10 +7,18 @@ void OLED::begin() {
         Serial.println("OLED initialisation failed!");
         while (true);
     }
-    m_oled.display();
+    m_oled.clearDisplay();
     m_oled.setTextColor(WHITE);
     m_oled.setFont(FONT);
     m_oled.setTextWrap(false);
+
+    set_text_size(LARGE);
+    m_oled.setCursor(
+        12, ((m_height - FONT_HEIGHT * LARGE) / 2) + (FONT_HEIGHT * LARGE));
+    m_oled.println("ratatoskr");
+    m_oled.display();
+    delay(1000);
+
     set_text_size(MEDIUM);
 }
 
@@ -42,9 +50,10 @@ void OLED::update_ToFs(uint16_t tof_left, uint16_t tof_front_left,
 }
 
 void OLED::idle() {
-    set_text_size(HUGE);
+    m_oled.drawXBitmap(0, 0, face_map[HAPPY], m_width, m_height, WHITE);
+    /*set_text_size(HUGE);
     m_oled.setCursor(15, FONT_HEIGHT * HUGE + 5);
     m_oled.print(">OwO<");
-    /*m_oled.setCursor(20, 20);
+    m_oled.setCursor(20, 20);
     m_oled.print(">-w-<");*/
 }

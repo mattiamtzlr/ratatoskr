@@ -328,7 +328,10 @@ void Ratatoskr::update_visuals(Maze &maze) {
     m_oled.clear();
     switch (m_oled.mode) {
         case DEBUG: {
-            /* TODO: update status bar, tofs and such */
+            int16_t gyro_angle = floor(m_gyro.getAngle(micros(), 0));
+            uint16_t left_rpm = m_motor_left.get_rpm();
+            uint16_t right_rpm = m_motor_right.get_rpm();
+            m_oled.update_status_bar(gyro_angle, left_rpm, right_rpm);
         }
 
         default: m_oled.idle();
