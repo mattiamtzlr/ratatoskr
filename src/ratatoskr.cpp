@@ -55,22 +55,36 @@ void Ratatoskr::calibrateEncoders() {
  * turn @angle degrees in counterclockwise direction
  */
 void Ratatoskr::turn(int angle) {
-    log("turning");
-    float threshold = 0.5f;
-    unsigned long t_now = micros();
-    unsigned long t_last = t_now;  // avoid huge first dt
-    // baseline angle in degrees
-    float current_angle = m_gyro.getAngle(t_now, t_last);
-    float target = current_angle + (float)angle;
+    float threshold = .5f;
+    float Kp = 0.4;          // Proportional gain
+    int MIN_PWM = 185;      
+    int MAX_PWM = 200;
 
-    while (current_angle < target - threshold) {
-        if (angle > 0) {
-            m_motor_left.spin_cw(TURN_PWM);
-            m_motor_right.spin_cw(TURN_PWM);
-        } else {
-            m_motor_left.spin_ccw(TURN_PWM);
-            m_motor_right.spin_ccw(TURN_PWM);
+    unsigned long t_last = micros();
+    unsigned long t_now = t_last;
+
+    float current_angle = m_gyro.getAngle(t_now, t_last);
+    float target = current_angle + angle;
+
+    t_last = t_now;
+    float error = target - current_angle;
+
+    while (abs(error) > threshold) {
+        error = target - current_angle;
+
+        // Proportional control
+        int pwm = (int)(Kp * error);
+
+        if (pwm > 0) { // Turning CCW
+            pwm = constrain(pwm, MIN_PWM, MAX_PWM);
+            m_motor_left.spin_ccw(pwm);
+            m_motor_right.spin_ccw(pwm);
+        } else { // Turning CW
+            pwm = constrain(abs(pwm), MIN_PWM, MAX_PWM);
+            m_motor_left.spin_cw(pwm);
+            m_motor_right.spin_cw(pwm);
         }
+
         t_now = micros();
         current_angle = m_gyro.getAngle(t_now, t_last);
         t_last = t_now;
