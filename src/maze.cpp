@@ -1,8 +1,8 @@
 #include "maze.hpp"
 
-#include <map>
 #include <algorithm>
 #include <iostream>
+#include <map>
 
 const int MOVE_COST = 1;
 const int TURN_COST = 5;
@@ -144,16 +144,19 @@ std::vector<std::vector<Position>> Maze::find_diagonal_paths(int min_length) {
 std::map<Position, std::vector<Edge>> Maze::get_adj_list() {
     std::map<Position, std::vector<Edge>> adj_list;
 
-    for(Position p : visited){
-        // ensure the node appears in the adjacency list even if it has no neighbors
-        for(Position neighbor : valid_neighbors(p)){
-            Edge e = {neighbor, MOVE_COST};
-            if (turns.find(p) != turns.end()) {
-                e.weight = TURN_COST;
+    for (Position p : visited) {
+        // ensure the node appears in the adjacency list even if it has no
+        // neighbors
+        for (Position neighbor : valid_neighbors(p)) {
+            if (visited.find(p) != visited.end()) {
+                Edge e = {neighbor, MOVE_COST};
+                if (turns.find(p) != turns.end()) {
+                    e.weight = TURN_COST;
+                }
+                adj_list[p].push_back(e);
             }
-            adj_list[p].push_back(e);
         }
     }
-    
+
     return adj_list;
 }

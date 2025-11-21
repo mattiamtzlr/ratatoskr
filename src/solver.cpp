@@ -1,11 +1,11 @@
 #include "solver.hpp"
 
+#include <algorithm>
 #include <deque>
+#include <iostream>
+#include <map>
 #include <queue>
 #include <tuple>
-#include <map>
-#include <algorithm>
-#include <iostream>
 
 Solver::Solver(Mouse &mouse, Maze &maze) : m_mouse(mouse), m_maze(maze) {
     width = m_maze.maze_width();
@@ -74,7 +74,8 @@ void Solver::solve() {
                 best_dir = dir_for_neighbor(neighbor, m_mouse.getPosition());
             }
         }
-        // Identify turns to use them later for finding best path in the speedrun
+        // Identify turns to use them later for finding best path in the
+        // speedrun
         Direction curr_dir = m_mouse.getDirection();
         Position pos_before = m_mouse.getPosition();
         face(best_dir);
@@ -98,7 +99,7 @@ std::vector<Position> Solver::dijkstra(Position start) {
     for (const auto &kv : adj_list) {
         dist[kv.first] = INF;
         for (const Edge &e : kv.second) {
-            if (dist.find(e.target) == dist.end()) { 
+            if (dist.find(e.target) == dist.end()) {
                 dist[e.target] = INF;
             }
         }
@@ -113,8 +114,7 @@ std::vector<Position> Solver::dijkstra(Position start) {
     };
 
     std::priority_queue<std::pair<int, Position>,
-                        std::vector<std::pair<int, Position>>,
-                        PQCmp>
+                        std::vector<std::pair<int, Position>>, PQCmp>
         pq;
 
     dist[start] = 0;
@@ -131,7 +131,7 @@ std::vector<Position> Solver::dijkstra(Position start) {
         pq.pop();
 
         // stale entry
-       if (d > dist[u]) {
+        if (d > dist[u]) {
             continue;
         }
 
@@ -142,7 +142,7 @@ std::vector<Position> Solver::dijkstra(Position start) {
         }
 
         auto it_adj = adj_list.find(u);
-        if (it_adj == adj_list.end()){ 
+        if (it_adj == adj_list.end()) {
             continue;
         }
 
@@ -150,7 +150,8 @@ std::vector<Position> Solver::dijkstra(Position start) {
             int alt = dist[u] + e.weight;
             if (alt < dist[e.target]) {
                 dist[e.target] = alt;
-                // update predecessor without requiring default-constructible Position
+                // update predecessor without requiring default-constructible
+                // Position
                 prev.erase(e.target);
                 prev.insert(std::make_pair(e.target, u));
                 pq.push(std::make_pair(alt, e.target));
@@ -160,7 +161,8 @@ std::vector<Position> Solver::dijkstra(Position start) {
 
     std::vector<Position> path;
     if (!found) {
-        return path; // no reachable target
+        std::cerr << "no path found" << std::endl;
+        return path;  // no reachable target
     }
 
     // reconstruct path from start -> found_target
@@ -177,4 +179,12 @@ std::vector<Position> Solver::dijkstra(Position start) {
     path.push_back(start);
     std::reverse(path.begin(), path.end());
     return path;
+}
+
+void Solver::run(std::vector<Position> solved) {
+    for (Position next_position : solved) {
+	if (next_position.x == m_mouse.getPosition().x && next_position.y == m_mouse.getPosition().y) continue;
+        face(dir_for_neighbor(next_position, m_mouse.getPosition()));
+        m_mouse.moveForward();
+    }
 }

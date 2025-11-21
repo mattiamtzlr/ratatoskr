@@ -21,6 +21,7 @@ class Solver {
     void detect_and_set_walls();
 
    public:
+    void run(std::vector<Position> solved);
     void solve();
     std::vector<Position> dijkstra(Position start);
     Solver(Mouse &mouse, Maze &maze);
