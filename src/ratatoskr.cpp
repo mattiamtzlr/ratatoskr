@@ -1,4 +1,5 @@
 #include "ratatoskr.hpp"
+
 #include <string>
 
 #include "pid.hpp"
@@ -31,14 +32,16 @@ void Ratatoskr::calibrateEncoders() {
         unsigned long now = millis();
         if (now - last_print >= 100) {
             last_print = now;
-            log("Ticks L = " + std::to_string(left_encoder) + " R = " + std::to_string(right_encoder));
-        } 
+            log("Ticks L = " + std::to_string(left_encoder) +
+                " R = " + std::to_string(right_encoder));
+        }
 
         if (Serial.available() > 0) {
             int c = Serial.read();
             if (c == '\n' || c == '\r') {
                 log("\nCalibration finished.");
-                log("Final ticks L = " + std::to_string(left_encoder) + " R = " + std::to_string(right_encoder) + "\n");
+                log("Final ticks L = " + std::to_string(left_encoder) +
+                    " R = " + std::to_string(right_encoder) + "\n");
                 break;
             }
         }
@@ -80,113 +83,130 @@ void Ratatoskr::turn(int angle) {
  * move @distance mm forwards with PID control
  */
 void Ratatoskr::moveForward(int distance) {
-    log("moving forward " + std::to_string(distance) + "mm");
-
-    // Calculate target encoder counts for desired distance
-    long target_counts = (long)(distance * ENCODER_COUNTS_PER_MM);
-
+    // log("moving forward " + std::to_string(distance) + "mm");
     // Reset encoder counts at start
+    long target_counts = 1200;  // (long)(distance * ENCODER_COUNTS_PER_MM);
+    int base_pwm = 200;
     m_motor_left.reset_encoder_count();
     m_motor_right.reset_encoder_count();
-
-    // Control loop parameters
-    const float time_step = 0.02;  // 20ms update rate
-    const int loop_delay = 20;
-
     long left_encoder = 0;
     long right_encoder = 0;
+    long left_encoder_prev = 0;
+    long right_encoder_prev = 0;
     uint16_t left_tof = 0;
     uint16_t right_tof = 0;
-    float target_distance = .0;
-    float target_encoder = .0;
-
-    // Base PWM that ramps up over time
-    float base_pwm = 70.0;  // TODO: move to header
-    const float accel_time =
-        500.0;  // milliseconds to reach FORWARD_PWM  TODO: Move to header
-    const float decel_distance =
-        30.0;  // mm before target to start decelerating  TODO: Move to header
-    const float pwm_increment =
-        (FORWARD_PWM - 70.0) / (accel_time / loop_delay);
-    const long decel_counts = (long)(decel_distance * ENCODER_COUNTS_PER_MM);
-
-    // Initial pwm values
+    const int loop_delay = 20;
+    double time_step = 0.2;
     float pwm_left = base_pwm;
     float pwm_right = base_pwm;
 
-    // PID controller instances
-    PID pid_distance(time_step, 0.25, 0.1, 0.00, 50,
-                     240);  // TODO: This is also not very clean like this
+    int t_now = millis();
+    int t_prev = t_now;
+
     PID pid_encoders(time_step, 0.75, 0.8, 0.1, 50, 240);
+    PID pid_distance(time_step, 0.25, 0.1, 0.15, 50,
+                     240);  // TODO: This is also not very clean like this
 
-    // Steps
-    int steps = 0;
-
-    // Main control loop - run until target distance reached
     while ((left_encoder + right_encoder) / 2 < target_counts) {
-        // Read current values
-        left_tof = constrain(m_tof_left.read(), 0, 80);
-        right_tof = constrain(m_tof_right.read(), 0, 80);
+        left_encoder_prev = left_encoder;
+        right_encoder_prev = right_encoder;
         left_encoder = m_motor_left.get_encoder_count();
         right_encoder = m_motor_right.get_encoder_count();
 
-        long avg_encoder = (left_encoder + right_encoder) / 2;
-        long remaining_counts = target_counts - avg_encoder;
+        int left_encoder_diff = left_encoder - left_encoder_prev;
+        int right_encoder_diff = right_encoder - right_encoder_prev;
 
-        // Log
-        if (steps++ % 10 == 0) {
-            log("ToF (l, r): " + std::to_string(left_tof) + ", " +
-                std::to_string(right_tof) +
-                " | Base PWM: " + std::to_string((int)base_pwm) +
-                " | Remaining: " + std::to_string(remaining_counts));
-        }
-
-        // Ramp up base PWM over time, or ramp down near target
-        // NOTE: It might make sense to have decel_counts be something we
-        // calculate based on percentages. e. g. have of a move_forward(x) call
-        // result in 10% speedup, 60% full speed and 30% slowdown
-        if (remaining_counts < decel_counts) {
-            // Deceleration phase - linearly decrease to 70
-            float decel_ratio = (float)remaining_counts / (float)decel_counts;
-            base_pwm = 70.0 + (FORWARD_PWM - 70.0) *
-                                  decel_ratio;  // NOTE: magic number
-        } else if (base_pwm < FORWARD_PWM) {
-            // Acceleration phase
-            base_pwm += pwm_increment;
-            if (base_pwm > FORWARD_PWM) {
-                base_pwm = FORWARD_PWM;
-            }
-        }
-
-        // Clamp and adjust tof readings
-        float left_dist = (left_tof == 0 && right_tof > 0) ? 0.75 : left_tof;
-        float right_dist = (right_tof == 0 && left_tof > 0) ? 0.75 : right_tof;
+        left_tof = constrain(m_tof_left.get_reading(), 0, 80);
+        right_tof = constrain(m_tof_right.get_reading(), 0, 80);
 
         // Prepare errors
-        float tof_error = target_distance - (left_dist - right_dist);
-        float encoder_error = target_encoder - (left_encoder - right_encoder);
+        float tof_error = 0 - (left_tof - right_tof);
+        float encoder_error = 0 - (left_encoder_diff - right_encoder_diff);
+
+        t_now = millis();
+        double t_diff = t_now - t_prev;
+        Serial.println(t_diff);
+        t_prev = t_now;
 
         // Update PID controllers
-        float tof_correction = pid_distance.update(tof_error);
+        pid_encoders.TIME_STEP = t_diff / 100.0;
+        pid_distance.TIME_STEP = t_diff / 100.0;
         float encoder_correction = pid_encoders.update(encoder_error);
+        float tof_correction = pid_distance.update(tof_error);
 
         // Calculate new PWM
-        pwm_left = base_pwm + tof_correction + encoder_correction;
-        pwm_right = base_pwm - tof_correction - encoder_correction;
+        pwm_left = base_pwm + .7 * tof_correction + .3 * encoder_correction;
+        pwm_right = base_pwm - .7 * tof_correction - .3 * encoder_correction;
 
         pwm_left = constrain(pwm_left, 70, 240);
         pwm_right = constrain(pwm_right, 70, 240);
 
-        // Apply motor commands
-        m_motor_left.spin_ccw(pwm_left);
-        m_motor_right.spin_cw(pwm_right);
+        Serial.print("left pwm: ");
+        Serial.print(pwm_left);
+        Serial.print(", right_pwm: ");
+        Serial.println(pwm_right);
 
-        // Wait for next control cycle
+        Serial.print("left encoder: ");
+        Serial.print(left_encoder);
+        Serial.print(", right encoder: ");
+        Serial.println(right_encoder);
+
+        Serial.print("left tof: ");
+        Serial.print(left_tof);
+        Serial.print(", right tof: ");
+        Serial.println(right_tof);
+
+        // Apply motor commands
+        m_motor_left.spin_cw(pwm_left);
+        m_motor_right.spin_ccw(pwm_right);
+
         delay(loop_delay);
     }
-
-    // Stop motors when target reached
+    Serial.print("left: ");
+    Serial.print(m_motor_left.get_encoder_count());
+    Serial.print(", right: ");
+    Serial.println(m_motor_right.get_encoder_count());
     stop();
+
+    /*
+// Calculate target encoder counts for desired distance
+
+// Control loop parameters
+
+long left_encoder = 0;
+long right_encoder = 0;
+uint16_t left_tof = 0;
+uint16_t right_tof = 0;
+float target_distance = .0;
+float target_encoder = .0;
+
+// Base PWM that ramps up over time
+float base_pwm = 70.0;  // TODO: move to header
+const float accel_time =
+    500.0;  // milliseconds to reach FORWARD_PWM  TODO: Move to header
+const float decel_distance =
+    30.0;  // mm before target to start decelerating  TODO: Move to header
+const float pwm_increment =
+    (FORWARD_PWM - 70.0) / (accel_time / loop_delay);
+const long decel_counts = (long)(decel_distance * ENCODER_COUNTS_PER_MM);
+
+    // Ramp up base PWM over time, or ramp down near target
+    // NOTE: It might make sense to have decel_counts be something we
+    // calculate based on percentages. e. g. have of a move_forward(x) call
+    // result in 10% speedup, 60% full speed and 30% slowdown
+    if (remaining_counts < decel_counts) {
+        // Deceleration phase - linearly decrease to 70
+        float decel_ratio = (float)remaining_counts / (float)decel_counts;
+        base_pwm = 70.0 + (FORWARD_PWM - 70.0) *
+                              decel_ratio;  // NOTE: magic number
+    } else if (base_pwm < FORWARD_PWM) {
+        // Acceleration phase
+        base_pwm += pwm_increment;
+        if (base_pwm > FORWARD_PWM) {
+            base_pwm = FORWARD_PWM;
+        }
+    }
+*/
 }
 
 /**
@@ -231,6 +251,4 @@ void Ratatoskr::update_visuals(Maze &maze) {}
 bool Ratatoskr::wasReset() { return false; }
 void Ratatoskr::ackReset() {}
 
-void Ratatoskr::log(std::string msg) {
-    Loggable::log(msg);
-}
+void Ratatoskr::log(std::string msg) { Loggable::log(msg); }
