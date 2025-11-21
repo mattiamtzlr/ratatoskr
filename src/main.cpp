@@ -101,7 +101,7 @@ void setup() {
         case TESTING: {
             while (true) {
                 delay(5000);
-                rat.moveForward();
+                rat.moveForward(200);
                 delay(5000);
             }
         }

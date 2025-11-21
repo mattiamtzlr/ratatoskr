@@ -79,6 +79,12 @@ void Ratatoskr::turn(int angle) {
     stop();
 }
 
+bool Ratatoskr::too_close_front(uint16_t fl, uint16_t fr) {
+    return (fl != 0) && (fr != 0) &&
+           ((fl < STOP_DISTANCE && fr < STOP_DISTANCE + 20) ||
+            (fl < STOP_DISTANCE + 20 && fr < STOP_DISTANCE));
+}
+
 /**
  * move @distance mm forwards with PID control
  */
@@ -110,7 +116,9 @@ void Ratatoskr::moveForward(int distance) {
     PID pid_encoders(time_step, 0.75, 0.8, 0.1, 50, 240);
     PID pid_distance(time_step, 0.25, 0.1, 0.15, 50, 240);
 
-    while ((left_encoder + right_encoder) / 2 < target_counts) {
+    while (!too_close_front(m_tof_front_left.get_reading(),
+                            m_tof_front_right.get_reading()) &&
+           (left_encoder + right_encoder) / 2 < target_counts) {
         left_encoder_prev = left_encoder;
         right_encoder_prev = right_encoder;
         left_encoder = m_motor_left.get_encoder_count();
@@ -149,6 +157,7 @@ void Ratatoskr::moveForward(int distance) {
 
         delay(loop_delay);
     }
+    stop();
 }
 
 /**
