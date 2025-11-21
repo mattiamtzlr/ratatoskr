@@ -1,5 +1,6 @@
 #include <Arduino.h>
 
+#include "esp32-hal-ledc.h"
 #include "pins.hpp"
 #include "ratatoskr.hpp"
 #include "solver.hpp"
@@ -21,32 +22,25 @@ ToF tof_right = ToF(RIGHT, TOF_RIGHT_ADDRESS, TOF_RIGHT_XSHUT);
 
 MPU6050 gyro = MPU6050();
 
+// encoder_sign is the last argument (default = 1). Determines the direction
+GearMotor motor_left(MOTOR_L_IN1, MOTOR_L_IN2, 0, 1,  // PWM channels
+                     ENC_L_OUT1, ENC_L_OUT2,
+                     255,  // max PWM
+                     +1    // encoder_sign (I tested)
+);
+
+GearMotor motor_right(MOTOR_R_IN1, MOTOR_R_IN2, 2, 3,  // PWM channels
+                      ENC_R_OUT1, ENC_R_OUT2,
+                      255,  // max PWM
+                      -1    // encoder_sign (I tested)
+);
+
 Maze maze;
-GearMotor motor_left(MOTOR_L_IN1, MOTOR_L_IN2, ENC_L_OUT1, ENC_L_OUT2, 50);
-GearMotor motor_right(MOTOR_R_IN1, MOTOR_R_IN2, ENC_R_OUT1, ENC_R_OUT2, 50);
-
-
 Ratatoskr rat(motor_left, motor_right, tof_left, tof_front_left,
               tof_front_right, tof_right, gyro);
 Solver solver(rat, maze);
 
 void setup() {
-    // Motor pins for left
-    pinMode(MOTOR_L_IN1, OUTPUT);
-    pinMode(MOTOR_L_IN2, OUTPUT);
-    pinMode(ENC_L_OUT1, INPUT);
-    pinMode(ENC_L_OUT2, INPUT);
-    attachInterruptArg(digitalPinToInterrupt(ENC_L_OUT2),
-                       motor_left.isr_trampoline, &motor_left, RISING);
-
-    // Motor pins for right
-    pinMode(MOTOR_R_IN1, OUTPUT);
-    pinMode(MOTOR_R_IN2, OUTPUT);
-    pinMode(ENC_R_OUT1, INPUT);
-    pinMode(ENC_R_OUT2, INPUT);
-    attachInterruptArg(digitalPinToInterrupt(ENC_R_OUT2),
-                       motor_right.isr_trampoline, &motor_right, RISING);
-
     // ToF XSHUT pins
     pinMode(TOF_LEFT_XSHUT, OUTPUT);
     pinMode(TOF_FRONT_LEFT_XSHUT, OUTPUT);
@@ -63,12 +57,22 @@ void setup() {
     tof_right.begin();
     tof_front_right.begin();
 
-    #ifdef CALIBRATE
+    // ---- ENCODER INTERRUPT SETUP (integrated with GearMotor) ----
+    // Use ESP32's attachInterruptArg so each motor instance gets its own ISR
+    // arg
+    attachInterruptArg(ENC_L_OUT1, GearMotor::isr_trampoline, &motor_left,
+                       RISING);
+
+    attachInterruptArg(ENC_R_OUT1, GearMotor::isr_trampoline, &motor_right,
+                       RISING);
+    // -------------------------------------------------------------
+
+#ifdef CALIBRATE
     tof_left.calibrate_sensor(TOF_SIDE_EXPECTED_MM);
     tof_front_left.calibrate_sensor(TOF_FRONT_EXPECTED_MM);
     tof_front_right.calibrate_sensor(TOF_FRONT_EXPECTED_MM);
     tof_right.calibrate_sensor(TOF_SIDE_EXPECTED_MM);
-    #endif
+#endif
 
     switch (mode) {
         case RUN: {
@@ -89,13 +93,19 @@ void setup() {
         }
 
         case DUMP_LOG: {
-            while (!Serial.available());
-            rat.export_logs();
+            Loggable::export_logs();
+            Loggable::clear_logs();
             break;
         }
 
-        case TESTING: break;
+        case TESTING: {
+            while (true) {
+                delay(5000);
+                rat.moveForward();
+                delay(5000);
+            }
+        }
     }
 }
 
-void loop() {}
+void loop() {}  // DO NOT USE THIS, WEIRD BEHAVIOR WITH LEDC AND PINS!!!!!

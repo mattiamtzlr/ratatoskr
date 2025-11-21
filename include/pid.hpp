@@ -9,7 +9,7 @@ class PID {
     // Bounds
     const float UPPER_BOUND;
     const float LOWER_BOUND;
-    const float TIME_STEP;
+    float TIME_STEP;
 
    private:
     // Coefficients
