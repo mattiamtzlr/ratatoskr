@@ -19,6 +19,7 @@ class Ratatoskr : public Mouse, public Loggable {
     ToF &m_tof_front_right;
     ToF &m_tof_right;
     MPU6050 &m_gyro;
+    bool too_close_front(uint16_t front_left_dist, uint16_t front_right_dist);
 
    public:
     Ratatoskr(GearMotor &motor_left, GearMotor &motor_right, ToF &tof_left,
@@ -27,10 +28,10 @@ class Ratatoskr : public Mouse, public Loggable {
 
     // static const float PERIOD;  // TODO: we compute this by recording 360/T
     static const u_int8_t TURN_PWM = 150;  // TODO: we set this arbitrarily
-
+    static const int STOP_DISTANCE = 90;
     // static const float TIME_PER_CELL;  // TODO: how long rat goes 16 cm
 
-    static const u_int8_t FORWARD_PWM = 170;  // TODO: we set this arbiturarily
+    static const u_int8_t FORWARD_PWM = 200;  // TODO: we set this arbiturarily
 
     static const u_int8_t WIDTH_MM = 68;
 
