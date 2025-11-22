@@ -155,6 +155,18 @@ std::map<Position, std::vector<Edge>> Maze::get_adj_list() {
             adj_list[p].push_back(e);
         }
     }
+    for (std::vector<Position> diagonal : find_diagonal_paths()) {
+        for (int i = 0; i < diagonal.size() - 1; i++) {
+            Position pos_1 = diagonal[i];
+            Position pos_2 = diagonal[i + 1];
+            Edge edge_1_to_2 = {pos_2,
+                                MOVE_COST};  // TODO: bit harder to calculate
+                                             // cost of turns for diagonals
+            Edge edge_2_to_1 = {pos_1, MOVE_COST};
+            adj_list[pos_1].push_back(edge_1_to_2);
+            adj_list[pos_2].push_back(edge_2_to_1);
+        }
+    }
 
     return adj_list;
 }
