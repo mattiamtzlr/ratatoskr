@@ -85,7 +85,7 @@ bool Maze::is_dead_end(Position pos) {
     return true;
 }
 
-bool Maze::can_move_diag(Position pos, DiagDirection dir) {
+bool Maze::can_move_diag(Position pos, Direction dir) {
     Position target_diag = get_diag_neighbor(pos, dir);
     if (!in_bounds(target_diag)) return false;
     return !exists_wall(pos, diagDirFirst[dir]) &&
@@ -95,7 +95,7 @@ bool Maze::can_move_diag(Position pos, DiagDirection dir) {
 
 std::vector<Position> Maze::valid_diag_neighbors(Position mouse_pos) {
     std::vector<Position> neigh;
-    for (DiagDirection k : {NORTH_EAST, SOUTH_EAST, SOUTH_WEST, NORTH_WEST}) {
+    for (Direction k : {NORTH_EAST, SOUTH_EAST, SOUTH_WEST, NORTH_WEST}) {
         if (can_move_diag(mouse_pos, k)) {
             neigh.push_back(get_diag_neighbor(mouse_pos, k));
         }
@@ -113,7 +113,7 @@ std::vector<std::vector<Position>> Maze::find_diagonal_paths(int min_length) {
             continue;
         }
 
-        for (DiagDirection d_dir :
+        for (Direction d_dir :
              {NORTH_EAST, SOUTH_EAST, SOUTH_WEST, NORTH_WEST}) {
             std::vector<Position> current_path;
             Position current_pos = pos;

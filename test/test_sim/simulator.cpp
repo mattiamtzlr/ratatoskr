@@ -37,16 +37,21 @@ int main(int argc, char* argv[]) {
     maze.targets.push_back(Position(8, 7));
     maze.targets.push_back(Position(8, 8));
 
-    std::map<Position, std::vector<Edge>> adj_list = maze.get_adj_list();
-
     solver.finalize_discovery();
 
-    std::vector<Position> solved = solver.bfs_shortest_path(Position(0, 0));
+    // std::vector<Position> solved = solver.bfs_shortest_path(Position(0, 0));
+    std::vector<Position> solved = solver.dijkstra(Position(0, 0));
+
+    API::clearAllText();
+    for (int i = 0; i < solved.size(); i++) {
+	Position pos = solved[i];
+        API::setText(pos.x, pos.y, std::to_string(i));
+    }
 
     std::cerr << "Path Length: " << solved.size() << std::endl;
     API::clearAllColor();
     for (const Position& p : solved) {
-        API::setColor(p.x, p.y, 'g');
+        API::setColor(p.x, p.y, 'B');
     }
     solver.run(solved);
 }

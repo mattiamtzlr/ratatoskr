@@ -6,13 +6,10 @@ enum Direction {
     EAST = 1,
     SOUTH = 2,
     WEST = 3,
-};
-
-enum DiagDirection {
-    NORTH_EAST = 0,
-    SOUTH_EAST = 1,
-    NORTH_WEST = 2,
-    SOUTH_WEST = 3,
+    NORTH_EAST = 4,
+    SOUTH_EAST = 5,
+    NORTH_WEST = 6,
+    SOUTH_WEST = 7,
 };
 
 static std::map<Direction, char> dirToCardinalChar = {
@@ -20,14 +17,14 @@ static std::map<Direction, char> dirToCardinalChar = {
 static std::map<char, Direction> cardinalCharToDir = {
     {'n', NORTH}, {'e', EAST}, {'s', SOUTH}, {'w', WEST}};
 
-static std::map<DiagDirection, Direction> diagDirFirst = {{NORTH_EAST, NORTH},
-                                                          {SOUTH_EAST, SOUTH},
-                                                          {SOUTH_WEST, SOUTH},
-                                                          {NORTH_WEST, NORTH}};
-static std::map<DiagDirection, Direction> diagDirSecond = {{NORTH_EAST, EAST},
-                                                           {SOUTH_EAST, EAST},
-                                                           {SOUTH_WEST, WEST},
-                                                           {NORTH_WEST, WEST}};
+static std::map<Direction, Direction> diagDirFirst = {{NORTH_EAST, NORTH},
+                                                      {SOUTH_EAST, SOUTH},
+                                                      {SOUTH_WEST, SOUTH},
+                                                      {NORTH_WEST, NORTH}};
+static std::map<Direction, Direction> diagDirSecond = {{NORTH_EAST, EAST},
+                                                       {SOUTH_EAST, EAST},
+                                                       {SOUTH_WEST, WEST},
+                                                       {NORTH_WEST, WEST}};
 
 struct Position {
     int x;
@@ -49,4 +46,4 @@ int dx(Direction d);
 int dy(Direction d);
 
 Position get_neighbor(Position pos, Direction d);
-Position get_diag_neighbor(Position pos, DiagDirection d);
+Position get_diag_neighbor(Position pos, Direction d);

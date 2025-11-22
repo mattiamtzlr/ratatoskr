@@ -39,7 +39,7 @@ class Maze {
     bool in_bounds(Position pos);
     bool exists_wall(Position pos, Direction dir);
     bool is_dead_end(Position pos);
-    bool can_move_diag(Position pos, DiagDirection dir);
+    bool can_move_diag(Position pos, Direction dir);
     void finalize_discovery();
     std::vector<Position> valid_diag_neighbors(Position mouse_pos);
     std::vector<std::vector<Position>> find_diagonal_paths(int min_length = 2);

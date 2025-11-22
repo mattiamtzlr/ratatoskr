@@ -223,6 +223,7 @@ void Solver::run(std::vector<Position> solved) {
         if (next_position.x == m_mouse.getPosition().x &&
             next_position.y == m_mouse.getPosition().y)
             continue;
+
         face(dir_for_neighbor(next_position, m_mouse.getPosition()));
         m_mouse.moveForward();
     }
