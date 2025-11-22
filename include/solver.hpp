@@ -21,8 +21,10 @@ class Solver {
     void detect_and_set_walls();
 
    public:
-    void run(std::vector<Position> solved);
     void solve();
+    void finalize_discovery();
+    void run(std::vector<Position> solved);
+    std::vector<Position> bfs_shortest_path(Position start);
     std::vector<Position> dijkstra(Position start);
     Solver(Mouse &mouse, Maze &maze);
 };

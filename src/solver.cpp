@@ -180,10 +180,49 @@ std::vector<Position> Solver::dijkstra(Position start) {
     std::reverse(path.begin(), path.end());
     return path;
 }
+std::vector<Position> Solver::bfs_shortest_path(Position start) {
+    bfs();
+    std::vector<Position> route;
+    std::set<Position> seen;
 
+    Position pos = start;
+
+    while (!m_maze.at_target(pos)) {
+        int best_v = m_maze.maze_height() * m_maze.maze_width() + 1;
+
+        for (Position neighbor : m_maze.valid_neighbors(pos)) {
+            if (m_maze.get_distance(neighbor) < best_v) {
+                best_v = m_maze.get_distance(neighbor);
+                pos = neighbor;
+            }
+        }
+        if (seen.count(pos)) break;
+        seen.insert(pos);
+        route.emplace_back(pos);
+    }
+    return route;
+}
+
+void Solver::finalize_discovery() {
+    // Assume all unchecked wall positions to have walls.
+    for (int x = 0; x < MAZE_WIDTH; ++x) {
+        for (int y = 0; y < MAZE_HEIGHT; ++y) {
+            Position pos = Position(x, y);
+            if (!m_maze.in_visited(pos)) {
+                for (Position n : m_maze.valid_neighbors(pos)) {
+                    if (!m_maze.in_visited(n))
+                        m_maze.set_wall(n, dir_for_neighbor(pos, n));
+                }
+            }
+        }
+    }
+    m_mouse.update_visuals(m_maze);
+}
 void Solver::run(std::vector<Position> solved) {
     for (Position next_position : solved) {
-	if (next_position.x == m_mouse.getPosition().x && next_position.y == m_mouse.getPosition().y) continue;
+        if (next_position.x == m_mouse.getPosition().x &&
+            next_position.y == m_mouse.getPosition().y)
+            continue;
         face(dir_for_neighbor(next_position, m_mouse.getPosition()));
         m_mouse.moveForward();
     }

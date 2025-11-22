@@ -1,5 +1,6 @@
 #include "virtual_mouse.hpp"
 
+#include <iostream>
 #include <vector>
 
 #include "API.hpp"
@@ -45,15 +46,22 @@ bool VirtualMouse::wallLeft() {
     return false;
 }
 void VirtualMouse::update_visuals(Maze& maze) {
-    for (int x = 0; x < maze.maze_width(); ++x)
-        for (int y = 0; y < maze.maze_height(); ++y)
+    for (int x = 0; x < maze.maze_width(); ++x) {
+        for (int y = 0; y < maze.maze_height(); ++y) {
+            for (Direction d : {NORTH, EAST, SOUTH, WEST}) {
+                if (maze.exists_wall(Position(x, y), d)) {
+                    API::setWall(x, y, dirToCardinalChar[d]);
+                }
+            }
             if (maze.get_distance(Position(x, y)) <
-                maze.maze_height() * maze.maze_width() + 1)
+                maze.maze_height() * maze.maze_width() + 1) {
                 API::setText(x, y,
                              std::to_string(maze.get_distance(Position(x, y))));
-            else
+            } else {
                 API::setText(x, y, "");
-
+            }
+        }
+    }
     std::vector<Position> route;
     std::set<Position> seen;
 

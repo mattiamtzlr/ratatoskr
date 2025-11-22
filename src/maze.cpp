@@ -148,15 +148,21 @@ std::map<Position, std::vector<Edge>> Maze::get_adj_list() {
         // ensure the node appears in the adjacency list even if it has no
         // neighbors
         for (Position neighbor : valid_neighbors(p)) {
-            if (visited.find(p) != visited.end()) {
-                Edge e = {neighbor, MOVE_COST};
-                if (turns.find(p) != turns.end()) {
-                    e.weight = TURN_COST;
-                }
-                adj_list[p].push_back(e);
+            Edge e = {neighbor, MOVE_COST};
+            if (turns.find(p) != turns.end()) {
+                e.weight = TURN_COST;
             }
+            adj_list[p].push_back(e);
         }
     }
 
     return adj_list;
+}
+bool Maze::in_visited(Position pos) {
+    for (Position checked : visited) {
+        if (checked.x == pos.x && checked.y == pos.y) {
+            return true;
+        }
+    }
+    return false;
 }

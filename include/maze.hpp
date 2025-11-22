@@ -10,7 +10,7 @@
 constexpr int MAZE_WIDTH = 16;
 constexpr int MAZE_HEIGHT = 16;
 
-struct Edge{
+struct Edge {
     Position target;
     int weight;
 };
@@ -19,6 +19,7 @@ class Maze {
    private:
     int m_wall_storage[MAZE_HEIGHT][MAZE_WIDTH] = {};
     int m_distances[MAZE_HEIGHT][MAZE_WIDTH] = {};
+
    public:
     std::vector<Position> targets;
     std::set<Position> visited = {};
@@ -39,7 +40,10 @@ class Maze {
     bool exists_wall(Position pos, Direction dir);
     bool is_dead_end(Position pos);
     bool can_move_diag(Position pos, DiagDirection dir);
+    void finalize_discovery();
     std::vector<Position> valid_diag_neighbors(Position mouse_pos);
     std::vector<std::vector<Position>> find_diagonal_paths(int min_length = 2);
     std::map<Position, std::vector<Edge>> get_adj_list();
+    bool in_visited(Position pos);  // TODO: I know that this can be than using
+                                    // cpp functionality but I dont trust it
 };
