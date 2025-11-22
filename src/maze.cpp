@@ -144,15 +144,18 @@ std::vector<std::vector<Position>> Maze::find_diagonal_paths(int min_length) {
 std::map<Position, std::vector<Edge>> Maze::get_adj_list() {
     std::map<Position, std::vector<Edge>> adj_list;
 
-    for (Position p : visited) {
-        // ensure the node appears in the adjacency list even if it has no
-        // neighbors
-        for (Position neighbor : valid_neighbors(p)) {
-            Edge e = {neighbor, MOVE_COST};
-            if (turns.find(p) != turns.end()) {
-                e.weight = TURN_COST;
+    for (int x = 0; x < MAZE_WIDTH; x++) {
+        for (int y = 0; y < MAZE_HEIGHT; y++) {
+            Position p = Position(x, y);
+            // ensure the node appears in the adjacency list even if it has no
+            // neighbors
+            for (Position neighbor : valid_neighbors(p)) {
+                Edge e = {neighbor, MOVE_COST};
+                if (turns.find(p) != turns.end()) {
+                    e.weight = TURN_COST;
+                }
+                adj_list[p].push_back(e);
             }
-            adj_list[p].push_back(e);
         }
     }
     for (std::vector<Position> diagonal : find_diagonal_paths()) {
