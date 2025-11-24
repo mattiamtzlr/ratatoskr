@@ -56,9 +56,9 @@ void Ratatoskr::calibrateEncoders() {
  */
 void Ratatoskr::turn(int angle) {
     float threshold = .5f;
-    float Kp = 0.4;          // Proportional gain
-    int MIN_PWM = 185;      
-    int MAX_PWM = 200;
+    float Kp = 0.4;  // Proportional gain
+    const int MIN_PWM = 185;
+    const int MAX_PWM = 200;
 
     unsigned long t_last = micros();
     unsigned long t_now = t_last;
@@ -75,12 +75,11 @@ void Ratatoskr::turn(int angle) {
         // Proportional control
         int pwm = (int)(Kp * error);
 
-        if (pwm > 0) { // Turning CCW
-            pwm = constrain(pwm, MIN_PWM, MAX_PWM);
+        pwm = constrain(abs(pwm), MIN_PWM, MAX_PWM);
+        if (pwm > 0) {  // Turning CCW
             m_motor_left.spin_ccw(pwm);
             m_motor_right.spin_ccw(pwm);
-        } else { // Turning CW
-            pwm = constrain(abs(pwm), MIN_PWM, MAX_PWM);
+        } else {  // Turning CW
             m_motor_left.spin_cw(pwm);
             m_motor_right.spin_cw(pwm);
         }
