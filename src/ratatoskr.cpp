@@ -3,6 +3,7 @@
 #include <string>
 
 #include "pid.hpp"
+#include "sys/_intsup.h"
 
 Ratatoskr::Ratatoskr(GearMotor &motor_left, GearMotor &motor_right,
                      ToF &tof_left, ToF &tof_front_left, ToF &tof_front_right,
@@ -50,20 +51,21 @@ void Ratatoskr::calibrateEncoders() {
     }
 }
 
+constexpr int MIN_TURN_PWM = 175;
+constexpr int MAX_TURN_PWM = 185;
+constexpr int TURN_TIME_LIMIT = 3000;
+
 //===============================[ CONTROL ]====================================
 /**
  * turn @angle degrees in counterclockwise direction
  */
 void Ratatoskr::turn(int angle) {
-    float threshold = 0.1f;
+    float threshold = 0.2f;
 
-    const int MIN_PWM = 175;
-    const int MAX_PWM = 210;
-    const int BASE_PWM = (MIN_PWM + MAX_PWM) / 2;
-
-    PID pid_turn(15.0f, 0.0f, 0.0f);
+    PID pid_turn(0.3f, 0.0f, 0.001f);
 
     unsigned long t_last = micros();
+    unsigned long t_start = millis();
     unsigned long t_now = t_last;
 
     float current_angle = m_gyro.getAngle(t_now, t_last);
@@ -71,20 +73,20 @@ void Ratatoskr::turn(int angle) {
 
     float error = angle;
 
-    while (abs(error) > threshold) {
+    /* turn until time limit reached or angle reached */
+    while ((millis() - t_start) < TURN_TIME_LIMIT && abs(error) > threshold) {
         error = target - current_angle;
-        Serial.println(error);
         t_now = micros();
 
-        // Proportional control
+        /* proportional control */
         float t_diff = ((float)(t_now - t_last)) / 10000.0f;
         int angle_correction = pid_turn.update(t_diff, error);
-        int pwm = min(MIN_PWM + abs(angle_correction), MAX_PWM);
+        int pwm = min(MIN_TURN_PWM + abs(angle_correction), MAX_TURN_PWM);
 
-        if (angle_correction > 0) {  // Turning CCW
+        if (angle_correction > 0) { /* turning CCW */
             m_motor_left.spin_ccw(pwm);
             m_motor_right.spin_ccw(pwm);
-        } else {  // Turning CW
+        } else { /* turning CW */
             m_motor_left.spin_cw(pwm);
             m_motor_right.spin_cw(pwm);
         }
@@ -216,6 +218,4 @@ void Ratatoskr::update_visuals(Maze &maze) {}
 bool Ratatoskr::wasReset() { return false; }
 void Ratatoskr::ackReset() {}
 
-void Ratatoskr::log(std::string msg) {
-    ESPLogger::log(msg);
-}
+void Ratatoskr::log(std::string msg) { ESPLogger::log(msg); }
