@@ -60,7 +60,7 @@ void Ratatoskr::turn(int angle) {
     const int MIN_PWM = 185;
     const int MAX_PWM = 200;
 
-    PID pid_turn(0.1, 0.4, .0, .0, 0, 0);
+    PID pid_turn(0.4, .0, .0);
 
     unsigned long t_last = micros();
     unsigned long t_now = t_last;
@@ -75,8 +75,8 @@ void Ratatoskr::turn(int angle) {
         error = target - current_angle;
 
         // Proportional control
-        pid_turn.TIME_STEP = (t_now - t_last) / 100.0;
-        int pwm = pid_turn.update(error);
+        float t_diff = (t_now - t_last) / 100.0;
+        int pwm = pid_turn.update(t_diff, error);
         pwm = constrain(abs(pwm), MIN_PWM, MAX_PWM);
 
         if (pwm > 0) {  // Turning CCW
@@ -106,7 +106,7 @@ bool Ratatoskr::too_close_front(uint16_t fl, uint16_t fr) {
  */
 void Ratatoskr::moveForward(int distance) {
     long target_counts = (long)(distance * ENCODER_COUNTS_PER_MM);
-    int base_pwm = 200;
+    const int BASE_PWM = 200;
 
     m_motor_left.reset_encoder_count();
     m_motor_right.reset_encoder_count();
@@ -119,18 +119,17 @@ void Ratatoskr::moveForward(int distance) {
     uint16_t left_tof = 0;
     uint16_t right_tof = 0;
 
-    float pwm_left = base_pwm;
-    float pwm_right = base_pwm;
+    float pwm_left = BASE_PWM;
+    float pwm_right = BASE_PWM;
 
     const int loop_delay = 20;
-    double time_step = 0.2;
 
     int t_now = millis();
     int t_prev = t_now;
 
     // TODO: This is also not very clean like this
-    PID pid_encoders(time_step, 0.75, 0.8, 0.1, 50, 240);
-    PID pid_distance(time_step, 0.25, 0.1, 0.15, 50, 240);
+    PID pid_encoders(0.75, 0.8, 0.1);
+    PID pid_distance(0.25, 0.1, 0.15);
 
     while (!too_close_front(m_tof_front_left.get_reading(),
                             m_tof_front_right.get_reading()) &&
@@ -151,18 +150,16 @@ void Ratatoskr::moveForward(int distance) {
         float encoder_error = 0 - (left_encoder_diff - right_encoder_diff);
 
         t_now = millis();
-        double t_diff = t_now - t_prev;
+        float t_diff = (t_now - t_prev) / 100.0;
         t_prev = t_now;
 
         // Update PID controllers
-        pid_encoders.TIME_STEP = t_diff / 100.0;
-        pid_distance.TIME_STEP = t_diff / 100.0;
-        float encoder_correction = pid_encoders.update(encoder_error);
-        float tof_correction = pid_distance.update(tof_error);
+        float encoder_correction = pid_encoders.update(t_diff, encoder_error);
+        float tof_correction = pid_distance.update(t_diff, tof_error);
 
         // Calculate new PWM
-        pwm_left = base_pwm + .7 * tof_correction + .3 * encoder_correction;
-        pwm_right = base_pwm - .7 * tof_correction - .3 * encoder_correction;
+        pwm_left = BASE_PWM + .7 * tof_correction + .3 * encoder_correction;
+        pwm_right = BASE_PWM - .7 * tof_correction - .3 * encoder_correction;
 
         pwm_left = constrain(pwm_left, 70, 240);
         pwm_right = constrain(pwm_right, 70, 240);
