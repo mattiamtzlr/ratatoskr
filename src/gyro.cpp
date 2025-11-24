@@ -216,11 +216,16 @@ void MPU6050::calibrateGyro() {
 
 
 float MPU6050::getAngle(unsigned long t_now, unsigned long t_last) {
-    Vector3D velocities = readScaledGyro();
     float dt = (float)(t_now - t_last) * 1e-6f;
-    float change = velocities.z * dt;  // degrees
+    Vector3D accData = readScaledAccel();
+    float force_mag = abs(accData.x) + abs(accData.y) + abs(accData.z);
+    float change = readScaledGyro().z * dt;
     if (fabsf(change) > 0.1f && dt > 0.0f) {
-        m_angle += change;
+        m_angle += change;  // degrees
+        if (force_mag > 0.03 && force_mag < 0.13) {
+            float spin_acc = atan2f(accData.x, accData.y) * 180 / M_PI;
+            m_angle = 0.7 * m_angle + 0.3 * spin_acc;//spin_acc;
+        }
     }
     return m_angle;
 }
