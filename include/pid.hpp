@@ -1,15 +1,10 @@
 // PID Controller Class
 class PID {
    public:
-    PID(float time_step, float k_p, float k_i, float k_d, float lower,
-        float upper);
+    PID(float k_p, float k_i, float k_d);
 
-    float update(float error);
+    float update(float time_step, float error);
     void reset();
-    // Bounds
-    const float UPPER_BOUND;
-    const float LOWER_BOUND;
-    float TIME_STEP;
 
    private:
     // Coefficients
@@ -20,7 +15,4 @@ class PID {
     // State Variables
     float previous_error;
     float integral;
-
-    // Output
-    float corrected_signal;
 };
