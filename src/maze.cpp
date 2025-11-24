@@ -1,6 +1,7 @@
 #include "maze.hpp"
 
 #include <algorithm>
+#include <cmath>
 #include <iostream>
 #include <map>
 
@@ -180,4 +181,15 @@ bool Maze::in_visited(Position pos) {
         }
     }
     return false;
+}
+float Maze::distance_to_target_L2(Position pos) {
+    float min_distance = .0;
+    for (Position target : targets) {
+        float distance = std::sqrt(std::pow((pos.x - target.x), 2) +
+                                   std::pow((pos.y - target.y), 2));
+        if (min_distance < distance) {
+            min_distance = distance;
+        }
+    }
+    return min_distance;
 }

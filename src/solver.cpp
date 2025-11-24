@@ -67,11 +67,15 @@ void Solver::solve() {
         m_mouse.update_visuals(m_maze);
         Direction best_dir = NORTH;
         int best_val = UBOUND_DIST;
+        float best_dist = 0;
         for (Position neighbor :
              m_maze.valid_neighbors(m_mouse.getPosition())) {
-            if (m_maze.get_distance(neighbor) < best_val) {
+            if (m_maze.get_distance(neighbor) < best_val ||
+                (m_maze.get_distance(neighbor) == best_val &&
+                 m_maze.distance_to_target_L2(neighbor) < best_dist)) {
                 best_val = m_maze.get_distance(neighbor);
                 best_dir = dir_for_neighbor(neighbor, m_mouse.getPosition());
+                best_dist = m_maze.distance_to_target_L2(neighbor);
             }
         }
         // Identify turns to use them later for finding best path in the
