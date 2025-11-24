@@ -57,11 +57,11 @@ void Ratatoskr::calibrateEncoders() {
 void Ratatoskr::turn(int angle) {
     float threshold = 0.1f;
 
-    const int MIN_PWM = 170;
-    const int MAX_PWM = 220;
+    const int MIN_PWM = 175;
+    const int MAX_PWM = 210;
     const int BASE_PWM = (MIN_PWM + MAX_PWM) / 2;
 
-    PID pid_turn(10.0f, 0.0f, 0.0f);
+    PID pid_turn(15.0f, 0.0f, 0.0f);
 
     unsigned long t_last = micros();
     unsigned long t_now = t_last;
@@ -76,14 +76,12 @@ void Ratatoskr::turn(int angle) {
         Serial.println(error);
         t_now = micros();
 
-
         // Proportional control
         float t_diff = ((float)(t_now - t_last)) / 10000.0f;
-        int pwm_diff = pid_turn.update(t_diff, error);
-        //Loggable::log("pwm_diff: " + std::to_string(pwm_diff));
-        int pwm = constrain(BASE_PWM + abs(pwm_diff), MIN_PWM, MAX_PWM);
+        int angle_correction = pid_turn.update(t_diff, error);
+        int pwm = min(MIN_PWM + abs(angle_correction), MAX_PWM);
 
-        if (pwm_diff > 0) {  // Turning CCW
+        if (angle_correction > 0) {  // Turning CCW
             m_motor_left.spin_ccw(pwm);
             m_motor_right.spin_ccw(pwm);
         } else {  // Turning CW
@@ -92,7 +90,6 @@ void Ratatoskr::turn(int angle) {
         }
 
         current_angle = m_gyro.getAngle(t_now, t_last);
-        delay(5);
         t_last = t_now;
     }
 
