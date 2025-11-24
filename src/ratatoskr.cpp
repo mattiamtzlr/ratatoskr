@@ -60,6 +60,8 @@ void Ratatoskr::turn(int angle) {
     const int MIN_PWM = 185;
     const int MAX_PWM = 200;
 
+    PID pid_turn(0.1, 0.4, .0, .0, 0, 0);
+
     unsigned long t_last = micros();
     unsigned long t_now = t_last;
 
@@ -73,9 +75,10 @@ void Ratatoskr::turn(int angle) {
         error = target - current_angle;
 
         // Proportional control
-        int pwm = (int)(Kp * error);
-
+        pid_turn.TIME_STEP = (t_now - t_last) / 100.0;
+        int pwm = pid_turn.update(error);
         pwm = constrain(abs(pwm), MIN_PWM, MAX_PWM);
+
         if (pwm > 0) {  // Turning CCW
             m_motor_left.spin_ccw(pwm);
             m_motor_right.spin_ccw(pwm);
