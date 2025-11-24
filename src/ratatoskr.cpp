@@ -202,4 +202,6 @@ void Ratatoskr::update_visuals(Maze &maze) {}
 bool Ratatoskr::wasReset() { return false; }
 void Ratatoskr::ackReset() {}
 
-void Ratatoskr::log(std::string msg) { Loggable::log(msg); }
+void Ratatoskr::log(std::string msg) {
+    ESPLogger::log(msg);
+}

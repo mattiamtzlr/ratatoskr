@@ -1,30 +1,26 @@
-#include "loggable.hpp"
+#include "esp_logger.hpp"
 
 #include <Arduino.h>
 
-void Loggable::increment_count() {
-    int next_count = get_count() + 1;
-    nvsDB.putPair("0", std::to_string(next_count).c_str());
-}
-
-int Loggable::get_count() {
+int ESPLogger::get_count() {
     char value[10];
     size_t maxSize = sizeof(value);
     nvsDB.getValueOf("0", value, &maxSize);
     return atoi(value);
 }
 
-void Loggable::log(std::string msg) {
+void ESPLogger::log(std::string msg) {
     nvsDB.putPair(std::to_string(get_count()).c_str(), msg.c_str());
-    increment_count();
+    int next_count = get_count() + 1;
+    nvsDB.putPair("0", std::to_string(next_count).c_str());
 }
 
-void Loggable::clear_logs() {
+void ESPLogger::clear_logs() {
     nvsDB.eraseAll();
     nvsDB.putPair("0", "1");
 }
 
-void Loggable::export_logs(void) {
+void ESPLogger::export_logs(void) {
     int index = 0;
     int num_entries = get_count();
 
