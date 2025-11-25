@@ -159,6 +159,7 @@ std::map<Position, std::vector<Edge>> Maze::get_adj_list() {
             }
         }
     }
+    /*
     for (std::vector<Position> diagonal : find_diagonal_paths()) {
         for (int i = 0; i < diagonal.size() - 1; i++) {
             Position pos_1 = diagonal[i];
@@ -171,6 +172,7 @@ std::map<Position, std::vector<Edge>> Maze::get_adj_list() {
             adj_list[pos_2].push_back(edge_2_to_1);
         }
     }
+    */
 
     return adj_list;
 }
