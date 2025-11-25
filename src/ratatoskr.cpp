@@ -1,4 +1,5 @@
 #include "ratatoskr.hpp"
+
 #include "pid.hpp"
 
 Ratatoskr::Ratatoskr(GearMotor &motor_left, GearMotor &motor_right,
@@ -48,7 +49,7 @@ void Ratatoskr::calibrateEncoders() {
 }
 
 constexpr int MIN_TURN_PWM = 175;
-constexpr int MAX_TURN_PWM = 185;
+constexpr int MAX_TURN_PWM = 200;
 constexpr int TURN_TIME_LIMIT = 3000;
 
 //===============================[ CONTROL ]====================================
@@ -58,11 +59,11 @@ constexpr int TURN_TIME_LIMIT = 3000;
 void Ratatoskr::turn(int angle) {
     float threshold = 0.2f;
 
-    PID pid_turn(0.3f, 0.0f, 0.001f);
+    PID pid_turn(0.5f, 0.0f, 0.0f);
 
-    unsigned long t_last = micros();
     unsigned long t_start = millis();
-    unsigned long t_now = t_last;
+    unsigned long t_now = micros();
+    unsigned long t_last = t_now;
 
     float current_angle = m_gyro.getAngle(t_now, t_last);
     float target = current_angle + angle;
@@ -70,14 +71,14 @@ void Ratatoskr::turn(int angle) {
     float error = angle;
 
     /* turn until time limit reached or angle reached */
-    while ((millis() - t_start) < TURN_TIME_LIMIT && abs(error) > threshold) {
+    while ((millis() - t_start) < TURN_TIME_LIMIT) {
         error = target - current_angle;
         t_now = micros();
 
         /* proportional control */
-        float t_diff = ((float)(t_now - t_last)) / 10000.0f;
+        float t_diff = ((float)(t_now - t_last)) / 1e6f;
         int angle_correction = pid_turn.update(t_diff, error);
-        int pwm = min(MIN_TURN_PWM + abs(angle_correction), MAX_TURN_PWM);
+        int pwm = constrain(abs(angle_correction), MIN_TURN_PWM, MAX_TURN_PWM);
 
         if (angle_correction > 0) { /* turning CCW */
             m_motor_left.spin_ccw(pwm);
