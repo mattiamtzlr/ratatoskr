@@ -16,6 +16,16 @@ void Mouse::turnRight() {
     dir = rotate_right(dir);
 }
 
+void Mouse::turnRight45() {
+    turn(-45);
+    dir = rotate_right45(dir);
+}
+
+void Mouse::turnLeft45() {
+    turn(45);
+    dir = rotate_left45(dir);
+}
+
 void Mouse::moveForward(int distance) {
     pos.y += distance * ((dir == NORTH) - (dir == SOUTH));
     pos.x += distance * ((dir == EAST) - (dir == WEST));

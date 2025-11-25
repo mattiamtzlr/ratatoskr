@@ -13,6 +13,8 @@ class Mouse {
    public:
     void turnLeft();
     void turnRight();
+    void turnRight45();
+    void turnLeft45();
 
     void setPosition(int x, int y);
     Position getPosition();

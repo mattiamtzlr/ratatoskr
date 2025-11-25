@@ -3,7 +3,9 @@
 #include <cctype>
 
 Direction rotate_right(Direction dir) { return (Direction)((dir + 2) % 8); }
+Direction rotate_right45(Direction dir) {return (Direction)((dir + 1) % 8); }
 Direction rotate_half(Direction dir) { return (Direction)((dir + 4) % 8); }
+Direction rotate_left45(Direction dir) {return (Direction)((dir + 7) % 8); }
 Direction rotate_left(Direction dir) { return (Direction)((dir + 6) % 8); }
 
 int dx(Direction d) { return d == EAST ? 1 : (d == WEST ? -1 : 0); }

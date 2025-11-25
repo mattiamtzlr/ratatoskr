@@ -54,8 +54,9 @@ typedef std::priority_queue<std::pair<int, Position>,
     p_queue;
 
 Direction rotate_right(Direction dir);
-
+Direction rotate_right45(Direction dir);
 Direction rotate_left(Direction dir);
+Direction rotate_left45(Direction dir);
 
 Direction rotate_half(Direction dir);
 Direction dir_for_neighbor(Position pos_n, Position pos_m);
