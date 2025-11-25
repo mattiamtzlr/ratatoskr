@@ -18,7 +18,7 @@ void Solver::face(Direction target_dir) {
     int i;
     if (diff >= 5) {
         for (i = 0; i < 7 - diff; i += 2) m_mouse.turnLeft();
-        if (i < diff) m_mouse.turnLeft45();
+        if (i < 8 - diff) m_mouse.turnLeft45();
     } else {
         for (i = 0; i < diff - 1; i += 2) m_mouse.turnRight();
         if (i < diff) m_mouse.turnRight45();
