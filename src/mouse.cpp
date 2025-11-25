@@ -21,6 +21,11 @@ void Mouse::moveForward(int distance) {
     pos.x += distance * ((dir == EAST) - (dir == WEST));
 }
 
+void Mouse::moveForwardHalf(int num_half_steps) {
+    pos.y += num_half_steps * 0.5 * ((dir == NORTH) - (dir == SOUTH));
+    pos.x += num_half_steps * 0.5 * ((dir == EAST) - (dir == WEST));
+}
+
 void Mouse::setPosition(int x, int y) {
     pos.x = x;
     pos.y = y;
