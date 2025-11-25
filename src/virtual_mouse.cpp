@@ -11,6 +11,13 @@ void VirtualMouse::moveForward(int distance) {
     API::moveForward(distance);
     API::setColor(getPosition().x, getPosition().y, 'G');
 }
+
+void VirtualMouse::moveForwardHalf(int num_half_steps) {
+    Mouse::moveForwardHalf(num_half_steps);
+    API::moveForwardHalf(num_half_steps);
+    API::setColor(getPosition().x, getPosition().y, 'G');
+}
+
 void VirtualMouse::turn(int angle) {
     if (angle == 90)
         API::turnLeft();
