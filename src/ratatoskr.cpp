@@ -1,9 +1,5 @@
 #include "ratatoskr.hpp"
-
-#include <string>
-
 #include "pid.hpp"
-#include "sys/_intsup.h"
 
 Ratatoskr::Ratatoskr(GearMotor &motor_left, GearMotor &motor_right,
                      ToF &tof_left, ToF &tof_front_left, ToF &tof_front_right,
