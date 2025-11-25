@@ -152,10 +152,9 @@ std::map<Position, std::vector<Edge>> Maze::get_adj_list() {
             // neighbors
             for (Position neighbor : valid_neighbors(p)) {
                 Edge e = {neighbor, MOVE_COST};
-                if (turns.find(p) != turns.end()) {
-                    e.weight = TURN_COST;
-                }
+                Edge e_back = {p, MOVE_COST};
                 adj_list[p].push_back(e);
+                adj_list[neighbor].push_back(e_back);
             }
         }
     }
