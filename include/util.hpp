@@ -5,13 +5,13 @@
 
 enum Direction {
     NORTH = 0,
-    EAST = 1,
-    SOUTH = 2,
-    WEST = 3,
-    NORTH_EAST = 4,
-    SOUTH_EAST = 5,
-    NORTH_WEST = 6,
-    SOUTH_WEST = 7,
+    NORTH_EAST = 1,
+    EAST = 2,
+    SOUTH_EAST = 3,
+    SOUTH = 4,
+    SOUTH_WEST = 5,
+    WEST = 6,
+    NORTH_WEST = 7,
 };
 
 static std::map<Direction, char> dirToCardinalChar = {

@@ -14,11 +14,11 @@ Solver::Solver(Mouse &mouse, Maze &maze) : m_mouse(mouse), m_maze(maze) {
 }
 
 void Solver::face(Direction target_dir) {
-    int diff = (target_dir - m_mouse.getDirection() + 4) % 4;
-    if (diff == 3) {
+    int diff = (target_dir - m_mouse.getDirection() + 8) % 8;
+    if (diff == 6) {
         m_mouse.turnLeft();
     } else {
-        for (int i = 0; i < diff; i++) m_mouse.turnRight();
+        for (int i = 0; i < diff; i += 2) m_mouse.turnRight();
     }
 }
 
