@@ -10,10 +10,12 @@
 constexpr int MAZE_WIDTH = 16;
 constexpr int MAZE_HEIGHT = 16;
 
+
 struct Edge {
     Position target;
-    int weight;
+    unsigned int weight;
 };
+
 
 class Maze {
    private:

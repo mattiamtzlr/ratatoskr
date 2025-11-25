@@ -1,5 +1,7 @@
 #pragma once
 #include <map>
+#include <queue>
+#include <vector>
 
 enum Direction {
     NORTH = 0,
@@ -30,6 +32,7 @@ struct Position {
     int x;
     int y;
     Position(size_t x, size_t y) : x(x), y(y) {}
+    Position() : x(0), y(0) {}
 };
 inline bool operator<(const Position& lhs, const Position& rhs) {
     if (lhs.x != rhs.x) return lhs.x < rhs.x;
@@ -39,6 +42,16 @@ inline bool operator<(const Position& lhs, const Position& rhs) {
 inline bool operator==(const Position& lhs, const Position& rhs) {
     return lhs.x == rhs.x && lhs.y == rhs.y;
 }
+struct PQCmp {
+    bool operator()(const std::pair<int, Position>& a,
+                    const std::pair<int, Position>& b) const {
+        return a.first > b.first;
+    }
+};
+
+typedef std::priority_queue<std::pair<int, Position>,
+                            std::vector<std::pair<int, Position>>, PQCmp>
+    p_queue;
 
 Direction rotate_right(Direction dir);
 

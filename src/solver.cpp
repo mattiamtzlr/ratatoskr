@@ -94,32 +94,16 @@ void Solver::solve() {
 std::vector<Position> Solver::dijkstra(Position start) {
     std::map<Position, std::vector<Edge>> adj_list = m_maze.get_adj_list();
 
+    // prio queue of (distance, position) with comparator on distance only
+    p_queue pq;
+
     // distance and predecessor maps
     std::map<Position, int> dist;
     std::map<Position, Position> prev;
-    const int INF = UBOUND_DIST;
 
     // initialize distances for all vertices (keys) and for all edge targets
-    for (const auto &kv : adj_list) {
-        dist[kv.first] = INF;
-        for (const Edge &e : kv.second) {
-            if (dist.find(e.target) == dist.end()) {
-                dist[e.target] = INF;
-            }
-        }
-    }
-
-    // min-heap of (distance, position) with comparator on distance only
-    struct PQCmp {
-        bool operator()(const std::pair<int, Position> &a,
-                        const std::pair<int, Position> &b) const {
-            return a.first > b.first;
-        }
-    };
-
-    std::priority_queue<std::pair<int, Position>,
-                        std::vector<std::pair<int, Position>>, PQCmp>
-        pq;
+    for (std::pair<Position, std::vector<Edge>> kv : adj_list)
+        dist[kv.first] = UBOUND_DIST;
 
     dist[start] = 0;
     pq.push(std::make_pair(0, start));
@@ -128,16 +112,10 @@ std::vector<Position> Solver::dijkstra(Position start) {
     bool found = false;
 
     while (!pq.empty()) {
-        auto top = pq.top();
+        const std::pair<int, Position> top = pq.top();
         int d = top.first;
         Position u = top.second;
-        std::cerr << "X: " << u.x << " Y: " << u.y << std::endl;
         pq.pop();
-
-        // stale entry
-        if (d > dist[u]) {
-            continue;
-        }
 
         if (m_maze.at_target(u)) {
             found_target = u;
@@ -145,13 +123,10 @@ std::vector<Position> Solver::dijkstra(Position start) {
             break;
         }
 
-        auto it_adj = adj_list.find(u);
-        if (it_adj == adj_list.end()) {
-            continue;
-        }
+        std::vector<Edge> edges = adj_list[u];
 
-        for (const Edge &e : it_adj->second) {
-            int alt = dist[u] + e.weight;
+        for (Edge e : edges) {
+            int alt = dist[u] + e.weight /* + Vertex weight*/;
             if (alt < dist[e.target]) {
                 dist[e.target] = alt;
                 // update predecessor without requiring default-constructible
@@ -164,26 +139,19 @@ std::vector<Position> Solver::dijkstra(Position start) {
     }
 
     std::vector<Position> path;
-    if (!found) {
-        std::cerr << "no path found" << std::endl;
-        return path;  // no reachable target
-    }
 
     // reconstruct path from start -> found_target
     Position cur = found_target;
     while (!(cur.x == start.x && cur.y == start.y)) {
         path.push_back(cur);
-        auto it = prev.find(cur);
-        if (it == prev.end()) {
-            // predecessor missing, abort and return empty
-            return std::vector<Position>();
-        }
-        cur = it->second;
+        cur = prev[cur];
     }
+
     path.push_back(start);
     std::reverse(path.begin(), path.end());
     return path;
 }
+
 std::vector<Position> Solver::bfs_shortest_path(Position start) {
     bfs();
     std::vector<Position> route;
@@ -208,7 +176,7 @@ std::vector<Position> Solver::bfs_shortest_path(Position start) {
 }
 
 void Solver::finalize_discovery() {
-    // Assume all unchecked wall positions to have walls.
+    /* Assume all unchecked wall positions to have walls. */
     for (int x = 0; x < MAZE_WIDTH; ++x) {
         for (int y = 0; y < MAZE_HEIGHT; ++y) {
             Position pos = Position(x, y);
@@ -222,6 +190,7 @@ void Solver::finalize_discovery() {
     }
     m_mouse.update_visuals(m_maze);
 }
+
 void Solver::run(std::vector<Position> solved) {
     for (Position next_position : solved) {
         if (next_position.x == m_mouse.getPosition().x &&
