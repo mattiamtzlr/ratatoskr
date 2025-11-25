@@ -35,6 +35,11 @@ inline bool operator<(const Position& lhs, const Position& rhs) {
     if (lhs.x != rhs.x) return lhs.x < rhs.x;
     return lhs.y < rhs.y;
 }
+
+inline bool operator==(const Position& lhs, const Position& rhs) {
+    return lhs.x == rhs.x && lhs.y == rhs.y;
+}
+
 Direction rotate_right(Direction dir);
 
 Direction rotate_left(Direction dir);
