@@ -15,10 +15,13 @@ Solver::Solver(Mouse &mouse, Maze &maze) : m_mouse(mouse), m_maze(maze) {
 
 void Solver::face(Direction target_dir) {
     int diff = (target_dir - m_mouse.getDirection() + 8) % 8;
+    int i;
     if (diff >= 5) {
-        for(int i = 0; i < 8 - diff; i++) m_mouse.turnLeft45();
+        for (i = 0; i < 7 - diff; i += 2) m_mouse.turnLeft();
+        if (i < diff) m_mouse.turnLeft45();
     } else {
-        for (int i = 0; i < diff; i++) m_mouse.turnRight45();
+        for (i = 0; i < diff - 1; i += 2) m_mouse.turnRight();
+        if (i < diff) m_mouse.turnRight45();
     }
 }
 
@@ -197,38 +200,37 @@ void Solver::run(std::vector<Position> solved) {
             next_position.y == m_mouse.getPosition().y)
             continue;
         Position curr_position = m_mouse.getPosition();
-        std::vector<Position> diag_neighbors = m_maze.valid_diag_neighbors(curr_position); 
-        if(std::find(diag_neighbors.begin(), diag_neighbors.end(), next_position) != diag_neighbors.end()){
-            if(next_position.x > curr_position.x &&
-               next_position.y > curr_position.y){
+        std::vector<Position> diag_neighbors =
+            m_maze.valid_diag_neighbors(curr_position);
+        if (std::find(diag_neighbors.begin(), diag_neighbors.end(),
+                      next_position) != diag_neighbors.end()) {
+            if (next_position.x > curr_position.x &&
+                next_position.y > curr_position.y) {
                 std::cerr << "Wants to turn diag NE" << std::endl;
-                if(m_maze.exists_wall(curr_position, NORTH)){
-                    std::cerr << "Wall to the NORTH, going EAST first" << std::endl;
+                if (m_maze.exists_wall(curr_position, NORTH)) {
+                    std::cerr << "Wall to the NORTH, going EAST first"
+                              << std::endl;
                     face(EAST);
                     m_mouse.moveForwardHalf();
                     face(NORTH_EAST);
-                }
-                else{
-                    std::cerr << "No wall to the NORTH, going NORTH first" << std::endl;
+                } else {
+                    std::cerr << "No wall to the NORTH, going NORTH first"
+                              << std::endl;
                     face(NORTH);
                     m_mouse.moveForwardHalf();
                     face(NORTH_EAST);
                 }
-            }
-            else if(next_position.x > m_mouse.getPosition().x &&
-                    next_position.y < m_mouse.getPosition().y){
+            } else if (next_position.x > m_mouse.getPosition().x &&
+                       next_position.y < m_mouse.getPosition().y) {
                 face(SOUTH_EAST);
-            }
-            else if(next_position.x < m_mouse.getPosition().x &&
-                    next_position.y < m_mouse.getPosition().y){
+            } else if (next_position.x < m_mouse.getPosition().x &&
+                       next_position.y < m_mouse.getPosition().y) {
                 face(SOUTH_WEST);
-            }
-            else if(next_position.x < m_mouse.getPosition().x &&
-                    next_position.y > m_mouse.getPosition().y){
+            } else if (next_position.x < m_mouse.getPosition().x &&
+                       next_position.y > m_mouse.getPosition().y) {
                 face(NORTH_WEST);
             }
-        }
-        else{
+        } else {
             face(dir_for_neighbor(next_position, m_mouse.getPosition()));
             m_mouse.moveForward();
         }
