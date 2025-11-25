@@ -11,11 +11,22 @@ void VirtualMouse::moveForward(int distance) {
     API::moveForward(distance);
     API::setColor(getPosition().x, getPosition().y, 'G');
 }
+
+void VirtualMouse::moveForwardHalf(int num_half_steps) {
+    Mouse::moveForwardHalf(num_half_steps);
+    API::moveForwardHalf(num_half_steps);
+    API::setColor(getPosition().x, getPosition().y, 'G');
+}
+
 void VirtualMouse::turn(int angle) {
     if (angle == 90)
         API::turnLeft();
     else if (angle == -90)
         API::turnRight();
+    else if (angle == 45)
+        API::turnLeft45();
+    else if (angle == -45)
+        API::turnRight45();
     // TODO: Some sort of logging indicating that turning non-90 is not possible
     // in MMS
     // NOTE: YES IT IS THERE IS API::TURN45DEGREES
@@ -48,15 +59,22 @@ bool VirtualMouse::wallLeft() {
 void VirtualMouse::log(std::string msg) { std::cerr << msg << std::endl; }
 
 void VirtualMouse::update_visuals(Maze& maze) {
-    for (int x = 0; x < maze.maze_width(); ++x)
-        for (int y = 0; y < maze.maze_height(); ++y)
+    for (int x = 0; x < maze.maze_width(); ++x) {
+        for (int y = 0; y < maze.maze_height(); ++y) {
+            for (Direction d : {NORTH, EAST, SOUTH, WEST}) {
+                if (maze.exists_wall(Position(x, y), d)) {
+                    API::setWall(x, y, dirToCardinalChar[d]);
+                }
+            }
             if (maze.get_distance(Position(x, y)) <
-                maze.maze_height() * maze.maze_width() + 1)
+                maze.maze_height() * maze.maze_width() + 1) {
                 API::setText(x, y,
                              std::to_string(maze.get_distance(Position(x, y))));
-            else
+            } else {
                 API::setText(x, y, "");
-
+            }
+        }
+    }
     std::vector<Position> route;
     std::set<Position> seen;
 

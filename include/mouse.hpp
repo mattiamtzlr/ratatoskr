@@ -13,6 +13,8 @@ class Mouse {
    public:
     void turnLeft();
     void turnRight();
+    void turnRight45();
+    void turnLeft45();
 
     void setPosition(int x, int y);
     Position getPosition();
@@ -23,6 +25,7 @@ class Mouse {
 
     // Call this method inside the overriding method in the derived class!
     virtual void moveForward(int distance = 1);
+    virtual void moveForwardHalf(int num_half_steps = 1);
 
     virtual void turn(int angle) = 0;
 

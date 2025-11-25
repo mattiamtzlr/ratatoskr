@@ -1,5 +1,7 @@
 #pragma once
 
+#include <vector>
+
 #include "maze.hpp"
 #include "mouse.hpp"
 #include "util.hpp"
@@ -20,5 +22,9 @@ class Solver {
 
    public:
     void solve();
+    void finalize_discovery();
+    void run(std::vector<Position> solved);
+    std::vector<Position> bfs_shortest_path(Position start);
+    std::vector<Position> dijkstra(Position start);
     Solver(Mouse &mouse, Maze &maze);
 };

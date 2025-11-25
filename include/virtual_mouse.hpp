@@ -3,6 +3,7 @@
 
 class VirtualMouse : public Mouse {
     virtual void moveForward(int distance = 1);
+    virtual void moveForwardHalf(int num_half_steps = 1);
     virtual void turn(int angle);
 
     virtual bool wallFront();

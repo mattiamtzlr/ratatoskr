@@ -1,5 +1,13 @@
 #include "maze.hpp"
 
+#include <algorithm>
+#include <cmath>
+#include <iostream>
+#include <map>
+
+const int MOVE_COST = 1;
+const int TURN_COST = 5;
+
 std::vector<Position> Maze::valid_neighbors(Position mouse_pos) {
     std::vector<Position> neigh;
     for (Direction k : {NORTH, EAST, SOUTH, WEST}) {
@@ -76,4 +84,113 @@ bool Maze::is_dead_end(Position pos) {
         }
     }
     return true;
+}
+
+bool Maze::can_move_diag(Position pos, Direction dir) {
+    Position target_diag = get_diag_neighbor(pos, dir);
+    if (!in_bounds(target_diag)) return false;
+    return !exists_wall(pos, diagDirFirst[dir]) &&
+           !exists_wall(get_neighbor(pos, diagDirFirst[dir]),
+                        diagDirSecond[dir]);
+}
+
+std::vector<Position> Maze::valid_diag_neighbors(Position mouse_pos) {
+    std::vector<Position> neigh;
+    for (Direction k : {NORTH_EAST, SOUTH_EAST, SOUTH_WEST, NORTH_WEST}) {
+        if (can_move_diag(mouse_pos, k)) {
+            neigh.push_back(get_diag_neighbor(mouse_pos, k));
+        }
+    }
+    return neigh;
+}
+
+std::vector<std::vector<Position>> Maze::find_diagonal_paths(int min_length) {
+    std::vector<std::vector<Position>> all_paths;
+
+    bool diag_path_visited[MAZE_WIDTH][MAZE_HEIGHT] = {};
+
+    for (const Position& pos : visited) {
+        if (diag_path_visited[pos.x][pos.y]) {
+            continue;
+        }
+
+        for (Direction d_dir :
+             {NORTH_EAST, SOUTH_EAST, SOUTH_WEST, NORTH_WEST}) {
+            std::vector<Position> current_path;
+            Position current_pos = pos;
+
+            while (in_bounds(current_pos) && visited.count(current_pos) &&
+                   !diag_path_visited[current_pos.x][current_pos.y]) {
+                current_path.push_back(current_pos);
+
+                if (!can_move_diag(current_pos, d_dir)) {
+                    break;
+                }
+
+                current_pos = get_diag_neighbor(current_pos, d_dir);
+            }
+
+            if (current_path.size() >= min_length + 1) {
+                all_paths.push_back(current_path);
+
+                for (const Position& p : current_path) {
+                    diag_path_visited[p.x][p.y] = true;
+                }
+            }
+        }
+    }
+    return all_paths;
+}
+
+std::map<Position, std::vector<Edge>> Maze::get_adj_list() {
+    std::map<Position, std::vector<Edge>> adj_list;
+
+    for (int x = 0; x < MAZE_WIDTH; x++) {
+        for (int y = 0; y < MAZE_HEIGHT; y++) {
+            Position p = Position(x, y);
+            // ensure the node appears in the adjacency list even if it has no
+            // neighbors
+            for (Position neighbor : valid_neighbors(p)) {
+                Edge e = {neighbor, MOVE_COST};
+                Edge e_back = {p, MOVE_COST};
+                adj_list[p].push_back(e);
+                adj_list[neighbor].push_back(e_back);
+            }
+        }
+    }
+    /*
+    for (std::vector<Position> diagonal : find_diagonal_paths()) {
+        for (int i = 0; i < diagonal.size() - 1; i++) {
+            Position pos_1 = diagonal[i];
+            Position pos_2 = diagonal[i + 1];
+            Edge edge_1_to_2 = {pos_2,
+                                MOVE_COST};  // TODO: bit harder to calculate
+                                             // cost of turns for diagonals
+            Edge edge_2_to_1 = {pos_1, MOVE_COST};
+            adj_list[pos_1].push_back(edge_1_to_2);
+            adj_list[pos_2].push_back(edge_2_to_1);
+        }
+    }
+    */
+
+    return adj_list;
+}
+bool Maze::in_visited(Position pos) {
+    for (Position checked : visited) {
+        if (checked.x == pos.x && checked.y == pos.y) {
+            return true;
+        }
+    }
+    return false;
+}
+float Maze::distance_to_target_L2(Position pos) {
+    float min_distance = .0;
+    for (Position target : targets) {
+        float distance = std::sqrt(std::pow((pos.x - target.x), 2) +
+                                   std::pow((pos.y - target.y), 2));
+        if (min_distance < distance) {
+            min_distance = distance;
+        }
+    }
+    return min_distance;
 }

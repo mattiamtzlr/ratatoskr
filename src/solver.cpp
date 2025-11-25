@@ -1,9 +1,12 @@
 #include "solver.hpp"
-#include "esp_logger.hpp"
 
+#include <algorithm>
 #include <deque>
+#include <iostream>
+#include <map>
+#include <queue>
+#include <tuple>
 
-using namespace ESPLogger;
 
 Solver::Solver(Mouse &mouse, Maze &maze) : m_mouse(mouse), m_maze(maze) {
     width = m_maze.maze_width();
@@ -12,11 +15,14 @@ Solver::Solver(Mouse &mouse, Maze &maze) : m_mouse(mouse), m_maze(maze) {
 }
 
 void Solver::face(Direction target_dir) {
-    int diff = (target_dir - m_mouse.getDirection() + 4) % 4;
-    if (diff == 3) {
-        m_mouse.turnLeft();
+    int diff = (target_dir - m_mouse.getDirection() + 8) % 8;
+    int i;
+    if (diff >= 5) {
+        for (i = 0; i < 7 - diff; i += 2) m_mouse.turnLeft();
+        if (i < 8 - diff) m_mouse.turnLeft45();
     } else {
-        for (int i = 0; i < diff; i++) m_mouse.turnRight();
+        for (i = 0; i < diff - 1; i += 2) m_mouse.turnRight();
+        if (i < diff) m_mouse.turnRight45();
     }
 }
 
@@ -65,15 +71,137 @@ void Solver::solve() {
         m_mouse.update_visuals(m_maze);
         Direction best_dir = NORTH;
         int best_val = UBOUND_DIST;
+        float best_dist = 0;
         for (Position neighbor :
              m_maze.valid_neighbors(m_mouse.getPosition())) {
-            if (m_maze.get_distance(neighbor) < best_val) {
+            if (m_maze.get_distance(neighbor) < best_val ||
+                (m_maze.get_distance(neighbor) == best_val &&
+                 m_maze.distance_to_target_L2(neighbor) < best_dist)) {
                 best_val = m_maze.get_distance(neighbor);
                 best_dir = dir_for_neighbor(neighbor, m_mouse.getPosition());
+                best_dist = m_maze.distance_to_target_L2(neighbor);
             }
         }
+        // Identify turns to use them later for finding best path in the
+        // speedrun
+        Direction curr_dir = m_mouse.getDirection();
+        Position pos_before = m_mouse.getPosition();
         face(best_dir);
         m_mouse.moveForward();
         m_maze.visited.insert(m_mouse.getPosition());
+        if (best_dir != curr_dir) {
+            m_maze.turns.insert(pos_before);
+        }
+    }
+}
+
+std::vector<Position> Solver::dijkstra(Position start) {
+    std::map<Position, std::vector<Edge>> adj_list = m_maze.get_adj_list();
+
+    // prio queue of (distance, position) with comparator on distance only
+    p_queue pq;
+
+    // distance and predecessor maps
+    std::map<Position, int> dist;
+    std::map<Position, Position> prev;
+
+    // initialize distances for all vertices (keys) and for all edge targets
+    for (std::pair<Position, std::vector<Edge>> kv : adj_list)
+        dist[kv.first] = UBOUND_DIST;
+
+    dist[start] = 0;
+    pq.push(std::make_pair(0, start));
+
+    Position found_target = start;
+    bool found = false;
+
+    while (!pq.empty()) {
+        const std::pair<int, Position> top = pq.top();
+        int d = top.first;
+        Position u = top.second;
+        pq.pop();
+
+        if (m_maze.at_target(u)) {
+            found_target = u;
+            found = true;
+            break;
+        }
+
+        std::vector<Edge> edges = adj_list[u];
+
+        for (Edge e : edges) {
+            int alt = dist[u] + e.weight /* + Vertex weight*/;
+            if (alt < dist[e.target]) {
+                dist[e.target] = alt;
+                // update predecessor without requiring default-constructible
+                // Position
+                prev.erase(e.target);
+                prev.insert(std::make_pair(e.target, u));
+                pq.push(std::make_pair(alt, e.target));
+            }
+        }
+    }
+
+    std::vector<Position> path;
+
+    // reconstruct path from start -> found_target
+    Position cur = found_target;
+    while (!(cur.x == start.x && cur.y == start.y)) {
+        path.push_back(cur);
+        cur = prev[cur];
+    }
+
+    path.push_back(start);
+    std::reverse(path.begin(), path.end());
+    return path;
+}
+
+std::vector<Position> Solver::bfs_shortest_path(Position start) {
+    bfs();
+    std::vector<Position> route;
+    std::set<Position> seen;
+
+    Position pos = start;
+
+    while (!m_maze.at_target(pos)) {
+        int best_v = m_maze.maze_height() * m_maze.maze_width() + 1;
+
+        for (Position neighbor : m_maze.valid_neighbors(pos)) {
+            if (m_maze.get_distance(neighbor) < best_v) {
+                best_v = m_maze.get_distance(neighbor);
+                pos = neighbor;
+            }
+        }
+        if (seen.count(pos)) break;
+        seen.insert(pos);
+        route.emplace_back(pos);
+    }
+    return route;
+}
+
+void Solver::finalize_discovery() {
+    /* Assume all unchecked wall positions to have walls. */
+    for (int x = 0; x < MAZE_WIDTH; ++x) {
+        for (int y = 0; y < MAZE_HEIGHT; ++y) {
+            Position pos = Position(x, y);
+            if (!m_maze.in_visited(pos)) {
+                for (Position n : m_maze.valid_neighbors(pos)) {
+                    if (!m_maze.in_visited(n))
+                        m_maze.set_wall(n, dir_for_neighbor(pos, n));
+                }
+            }
+        }
+    }
+    m_mouse.update_visuals(m_maze);
+}
+
+void Solver::run(std::vector<Position> solved) {
+    for (Position next_position : solved) {
+        if (next_position.x == m_mouse.getPosition().x &&
+            next_position.y == m_mouse.getPosition().y)
+            continue;
+
+        face(dir_for_neighbor(next_position, m_mouse.getPosition()));
+        m_mouse.moveForward();
     }
 }
