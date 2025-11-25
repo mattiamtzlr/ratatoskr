@@ -11,6 +11,7 @@ class VirtualMouse : public Mouse {
     virtual bool wallLeft();
 
     virtual void update_visuals(Maze &maze);
+    virtual void log(std::string msg);
 
     virtual bool wasReset();
     virtual void ackReset();

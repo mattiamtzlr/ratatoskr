@@ -1,28 +1,111 @@
-
-
 #include <Arduino.h>
 
-#include "logger.hpp"
+#include "esp32-hal-ledc.h"
+#include "pins.hpp"
+#include "ratatoskr.hpp"
+#include "solver.hpp"
 
-Logger myLogs;
+// I2C addresses for the ToF sensors
+const uint8_t TOF_LEFT_ADDRESS = 0x30;
+const uint8_t TOF_FRONT_LEFT_ADDRESS = 0x31;
+const uint8_t TOF_FRONT_RIGHT_ADDRESS = 0x32;
+const uint8_t TOF_RIGHT_ADDRESS = 0x33;
 
-void populate() {
-    for (int i = 0; i < 10; i++) {
-        std::string msg = std::to_string(i++);
-        myLogs.log(msg);
-        delay(100);
-    }
-}
-void read() { myLogs.export_logs(); }
+const MODE mode = TESTING;  // TODO: Right now you have to change this by hand.
+
+ToF tof_left = ToF(LEFT, TOF_LEFT_ADDRESS, TOF_LEFT_XSHUT);
+ToF tof_front_left =
+    ToF(FRONT_LEFT, TOF_FRONT_LEFT_ADDRESS, TOF_FRONT_LEFT_XSHUT);
+ToF tof_front_right =
+    ToF(FRONT_RIGHT, TOF_FRONT_RIGHT_ADDRESS, TOF_FRONT_RIGHT_XSHUT);
+ToF tof_right = ToF(RIGHT, TOF_RIGHT_ADDRESS, TOF_RIGHT_XSHUT);
+
+MPU6050 gyro = MPU6050();
+
+// encoder_sign is the last argument (default = 1). Determines the direction
+GearMotor motor_left(MOTOR_L_IN1, MOTOR_L_IN2, 0, 1,  // PWM channels
+                     ENC_L_OUT1, ENC_L_OUT2,
+                     255,  // max PWM
+                     +1    // encoder_sign (I tested)
+);
+
+GearMotor motor_right(MOTOR_R_IN1, MOTOR_R_IN2, 2, 3,  // PWM channels
+                      ENC_R_OUT1, ENC_R_OUT2,
+                      255,  // max PWM
+                      -1    // encoder_sign (I tested)
+);
+
+Maze maze;
+Ratatoskr rat(motor_left, motor_right, tof_left, tof_front_left,
+              tof_front_right, tof_right, gyro);
+Solver solver(rat, maze);
 
 void setup() {
+    // ToF XSHUT pins
+    pinMode(TOF_LEFT_XSHUT, OUTPUT);
+    pinMode(TOF_FRONT_LEFT_XSHUT, OUTPUT);
+    pinMode(TOF_RIGHT_XSHUT, OUTPUT);
+    pinMode(TOF_FRONT_RIGHT_XSHUT, OUTPUT);
+
+    Wire.begin();
     Serial.begin(115200);
-    delay(2000);
-    myLogs.begin();
-    // populate();
-    read();
-    // myLogs.clear();
-    Serial.println("DONE");
+    gyro.begin();
+    delay(1000);
+
+    tof_left.begin();
+    tof_front_left.begin();
+    tof_right.begin();
+    tof_front_right.begin();
+
+    // ---- ENCODER INTERRUPT SETUP (integrated with GearMotor) ----
+    // Use ESP32's attachInterruptArg so each motor instance gets its own ISR
+    // arg
+    attachInterruptArg(ENC_L_OUT1, GearMotor::isr_trampoline, &motor_left,
+                       RISING);
+
+    attachInterruptArg(ENC_R_OUT1, GearMotor::isr_trampoline, &motor_right,
+                       RISING);
+    // -------------------------------------------------------------
+
+#ifdef CALIBRATE
+    tof_left.calibrate_sensor(TOF_SIDE_EXPECTED_MM);
+    tof_front_left.calibrate_sensor(TOF_FRONT_EXPECTED_MM);
+    tof_front_right.calibrate_sensor(TOF_FRONT_EXPECTED_MM);
+    tof_right.calibrate_sensor(TOF_SIDE_EXPECTED_MM);
+#endif
+
+    switch (mode) {
+        case RUN: {
+            // Push target to maze
+            maze.targets.push_back(Position(7, 7));
+            maze.targets.push_back(Position(7, 8));
+            maze.targets.push_back(Position(8, 7));
+            maze.targets.push_back(Position(8, 8));
+
+            solver.solve();  // Run from start to target
+
+            // Push start to maze
+            maze.targets.clear();
+            maze.targets.push_back(Position(0, 0));
+
+            solver.solve();  // Run from target to start
+            break;
+        }
+
+        case DUMP_LOG: {
+            ESPLogger::export_logs();
+            ESPLogger::clear_logs();
+            break;
+        }
+
+        case TESTING: {
+            while (true) {
+                delay(5000);
+                rat.moveForward(200);
+                delay(5000);
+            }
+        }
+    }
 }
 
-void loop() {}
+void loop() {}  // DO NOT USE THIS, WEIRD BEHAVIOR WITH LEDC AND PINS!!!!!

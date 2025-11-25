@@ -56,6 +56,8 @@ bool VirtualMouse::wallLeft() {
     }
     return false;
 }
+void VirtualMouse::log(std::string msg) { std::cerr << msg << std::endl; }
+
 void VirtualMouse::update_visuals(Maze& maze) {
     for (int x = 0; x < maze.maze_width(); ++x) {
         for (int y = 0; y < maze.maze_height(); ++y) {

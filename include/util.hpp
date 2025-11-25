@@ -3,6 +3,9 @@
 #include <queue>
 #include <vector>
 
+constexpr int CELL_SIZE_MM = 180;     // 18 cm
+constexpr int WALL_TO_WALL_MM = 160;  // 16 cm
+
 enum Direction {
     NORTH = 0,
     NORTH_EAST = 1,
@@ -13,6 +16,8 @@ enum Direction {
     WEST = 6,
     NORTH_WEST = 7,
 };
+
+enum MODE { RUN, DUMP_LOG, TESTING };
 
 static std::map<Direction, char> dirToCardinalChar = {
     {NORTH, 'n'}, {EAST, 'e'}, {SOUTH, 's'}, {WEST, 'w'}};
@@ -34,6 +39,7 @@ struct Position {
     Position(size_t x, size_t y) : x(x), y(y) {}
     Position() : x(0), y(0) {}
 };
+
 inline bool operator<(const Position& lhs, const Position& rhs) {
     if (lhs.x != rhs.x) return lhs.x < rhs.x;
     return lhs.y < rhs.y;
