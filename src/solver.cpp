@@ -1,5 +1,4 @@
 #include "solver.hpp"
-#include "esp_logger.hpp"
 
 #include <algorithm>
 #include <deque>
@@ -8,7 +7,6 @@
 #include <queue>
 #include <tuple>
 
-using namespace ESPLogger;
 
 Solver::Solver(Mouse &mouse, Maze &maze) : m_mouse(mouse), m_maze(maze) {
     width = m_maze.maze_width();
