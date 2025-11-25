@@ -48,18 +48,17 @@ void Ratatoskr::calibrateEncoders() {
     }
 }
 
-constexpr int MIN_TURN_PWM = 175;
+constexpr int MIN_TURN_PWM = 190;
 constexpr int MAX_TURN_PWM = 200;
-constexpr int TURN_TIME_LIMIT = 3000;
+constexpr int TURN_TIME_LIMIT = 5000;
 
 //===============================[ CONTROL ]====================================
 /**
  * turn @angle degrees in counterclockwise direction
  */
 void Ratatoskr::turn(int angle) {
-    float threshold = 0.2f;
-
-    PID pid_turn(0.5f, 0.0f, 0.0f);
+    float threshold = 1.0f; 
+    PID pid_turn(0.5f, 0.05f, 0.0f);  // Added small I term to eliminate steady-state error
 
     unsigned long t_start = millis();
     unsigned long t_now = micros();
@@ -67,25 +66,40 @@ void Ratatoskr::turn(int angle) {
 
     float current_angle = m_gyro.getAngle(t_now, t_last);
     float target = current_angle + angle;
-
     float error = angle;
+    int pwm = (MIN_TURN_PWM) * 90/angle;
+    pwm = constrain(pwm, MIN_TURN_PWM - 7, MAX_TURN_PWM); // what min is here is the 180 speed
+    // the goal is to have higher min speed for smaller angles so we have better momentum
+    // and slower for large so we dont overshoot too much (this doesnt even use PID lmao, just vibe stop using gyro)
 
-    /* turn until time limit reached or angle reached */
+
     while ((millis() - t_start) < TURN_TIME_LIMIT) {
         error = target - current_angle;
-        t_now = micros();
+        
+        // Actually use the threshold to exit early
+        if (abs(error) < threshold) {
+            break;
+        }
 
-        /* proportional control */
+        t_now = micros();
         float t_diff = ((float)(t_now - t_last)) / 1e6f;
         int angle_correction = pid_turn.update(t_diff, error);
-        int pwm = constrain(abs(angle_correction), MIN_TURN_PWM, MAX_TURN_PWM);
-
-        if (angle_correction > 0) { /* turning CCW */
-            m_motor_left.spin_ccw(pwm);
-            m_motor_right.spin_ccw(pwm);
-        } else { /* turning CW */
-            m_motor_left.spin_cw(pwm);
-            m_motor_right.spin_cw(pwm);
+        
+        // Only apply motor commands if correction is meaningful
+        if (abs(angle_correction) > 10) {  // Adjust this threshold
+            // int pwm = constrain(abs(angle_correction), MIN_TURN_PWM, MAX_TURN_PWM); lmao L PID bro (jk lets try it later)
+            
+            if (angle_correction > 0) { /* turning CCW */
+                m_motor_left.spin_ccw(pwm);
+                m_motor_right.spin_ccw(pwm);
+            } else { /* turning CW */
+                m_motor_left.spin_cw(pwm);
+                m_motor_right.spin_cw(pwm);
+            }
+        } else {
+            // Stop motors when correction is too small
+            m_motor_left.coast();  // or brake() for faster settling idk
+            m_motor_right.coast();
         }
 
         current_angle = m_gyro.getAngle(t_now, t_last);
