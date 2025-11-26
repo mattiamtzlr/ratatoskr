@@ -48,8 +48,8 @@ void Ratatoskr::calibrateEncoders() {
     }
 }
 
-constexpr int MIN_TURN_PWM = 190;
-constexpr int MAX_TURN_PWM = 200;
+constexpr int MIN_TURN_PWM = 185;
+constexpr int MAX_TURN_PWM = 195;
 constexpr int TURN_TIME_LIMIT = 2000;
 constexpr float TURN_TRESHOLD = 0.2f;
 
@@ -70,7 +70,7 @@ void Ratatoskr::turn(int angle) {
     int turn_speed = ((MIN_TURN_PWM + MAX_TURN_PWM)/2) * 90 / angle;
     turn_speed     = constrain(turn_speed, MIN_TURN_PWM, MAX_TURN_PWM);
 
-    while (millis() - t_start < TURN_TIME_LIMIT) {
+    while (millis() - t_start < TURN_TIME_LIMIT * (angle / 180.0f)) {
         t_now = micros();
         float yaw = m_gyro.getAngle(t_now, t_last);
         t_last = t_now;
@@ -140,7 +140,7 @@ void Ratatoskr::moveForward(int distance) {
 
     // TODO: This is also not very clean like this
     PID pid_encoders(0.75, 0.8, 0.1);
-    PID pid_distance(0.25, 0.1, 0.15);
+    PID pid_distance(0.25, 0.1, 0.2);
 
     while (!too_close_front(m_tof_front_left.get_reading(),
                             m_tof_front_right.get_reading()) &&
@@ -182,6 +182,7 @@ void Ratatoskr::moveForward(int distance) {
         delay(loop_delay);
     }
     stop();
+    delay(1000);
 }
 
 /**
