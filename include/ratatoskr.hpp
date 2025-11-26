@@ -63,6 +63,7 @@ class Ratatoskr : public Mouse {
      */
     virtual bool wallLeft();
 
+    void update_screen();
     virtual void update_visuals(Maze &maze);
     virtual void log(std::string msg);
 

@@ -45,7 +45,7 @@ void OLED::update_ToFs(uint16_t tof_left, uint16_t tof_front_left,
                        uint16_t tof_front_right, uint16_t tof_right) {
     m_oled.setCursor(5, FONT_HEIGHT * MEDIUM * 2 + 5);
     m_oled.printf("    %03d %03d    ", tof_front_left, tof_front_right);
-    m_oled.println();
+    m_oled.println("\n");
     m_oled.printf(" %03d          %03d ", tof_left, tof_right);
 }
 

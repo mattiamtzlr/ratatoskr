@@ -208,6 +208,8 @@ void Ratatoskr::moveForward(int distance_cells) {
         right_encoder = m_motor_right.get_encoder_count();
 
         avg_counts = (left_encoder + right_encoder) / 2;
+
+        update_screen();
     }
     safe_stop();
 }
@@ -324,7 +326,7 @@ bool Ratatoskr::wallLeft() {
     return (distance_left > 0) && (distance_left < SIDE_WALL_MM);
 }
 
-void Ratatoskr::update_visuals(Maze &maze) {
+void Ratatoskr::update_screen() {
     m_oled.clear();
     switch (m_oled.mode) {
         case DEBUG: {
@@ -332,13 +334,22 @@ void Ratatoskr::update_visuals(Maze &maze) {
             uint16_t left_rpm = m_motor_left.get_rpm();
             uint16_t right_rpm = m_motor_right.get_rpm();
             m_oled.update_status_bar(gyro_angle, left_rpm, right_rpm);
+
+            uint16_t tof_left = m_tof_left.read();
+            uint16_t tof_front_left = m_tof_front_left.read();
+            uint16_t tof_front_right = m_tof_front_right.read();
+            uint16_t tof_right = m_tof_right.read();
+            m_oled.update_ToFs(tof_left, tof_front_left, tof_front_right, tof_right);
+            break;
         }
 
-        default: m_oled.idle();
+        default:
+            m_oled.idle();
     }
     m_oled.display();
 }
 
+void Ratatoskr::update_visuals(Maze &maze) {}
 bool Ratatoskr::wasReset() { return false; }
 void Ratatoskr::ackReset() {}
 
