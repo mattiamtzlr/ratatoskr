@@ -50,55 +50,57 @@ void Ratatoskr::calibrateEncoders() {
 
 constexpr int MIN_TURN_PWM = 190;
 constexpr int MAX_TURN_PWM = 200;
-constexpr int TURN_TIME_LIMIT = 5000;
-constexpr float TURN_TRESHOLD = 1.0f;
+constexpr int TURN_TIME_LIMIT = 2000;
+constexpr float TURN_TRESHOLD = 0.2f;
 
 //===============================[ CONTROL ]====================================
 /**
  * turn @angle degrees in counterclockwise direction
  */
 void Ratatoskr::turn(int angle) {
-    /* PID is only used for getting the angle correction, uses small I term to
-     * eliminate steady-state error */
-    PID pid_turn(0.5f, 0.05f, 0.0f);
-
     unsigned long t_start = millis();
-    unsigned long t_now = micros();
-    unsigned long t_last = t_now;
+    unsigned long t_now   = micros();
+    unsigned long t_last  = t_now;
 
-    float current_angle = m_gyro.getAngle(t_now, t_last);
-    float target = current_angle + angle;
-    float error = angle;
+    // Read current heading and define absolute target
+    float start_angle = m_gyro.getAngle(t_now, t_last);
+    float target      = start_angle + angle;
 
-    /* higer pwm for smaller angles */
-    int pwm = (MIN_TURN_PWM) * 90 / angle;
-    pwm = constrain(pwm, MIN_TURN_PWM - 7, MAX_TURN_PWM);
+    // Initial turn speed
+    int turn_speed = ((MIN_TURN_PWM + MAX_TURN_PWM)/2) * 90 / angle;
+    turn_speed     = constrain(turn_speed, MIN_TURN_PWM, MAX_TURN_PWM);
 
-    while (abs(error) > TURN_TRESHOLD &&
-           (millis() - t_start) < TURN_TIME_LIMIT) {
-        error = target - current_angle;
-
+    while (millis() - t_start < TURN_TIME_LIMIT) {
         t_now = micros();
-        float t_diff = ((float)(t_now - t_last)) / 1e6f;
-        int angle_correction = pid_turn.update(t_diff, error);
+        float yaw = m_gyro.getAngle(t_now, t_last);
+        t_last = t_now;
 
-        /* only apply motor commands if correction is meaningful, else coast */
-        if (abs(angle_correction) < 10) {
+        float err     = target - yaw;
+        float abs_err = fabs(err);
+
+        if (abs_err <= TURN_TRESHOLD) {
+            // Inside band: stop and shrink speed so next corrections are softer
             coast();
+            if (turn_speed > MIN_TURN_PWM) {
+                turn_speed -= 3;                 // shrink oscillation amplitude
+                if (turn_speed < MIN_TURN_PWM)
+                    turn_speed = MIN_TURN_PWM;
+            }
         } else {
-            if (angle_correction > 0) { /* turning CCW */
+            // Outside band: correct direction based on sign of error
+            int pwm = constrain(turn_speed, MIN_TURN_PWM, MAX_TURN_PWM);
+
+            if (err > 0) {  // need to increase angle (CCW)
                 m_motor_left.spin_ccw(pwm);
                 m_motor_right.spin_ccw(pwm);
-            } else { /* turning CW */
+            } else {        // err < 0, need to decrease angle (CW)
                 m_motor_left.spin_cw(pwm);
                 m_motor_right.spin_cw(pwm);
             }
         }
-
-        current_angle = m_gyro.getAngle(t_now, t_last);
-        t_last = t_now;
     }
-
+    coast(); // Kinda fixes that large overshoot
+    delay(1);
     stop();
 }
 
