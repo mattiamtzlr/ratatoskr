@@ -35,14 +35,14 @@ class Ratatoskr : public Mouse {
 
     static const u_int8_t WIDTH_MM = 68;
 
-    // So one revolution is 27*pi mm = 84.82 mm
-    static const u_int8_t WHEEL_DIAMETER_MM = 27;
+    // So one revolution is 31*pi mm = 97.4 mm
+    static const u_int8_t WHEEL_DIAMETER_MM = 31;
 
     // So encooder counts per mm = counts per rev / (WHEEL_DIAMETER_MM * pi)
     static constexpr float ENCODER_COUNTS_PER_MM =
-        200.0f / (WHEEL_DIAMETER_MM * PI);
+        90.0f / (WHEEL_DIAMETER_MM * PI);
 
-    static constexpr float MM_PER_CELL = 160.0;
+    static constexpr float MM_PER_CELL = 180.0;
 
     inline void stop();
     inline void coast();

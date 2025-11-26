@@ -105,9 +105,11 @@ void Ratatoskr::turn(int angle) {
 }
 
 bool Ratatoskr::too_close_front(uint16_t fl, uint16_t fr) {
-    return (fl != 0) && (fr != 0) &&
+    bool res = (fl != 0) && (fr != 0) &&
            ((fl < STOP_DISTANCE && fr < STOP_DISTANCE + 20) ||
             (fl < STOP_DISTANCE + 20 && fr < STOP_DISTANCE));
+    // log("Too close?" + res ? " YES" : " NO");
+    return res;
 }
 
 /**
@@ -140,8 +142,7 @@ void Ratatoskr::moveForward(int distance) {
 
     // TODO: This is also not very clean like this
     PID pid_encoders(0.75, 0.8, 0.1);
-    PID pid_distance(0.25, 0.1, 0.2);
-
+    PID pid_distance(0.25, 0.1, 0.15);
     while (!too_close_front(m_tof_front_left.get_reading(),
                             m_tof_front_right.get_reading()) &&
            (left_encoder + right_encoder) / 2 < target_counts) {
@@ -207,6 +208,7 @@ void Ratatoskr::coast() {
 bool Ratatoskr::wallFront() {
     uint16_t distance_front_left = m_tof_front_left.read();
     uint16_t distance_front_right = m_tof_front_right.read();
+    
     return (distance_front_left > 0) && (distance_front_left < FRONT_WALL_MM) ||
            (distance_front_right > 0) && (distance_front_right < FRONT_WALL_MM);
 }

@@ -11,7 +11,7 @@ const uint8_t TOF_FRONT_LEFT_ADDRESS = 0x31;
 const uint8_t TOF_FRONT_RIGHT_ADDRESS = 0x32;
 const uint8_t TOF_RIGHT_ADDRESS = 0x33;
 
-const MODE mode = TESTING;  // TODO: Right now you have to change this by hand.
+const MODE mode = RUN;  // TODO: Right now you have to change this by hand.
 
 ToF tof_left = ToF(LEFT, TOF_LEFT_ADDRESS, TOF_LEFT_XSHUT);
 ToF tof_front_left =
@@ -77,10 +77,10 @@ void setup() {
     switch (mode) {
         case RUN: {
             // Push target to maze
-            maze.targets.push_back(Position(7, 7));
-            maze.targets.push_back(Position(7, 8));
-            maze.targets.push_back(Position(8, 7));
-            maze.targets.push_back(Position(8, 8));
+            maze.targets.push_back(Position(2, 2));
+            // maze.targets.push_back(Position(7, 8));
+            // maze.targets.push_back(Position(8, 7));
+            // maze.targets.push_back(Position(8, 8));
 
             solver.solve();  // Run from start to target
 
@@ -101,12 +101,13 @@ void setup() {
         case TESTING: {
             while (true) {
                 delay(1000);
-                rat.turn(45);
-                delay(3000);
-                rat.turn(90);
-                delay(3000);
-                rat.turn(180);
-                delay(3000);
+                // rat.turn(45);
+                // delay(3000);
+                rat.turn(-90);
+                // delay(3000);
+                // rat.turn(180);
+                // delay(3000);
+                // rat.calibrateEncoders();
             }
         }
     }
