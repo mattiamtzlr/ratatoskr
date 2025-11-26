@@ -142,7 +142,7 @@ void Ratatoskr::moveForward(int distance) {
 
     // TODO: This is also not very clean like this
     PID pid_encoders(0.75, 0.8, 0.1);
-    PID pid_distance(0.25, 0.1, 0.15);
+    PID pid_distance(0.8, 0.2, 0.5);
     while (!too_close_front(m_tof_front_left.get_reading(),
                             m_tof_front_right.get_reading()) &&
            (left_encoder + right_encoder) / 2 < target_counts) {
@@ -154,8 +154,8 @@ void Ratatoskr::moveForward(int distance) {
         int left_encoder_diff = left_encoder - left_encoder_prev;
         int right_encoder_diff = right_encoder - right_encoder_prev;
 
-        left_tof = constrain(m_tof_left.get_reading(), 0, 80);
-        right_tof = constrain(m_tof_right.get_reading(), 0, 80);
+        left_tof = constrain(m_tof_left.get_reading(), 0, 90);
+        right_tof = constrain(m_tof_right.get_reading(), 0, 90);
 
         // Prepare errors
         float tof_error = 0 - (left_tof - right_tof);
@@ -170,8 +170,8 @@ void Ratatoskr::moveForward(int distance) {
         float tof_correction = pid_distance.update(t_diff, tof_error);
 
         // Calculate new PWM
-        pwm_left = BASE_PWM + .7 * tof_correction + .3 * encoder_correction;
-        pwm_right = BASE_PWM - .7 * tof_correction - .3 * encoder_correction;
+        pwm_left = BASE_PWM + .6 * tof_correction + .4 * encoder_correction;
+        pwm_right = BASE_PWM - .6 * tof_correction - .4 * encoder_correction;
 
         pwm_left = constrain(pwm_left, 70, 240);
         pwm_right = constrain(pwm_right, 70, 240);
