@@ -101,7 +101,11 @@ void setup() {
         case TESTING: {
             while (true) {
                 delay(1000);
+                rat.turn(45);
+                delay(3000);
                 rat.turn(90);
+                delay(3000);
+                rat.turn(180);
                 delay(3000);
             }
         }
