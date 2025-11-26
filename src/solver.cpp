@@ -201,6 +201,14 @@ bool in_diags(std::vector<std::vector<Position>> diagonals, Position pos) {
     }
     return false;
 }
+std::vector<Position> get_diag(std::vector<std::vector<Position>> diagonals,
+                               Position pos) {
+    for (std::vector<Position> diagonal : diagonals) {
+        if (std::find(diagonal.begin(), diagonal.end(), pos) != diagonal.end())
+            return diagonal;
+    }
+    return {};
+}
 
 void Solver::run(std::vector<Position> solved,
                  std::vector<std::vector<Position>> diagonals) {
@@ -209,11 +217,12 @@ void Solver::run(std::vector<Position> solved,
         if (next_position.x == m_mouse.getPosition().x &&
             next_position.y == m_mouse.getPosition().y)
             continue;
-        if (in_diags(diagonals, m_mouse.getPosition()) && in_diags(diagonals, next_position)) {
-            std::cerr << "diag" << std::endl;
-            /* Diagonal case */
+        if (in_diags(diagonals, m_mouse.getPosition()) &&
+            in_diags(diagonals, next_position)) {
+            std::vector<Position> diagonal = get_diag(diagonals, next_position);
             Position next_next_position = *std::next(
                 std::find(solved.begin(), solved.end(), next_position));
+            /* Diagonal case */
             if (!on_diag) {
                 on_diag = true;
 
@@ -225,19 +234,24 @@ void Solver::run(std::vector<Position> solved,
 
                 face(diag_first);
                 m_mouse.moveForwardHalf();
-                face((Direction)((diag_first + diag_second) / 2));
+                if ((diag_first == NORTH && diag_second == WEST) ||
+                    (diag_first == WEST && diag_second == NORTH)) {
+                    face((Direction)((diag_first + diag_second + 8) / 2));
+                } else {
+                    face((Direction)((diag_first + diag_second) / 2));
+                }
             } else {
-                on_diag = in_diags(diagonals, next_next_position);
+                on_diag = std::find(diagonal.begin(), diagonal.end(),
+                                    next_next_position) != diagonal.end();
                 m_mouse.moveForwardHalf();
-                if(!on_diag){
-                    face(dir_for_neighbor(next_position, m_mouse.getPosition()));
+                if (!on_diag) {
+                    face(
+                        dir_for_neighbor(next_position, m_mouse.getPosition()));
                     m_mouse.moveForwardHalf();
                 }
                 m_mouse.setPosition(next_position.x, next_position.y);
             }
-        }
-        else {
-            std::cerr << "forward" << std::endl;
+        } else {
             face(dir_for_neighbor(next_position, m_mouse.getPosition()));
             m_mouse.moveForward();
         }

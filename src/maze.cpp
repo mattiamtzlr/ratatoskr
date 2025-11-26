@@ -120,11 +120,12 @@ std::vector<std::vector<Position>> Maze::find_diagonal_paths(
             continue;
         }
         for (Position neighbor : valid_neighbors(pos)) {
+            Position starting_neighbor = neighbor;
             if (std::find(path.begin(), path.end(), neighbor) == path.end())
                 continue;
-            diag_path_visited[neighbor.x][neighbor.y] = true;
             for (int i = 0; i < 2; i++) {  // Right diag and left diag
                 std::vector<Position> current_path;
+                current_path.push_back(pos);
                 current_path.push_back(neighbor);
                 bool right = i == 0;
                 Direction dir =
@@ -140,8 +141,11 @@ std::vector<std::vector<Position>> Maze::find_diagonal_paths(
                     diag_path_visited[neighbor.x][neighbor.y] = true;
                     current_path.push_back(neighbor);
                 }
-                if (current_path.size() > min_length * 2)
+                if (current_path.size() > min_length * 2) {
                     all_paths.push_back(current_path);
+                    diag_path_visited[starting_neighbor.x]
+                                     [starting_neighbor.y] = true;
+                }
             }
         }
     }

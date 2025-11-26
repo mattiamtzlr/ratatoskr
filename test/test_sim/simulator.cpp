@@ -34,29 +34,24 @@ int main(int argc, char* argv[]) {
     std::vector<std::vector<Position>> diag_paths =
         maze.find_diagonal_paths(2, solved);
 
+    std::vector<char> colors = {'r', 'g', 'b', 'y', 'R', 'G'};
     // Color diagonals of blue
-    API::clearAllColor();
     API::clearAllColor();
     for (const Position& p : solved) {
         API::setColor(p.x, p.y, 'B');
     }
+    int color = 0;
     for (const auto& path : diag_paths) {
-        std::cerr << "1" << std::endl;
         for (const Position& p : path) {
-            API::setColor(p.x, p.y, 'b');
+            API::setColor(p.x, p.y, colors[color]);
         }
+        color = (color + 1) % 6;
     }
 
     API::clearAllText();
     for (int i = 0; i < solved.size(); i++) {
         Position pos = solved[i];
         API::setText(pos.x, pos.y, std::to_string(i));
-    }
-
-    std::cerr << "Path Length: " << solved.size() << std::endl;
-    API::clearAllColor();
-    for (const Position& p : solved) {
-        API::setColor(p.x, p.y, 'B');
     }
     solver.run(solved, diag_paths);
 }
