@@ -1,7 +1,5 @@
 #include "ratatoskr.hpp"
 
-#include <string>
-
 #include "pid.hpp"
 
 Ratatoskr::Ratatoskr(GearMotor &motor_left, GearMotor &motor_right,
@@ -50,28 +48,53 @@ void Ratatoskr::calibrateEncoders() {
     }
 }
 
+constexpr int MIN_TURN_PWM = 190;
+constexpr int MAX_TURN_PWM = 200;
+constexpr int TURN_TIME_LIMIT = 5000;
+constexpr float TURN_TRESHOLD = 1.0f;
+
 //===============================[ CONTROL ]====================================
 /**
  * turn @angle degrees in counterclockwise direction
  */
 void Ratatoskr::turn(int angle) {
-    log("turning");
-    float threshold = 0.5f;
-    unsigned long t_now = micros();
-    unsigned long t_last = t_now;  // avoid huge first dt
-    // baseline angle in degrees
-    float current_angle = m_gyro.getAngle(t_now, t_last);
-    float target = current_angle + (float)angle;
+    /* PID is only used for getting the angle correction, uses small I term to
+     * eliminate steady-state error */
+    PID pid_turn(0.5f, 0.05f, 0.0f);
 
-    while (current_angle < target - threshold) {
-        if (angle > 0) {
-            m_motor_left.spin_cw(TURN_PWM);
-            m_motor_right.spin_cw(TURN_PWM);
-        } else {
-            m_motor_left.spin_ccw(TURN_PWM);
-            m_motor_right.spin_ccw(TURN_PWM);
-        }
+    unsigned long t_start = millis();
+    unsigned long t_now = micros();
+    unsigned long t_last = t_now;
+
+    float current_angle = m_gyro.getAngle(t_now, t_last);
+    float target = current_angle + angle;
+    float error = angle;
+
+    /* higer pwm for smaller angles */
+    int pwm = (MIN_TURN_PWM) * 90 / angle;
+    pwm = constrain(pwm, MIN_TURN_PWM - 7, MAX_TURN_PWM);
+
+    while (abs(error) > TURN_TRESHOLD &&
+           (millis() - t_start) < TURN_TIME_LIMIT) {
+        error = target - current_angle;
+
         t_now = micros();
+        float t_diff = ((float)(t_now - t_last)) / 1e6f;
+        int angle_correction = pid_turn.update(t_diff, error);
+
+        /* only apply motor commands if correction is meaningful, else coast */
+        if (abs(angle_correction) < 10) {
+            coast();
+        } else {
+            if (angle_correction > 0) { /* turning CCW */
+                m_motor_left.spin_ccw(pwm);
+                m_motor_right.spin_ccw(pwm);
+            } else { /* turning CW */
+                m_motor_left.spin_cw(pwm);
+                m_motor_right.spin_cw(pwm);
+            }
+        }
+
         current_angle = m_gyro.getAngle(t_now, t_last);
         t_last = t_now;
     }
@@ -86,11 +109,13 @@ bool Ratatoskr::too_close_front(uint16_t fl, uint16_t fr) {
 }
 
 /**
- * move @distance mm forwards with PID control
+ * move @distance cells forward with PID control
  */
 void Ratatoskr::moveForward(int distance) {
+    Mouse::moveForward(distance);
+    distance *= CELL_SIZE_MM;
     long target_counts = (long)(distance * ENCODER_COUNTS_PER_MM);
-    int base_pwm = 200;
+    const int BASE_PWM = 200;
 
     m_motor_left.reset_encoder_count();
     m_motor_right.reset_encoder_count();
@@ -103,18 +128,17 @@ void Ratatoskr::moveForward(int distance) {
     uint16_t left_tof = 0;
     uint16_t right_tof = 0;
 
-    float pwm_left = base_pwm;
-    float pwm_right = base_pwm;
+    float pwm_left = BASE_PWM;
+    float pwm_right = BASE_PWM;
 
     const int loop_delay = 20;
-    double time_step = 0.2;
 
     int t_now = millis();
     int t_prev = t_now;
 
     // TODO: This is also not very clean like this
-    PID pid_encoders(time_step, 0.75, 0.8, 0.1, 50, 240);
-    PID pid_distance(time_step, 0.25, 0.1, 0.15, 50, 240);
+    PID pid_encoders(0.75, 0.8, 0.1);
+    PID pid_distance(0.25, 0.1, 0.15);
 
     while (!too_close_front(m_tof_front_left.get_reading(),
                             m_tof_front_right.get_reading()) &&
@@ -135,18 +159,16 @@ void Ratatoskr::moveForward(int distance) {
         float encoder_error = 0 - (left_encoder_diff - right_encoder_diff);
 
         t_now = millis();
-        double t_diff = t_now - t_prev;
+        float t_diff = (t_now - t_prev) / 100.0;
         t_prev = t_now;
 
         // Update PID controllers
-        pid_encoders.TIME_STEP = t_diff / 100.0;
-        pid_distance.TIME_STEP = t_diff / 100.0;
-        float encoder_correction = pid_encoders.update(encoder_error);
-        float tof_correction = pid_distance.update(tof_error);
+        float encoder_correction = pid_encoders.update(t_diff, encoder_error);
+        float tof_correction = pid_distance.update(t_diff, tof_error);
 
         // Calculate new PWM
-        pwm_left = base_pwm + .7 * tof_correction + .3 * encoder_correction;
-        pwm_right = base_pwm - .7 * tof_correction - .3 * encoder_correction;
+        pwm_left = BASE_PWM + .7 * tof_correction + .3 * encoder_correction;
+        pwm_right = BASE_PWM - .7 * tof_correction - .3 * encoder_correction;
 
         pwm_left = constrain(pwm_left, 70, 240);
         pwm_right = constrain(pwm_right, 70, 240);
@@ -167,6 +189,11 @@ void Ratatoskr::stop() {
     log("stop");
     m_motor_left.brake();
     m_motor_right.brake();
+}
+
+void Ratatoskr::coast() {
+    m_motor_left.coast();
+    m_motor_right.coast();
 }
 
 //===============================[ SENSING ]====================================
@@ -202,6 +229,4 @@ void Ratatoskr::update_visuals(Maze &maze) {}
 bool Ratatoskr::wasReset() { return false; }
 void Ratatoskr::ackReset() {}
 
-void Ratatoskr::log(std::string msg) {
-    ESPLogger::log(msg);
-}
+void Ratatoskr::log(std::string msg) { ESPLogger::log(msg); }
