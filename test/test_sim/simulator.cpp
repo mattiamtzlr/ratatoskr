@@ -1,4 +1,5 @@
 #include <iostream>
+#include <vector>
 
 #include "API.hpp"
 #include "solver.hpp"
@@ -28,31 +29,34 @@ int main(int argc, char* argv[]) {
     maze.targets.push_back(Position(8, 8));
 
     solver.finalize_discovery();
-    std::vector<std::vector<Position>> diag_paths = maze.find_diagonal_paths(2);
+    std::vector<Position> solved = solver.dijkstra(Position(0, 0));
+
+    std::vector<std::vector<Position>> diag_paths =
+        maze.find_diagonal_paths(2, solved);
 
     // Color diagonals of blue
     API::clearAllColor();
+    API::clearAllColor();
+    for (const Position& p : solved) {
+        API::setColor(p.x, p.y, 'B');
+    }
     for (const auto& path : diag_paths) {
+        std::cerr << "1" << std::endl;
         for (const Position& p : path) {
             API::setColor(p.x, p.y, 'b');
         }
     }
-    /*
 
-// std::vector<Position> solved = solver.bfs_shortest_path(Position(0, 0));
-std::vector<Position> solved = solver.dijkstra(Position(0, 0));
+    API::clearAllText();
+    for (int i = 0; i < solved.size(); i++) {
+        Position pos = solved[i];
+        API::setText(pos.x, pos.y, std::to_string(i));
+    }
 
-API::clearAllText();
-for (int i = 0; i < solved.size(); i++) {
-    Position pos = solved[i];
-    API::setText(pos.x, pos.y, std::to_string(i));
-}
-
-std::cerr << "Path Length: " << solved.size() << std::endl;
-API::clearAllColor();
-for (const Position& p : solved) {
-    API::setColor(p.x, p.y, 'B');
-}
-solver.run(solved);
-    */
+    std::cerr << "Path Length: " << solved.size() << std::endl;
+    API::clearAllColor();
+    for (const Position& p : solved) {
+        API::setColor(p.x, p.y, 'B');
+    }
+    solver.run(solved, diag_paths);
 }

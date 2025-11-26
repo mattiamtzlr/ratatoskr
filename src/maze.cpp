@@ -109,37 +109,39 @@ std::vector<Position> Maze::valid_diag_neighbors(Position mouse_pos) {
     return neigh;
 }
 
-std::vector<std::vector<Position>> Maze::find_diagonal_paths(int min_length) {
+std::vector<std::vector<Position>> Maze::find_diagonal_paths(
+    int min_length, std::vector<Position> path) {
     std::vector<std::vector<Position>> all_paths;
 
     bool diag_path_visited[MAZE_WIDTH][MAZE_HEIGHT] = {};
 
-    for (int x = 0; x < MAZE_WIDTH; x++) {
-        for (int y = 0; y < MAZE_HEIGHT; y++) {
-            Position pos = Position(x, y);
-            if (diag_path_visited[pos.x][pos.y]) {
+    for (Position pos : path) {
+        if (diag_path_visited[pos.x][pos.y]) {
+            continue;
+        }
+        for (Position neighbor : valid_neighbors(pos)) {
+            if (std::find(path.begin(), path.end(), neighbor) == path.end())
                 continue;
-            }
-            for (Position neighbor : valid_neighbors(pos)) {
-                diag_path_visited[neighbor.x][neighbor.y] = true;
-                for (int i = 0; i < 2; i++) {  // Right diag and left diag
-                    std::vector<Position> current_path;
-                    current_path.push_back(neighbor);
-                    bool right = i == 0;
-                    Direction dir =
-                        (right) ? rotate_right(dir_for_neighbor(neighbor, pos))
-                                : rotate_left(dir_for_neighbor(neighbor, pos));
+            diag_path_visited[neighbor.x][neighbor.y] = true;
+            for (int i = 0; i < 2; i++) {  // Right diag and left diag
+                std::vector<Position> current_path;
+                current_path.push_back(neighbor);
+                bool right = i == 0;
+                Direction dir =
+                    (right) ? rotate_right(dir_for_neighbor(neighbor, pos))
+                            : rotate_left(dir_for_neighbor(neighbor, pos));
 
-                    while (!exists_wall(neighbor, dir)) {
-                        neighbor = get_neighbor(neighbor, dir);
-                        current_path.push_back(neighbor);
-                        right = !right;
-                        dir = (right) ? rotate_right(dir) : rotate_left(dir);
-                        diag_path_visited[neighbor.x][neighbor.y] = true;
-                    }
-                    if (current_path.size() > min_length * 2)
-                        all_paths.push_back(current_path);
+                while (!exists_wall(neighbor, dir) &&
+                       std::find(path.begin(), path.end(), neighbor) !=
+                           path.end()) {
+                    neighbor = get_neighbor(neighbor, dir);
+                    right = !right;
+                    dir = (right) ? rotate_right(dir) : rotate_left(dir);
+                    diag_path_visited[neighbor.x][neighbor.y] = true;
+                    current_path.push_back(neighbor);
                 }
+                if (current_path.size() > min_length * 2)
+                    all_paths.push_back(current_path);
             }
         }
     }
