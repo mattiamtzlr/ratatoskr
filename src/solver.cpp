@@ -209,7 +209,7 @@ void Solver::run(std::vector<Position> solved,
         if (next_position.x == m_mouse.getPosition().x &&
             next_position.y == m_mouse.getPosition().y)
             continue;
-        if (in_diags(diagonals, m_mouse.getPosition())) {
+        if (in_diags(diagonals, m_mouse.getPosition()) && in_diags(diagonals, next_position)) {
             std::cerr << "diag" << std::endl;
             /* Diagonal case */
             Position next_next_position = *std::next(
@@ -227,15 +227,15 @@ void Solver::run(std::vector<Position> solved,
                 m_mouse.moveForwardHalf();
                 face((Direction)((diag_first + diag_second) / 2));
             } else {
-                m_mouse.moveForwardHalf();
-                Direction dir = m_mouse.getDirection();
                 on_diag = in_diags(diagonals, next_next_position);
-                if (!on_diag) {
-                    // m_mouse.moveForwardHalf();
+                m_mouse.moveForwardHalf();
+                if(!on_diag){
+                    face(dir_for_neighbor(next_position, m_mouse.getPosition()));
+                    m_mouse.moveForwardHalf();
                 }
+                m_mouse.setPosition(next_position.x, next_position.y);
             }
         }
-
         else {
             std::cerr << "forward" << std::endl;
             face(dir_for_neighbor(next_position, m_mouse.getPosition()));
