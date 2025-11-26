@@ -29,7 +29,7 @@ int main(int argc, char* argv[]) {
     maze.targets.push_back(Position(8, 8));
 
     solver.finalize_discovery();
-    std::vector<Position> solved = solver.dijkstra(Position(0, 0));
+    std::vector<GraphCoordinate> solved = solver.dijkstra(GraphCoordinate());
 
     std::vector<std::vector<Position>> diag_paths =
         maze.find_diagonal_paths(2, solved);
@@ -37,8 +37,8 @@ int main(int argc, char* argv[]) {
     std::vector<char> colors = {'r', 'g', 'b', 'y', 'R', 'G'};
     // Color diagonals of blue
     API::clearAllColor();
-    for (const Position& p : solved) {
-        API::setColor(p.x, p.y, 'B');
+    for (const GraphCoordinate& p : solved) {
+        API::setColor((int)p.x, (int)p.y, 'B');
     }
     int color = 0;
     for (const auto& path : diag_paths) {
@@ -50,8 +50,8 @@ int main(int argc, char* argv[]) {
 
     API::clearAllText();
     for (int i = 0; i < solved.size(); i++) {
-        Position pos = solved[i];
-        API::setText(pos.x, pos.y, std::to_string(i));
+        GraphCoordinate pos = solved[i];
+        API::setText((int)pos.x, (int)pos.y, std::to_string(i));
     }
     solver.run(solved, diag_paths);
 }

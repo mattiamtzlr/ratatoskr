@@ -38,3 +38,16 @@ Direction dir_for_neighbor(Position pos_n, Position pos_m) {
     else
         return SOUTH;
 }
+
+Direction dir_for_neighbor(GraphCoordinate coord_n, GraphCoordinate coord_m) {
+    if (coord_n.x > coord_m.x)
+        return EAST;
+    else if (coord_n.x < coord_m.x)
+        return WEST;
+
+    else if (coord_n.y > coord_m.y)
+        return NORTH;
+
+    else
+        return SOUTH;
+}

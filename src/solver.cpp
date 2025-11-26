@@ -93,34 +93,44 @@ void Solver::solve() {
         }
     }
 }
+bool isInteger(double n) {
+    int x = n;
 
-std::vector<Position> Solver::dijkstra(Position start) {
-    std::map<Position, std::vector<Edge>> adj_list = m_maze.get_adj_list();
+    if (((double)(n - x)) > 0) {
+        return false;
+    }
+    return true;
+}
+
+std::vector<GraphCoordinate> Solver::dijkstra(GraphCoordinate start) {
+    std::map<GraphCoordinate, std::vector<Edge>> adj_list =
+        m_maze.get_adj_list();
 
     // prio queue of (distance, position) with comparator on distance only
     p_queue pq;
 
     // distance and predecessor maps
-    std::map<Position, int> dist;
-    std::map<Position, Position> prev;
+    std::map<GraphCoordinate, int> dist;
+    std::map<GraphCoordinate, GraphCoordinate> prev;
 
     // initialize distances for all vertices (keys) and for all edge targets
-    for (std::pair<Position, std::vector<Edge>> kv : adj_list)
+    for (std::pair<GraphCoordinate, std::vector<Edge>> kv : adj_list)
         dist[kv.first] = UBOUND_DIST;
 
     dist[start] = 0;
     pq.push(std::make_pair(0, start));
 
-    Position found_target = start;
+    GraphCoordinate found_target = start;
     bool found = false;
 
     while (!pq.empty()) {
-        const std::pair<int, Position> top = pq.top();
+        const std::pair<int, GraphCoordinate> top = pq.top();
         int d = top.first;
-        Position u = top.second;
+        GraphCoordinate u = top.second;
         pq.pop();
 
-        if (m_maze.at_target(u)) {
+        if (isInteger(u.x) && isInteger(u.y) &&
+            m_maze.at_target(Position(u.x, u.y))) {
             found_target = u;
             found = true;
             break;
@@ -133,7 +143,7 @@ std::vector<Position> Solver::dijkstra(Position start) {
             if (alt < dist[e.target]) {
                 dist[e.target] = alt;
                 // update predecessor without requiring default-constructible
-                // Position
+                // GraphCoordinate
                 prev.erase(e.target);
                 prev.insert(std::make_pair(e.target, u));
                 pq.push(std::make_pair(alt, e.target));
@@ -141,10 +151,10 @@ std::vector<Position> Solver::dijkstra(Position start) {
         }
     }
 
-    std::vector<Position> path;
+    std::vector<GraphCoordinate> path;
 
     // reconstruct path from start -> found_target
-    Position cur = found_target;
+    GraphCoordinate cur = found_target;
     while (!(cur.x == start.x && cur.y == start.y)) {
         path.push_back(cur);
         cur = prev[cur];
@@ -210,50 +220,14 @@ std::vector<Position> get_diag(std::vector<std::vector<Position>> diagonals,
     return {};
 }
 
-void Solver::run(std::vector<Position> solved,
+void Solver::run(std::vector<GraphCoordinate> solved,
                  std::vector<std::vector<Position>> diagonals) {
     bool on_diag = false;
-    for (Position next_position : solved) {
-        if (next_position.x == m_mouse.getPosition().x &&
-            next_position.y == m_mouse.getPosition().y)
+    for (GraphCoordinate next_coordinate : solved) {
+        if (next_coordinate.x == (float)m_mouse.getPosition().x &&
+            next_coordinate.y == (float)m_mouse.getPosition().y)
             continue;
-        if (in_diags(diagonals, m_mouse.getPosition()) &&
-            in_diags(diagonals, next_position)) {
-            std::vector<Position> diagonal = get_diag(diagonals, next_position);
-            Position next_next_position = *std::next(
-                std::find(solved.begin(), solved.end(), next_position));
-            /* Diagonal case */
-            if (!on_diag) {
-                on_diag = true;
-
-                Direction diag_first =
-                    dir_for_neighbor(next_position, m_mouse.getPosition());
-
-                Direction diag_second =
-                    dir_for_neighbor(next_next_position, next_position);
-
-                face(diag_first);
-                m_mouse.moveForwardHalf();
-                if ((diag_first == NORTH && diag_second == WEST) ||
-                    (diag_first == WEST && diag_second == NORTH)) {
-                    face((Direction)((diag_first + diag_second + 8) / 2));
-                } else {
-                    face((Direction)((diag_first + diag_second) / 2));
-                }
-            } else {
-                on_diag = std::find(diagonal.begin(), diagonal.end(),
-                                    next_next_position) != diagonal.end();
-                m_mouse.moveForwardHalf();
-                if (!on_diag) {
-                    face(
-                        dir_for_neighbor(next_position, m_mouse.getPosition()));
-                    m_mouse.moveForwardHalf();
-                }
-                m_mouse.setPosition(next_position.x, next_position.y);
-            }
-        } else {
-            face(dir_for_neighbor(next_position, m_mouse.getPosition()));
-            m_mouse.moveForward();
-        }
+        face(dir_for_neighbor(next_coordinate, m_mouse.getPosition()));
+        m_mouse.moveForward();
     }
 }

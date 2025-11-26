@@ -36,8 +36,8 @@ static std::map<Direction, Direction> diagDirSecond = {{NORTH_EAST, EAST},
 struct Position {
     int x;
     int y;
-    Position(size_t x, size_t y) : x(x), y(y) {}
-    Position() : x(0), y(0) {}
+    Position(size_t x, size_t y) : x(x), y(y) {};
+    Position() : x(0), y(0) {};
 };
 
 inline bool operator<(const Position& lhs, const Position& rhs) {
@@ -48,15 +48,32 @@ inline bool operator<(const Position& lhs, const Position& rhs) {
 inline bool operator==(const Position& lhs, const Position& rhs) {
     return lhs.x == rhs.x && lhs.y == rhs.y;
 }
+
+struct GraphCoordinate {
+    float x;
+    float y;
+    GraphCoordinate(float x, float y) : x(x), y(y) {}
+    GraphCoordinate(Position pos) : x(pos.x), y(pos.y) {}
+    GraphCoordinate() : x(0), y(0) {}
+};
+
+inline bool operator<(const GraphCoordinate& lhs, const GraphCoordinate& rhs) {
+    if (lhs.x != rhs.x) return lhs.x < rhs.x;
+    return lhs.y < rhs.y;
+}
+
+inline bool operator==(const GraphCoordinate& lhs, const GraphCoordinate& rhs) {
+    return lhs.x == rhs.x && lhs.y == rhs.y;
+}
 struct PQCmp {
-    bool operator()(const std::pair<int, Position>& a,
-                    const std::pair<int, Position>& b) const {
+    bool operator()(const std::pair<int, GraphCoordinate>& a,
+                    const std::pair<int, GraphCoordinate>& b) const {
         return a.first > b.first;
     }
 };
 
-typedef std::priority_queue<std::pair<int, Position>,
-                            std::vector<std::pair<int, Position>>, PQCmp>
+typedef std::priority_queue<std::pair<int, GraphCoordinate>,
+                            std::vector<std::pair<int, GraphCoordinate>>, PQCmp>
     p_queue;
 
 Direction rotate_right(Direction dir);
@@ -66,6 +83,7 @@ Direction rotate_left45(Direction dir);
 
 Direction rotate_half(Direction dir);
 Direction dir_for_neighbor(Position pos_n, Position pos_m);
+Direction dir_for_neighbor(GraphCoordinate pos_n, GraphCoordinate pos_m);
 
 int dx(Direction d);
 int dy(Direction d);

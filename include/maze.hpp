@@ -11,7 +11,7 @@ constexpr int MAZE_WIDTH = 16;
 constexpr int MAZE_HEIGHT = 16;
 
 struct Edge {
-    Position target;
+    GraphCoordinate target;
     unsigned int weight;
 };
 
@@ -44,8 +44,8 @@ class Maze {
     void finalize_discovery();
     std::vector<Position> valid_diag_neighbors(Position mouse_pos);
     std::vector<std::vector<Position>> find_diagonal_paths(
-        int min_length, std::vector<Position> path);
-    std::map<Position, std::vector<Edge>> get_adj_list();
+        int min_length, std::vector<GraphCoordinate> path);
+    std::map<GraphCoordinate, std::vector<Edge>> get_adj_list();
     bool in_visited(Position pos);  // TODO: I know that this can be than using
                                     // cpp functionality but I dont trust it
 };

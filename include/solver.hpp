@@ -23,9 +23,9 @@ class Solver {
    public:
     void solve();
     void finalize_discovery();
-    void run(std::vector<Position> solved,
+    void run(std::vector<GraphCoordinate> solved,
              std::vector<std::vector<Position>> diagonals);
     std::vector<Position> bfs_shortest_path(Position start);
-    std::vector<Position> dijkstra(Position start);
+    std::vector<GraphCoordinate> dijkstra(GraphCoordinate start);
     Solver(Mouse &mouse, Maze &maze);
 };

@@ -110,12 +110,13 @@ std::vector<Position> Maze::valid_diag_neighbors(Position mouse_pos) {
 }
 
 std::vector<std::vector<Position>> Maze::find_diagonal_paths(
-    int min_length, std::vector<Position> path) {
+    int min_length, std::vector<GraphCoordinate> path) {
     std::vector<std::vector<Position>> all_paths;
 
     bool diag_path_visited[MAZE_WIDTH][MAZE_HEIGHT] = {};
 
-    for (Position pos : path) {
+    for (GraphCoordinate coord : path) {
+        Position pos = Position(coord.x, coord.y);
         if (diag_path_visited[pos.x][pos.y]) {
             continue;
         }
@@ -152,15 +153,16 @@ std::vector<std::vector<Position>> Maze::find_diagonal_paths(
     return all_paths;
 }
 
-std::map<Position, std::vector<Edge>> Maze::get_adj_list() {
-    std::map<Position, std::vector<Edge>> adj_list;
+std::map<GraphCoordinate, std::vector<Edge>> Maze::get_adj_list() {
+    std::map<GraphCoordinate, std::vector<Edge>> adj_list;
 
     for (int x = 0; x < MAZE_WIDTH; x++) {
         for (int y = 0; y < MAZE_HEIGHT; y++) {
-            Position p = Position(x, y);
+            GraphCoordinate p = GraphCoordinate(x, y);
             // ensure the node appears in the adjacency list even if it has
             // no neighbors
-            for (Position neighbor : valid_neighbors(p)) {
+            for (Position n : valid_neighbors(Position(p.x, p.y))) {
+                GraphCoordinate neighbor = GraphCoordinate(n);
                 Edge e = {neighbor, MOVE_COST};
                 Edge e_back = {p, MOVE_COST};
                 adj_list[p].push_back(e);
