@@ -109,9 +109,11 @@ bool Ratatoskr::too_close_front(uint16_t fl, uint16_t fr) {
 }
 
 /**
- * move @distance mm forwards with PID control
+ * move @distance cells forward with PID control
  */
 void Ratatoskr::moveForward(int distance) {
+    Mouse::moveForward(distance);
+    distance *= CELL_SIZE_MM;
     long target_counts = (long)(distance * ENCODER_COUNTS_PER_MM);
     const int BASE_PWM = 200;
 
@@ -189,12 +191,10 @@ void Ratatoskr::stop() {
     m_motor_right.brake();
 }
 
-
 void Ratatoskr::coast() {
     m_motor_left.coast();
     m_motor_right.coast();
 }
-
 
 //===============================[ SENSING ]====================================
 /**
