@@ -67,10 +67,10 @@ void Ratatoskr::turn(int angle) {
     float target      = start_angle + angle;
 
     // Initial turn speed
-    int turn_speed = ((MIN_TURN_PWM + MAX_TURN_PWM)/2) * 90 / angle;
+    int turn_speed = ((MIN_TURN_PWM + MAX_TURN_PWM)/2) * 90 / abs(angle);
     turn_speed     = constrain(turn_speed, MIN_TURN_PWM, MAX_TURN_PWM);
 
-    while (millis() - t_start < TURN_TIME_LIMIT * (angle / 180.0f)) {
+    while (millis() - t_start < TURN_TIME_LIMIT * (abs(angle) / 180.0f)) {
         t_now = micros();
         float yaw = m_gyro.getAngle(t_now, t_last);
         t_last = t_now;
