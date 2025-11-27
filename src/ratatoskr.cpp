@@ -118,6 +118,7 @@ constexpr float MAX_PWM_CORRECTION = 30.0f;
  */
 void Ratatoskr::moveForward(int distance) {
     Mouse::moveForward(distance);
+    coast(); // This is to reset any previous motor commands (might help with starts)
     distance *= CELL_SIZE_MM;
     long target_counts = (long)(distance * ENCODER_COUNTS_PER_MM);
 
@@ -144,7 +145,7 @@ void Ratatoskr::moveForward(int distance) {
 
     // PID(Kp, Ki, Kd)
     PID pid_encoders(0.75, 0.8, 0.1);
-    PID pid_distance(0.8, 0.05, 0.4);
+    PID pid_distance(0.9, 0.05, 0.45);
     while (true) {
         // ---- FRONT STOP CHECK ----
         uint16_t fl = m_tof_front_left.get_reading();
@@ -189,8 +190,8 @@ void Ratatoskr::moveForward(int distance) {
 
         // tof_correction = constrain(tof_correction, -MAX_PWM_CORRECTION, MAX_PWM_CORRECTION); doesnt even work lmao
         // ---- PWM COMPUTATION ----
-        pwm_left  = BASE_PWM + 0.6f * tof_correction + 0.4f * encoder_correction;
-        pwm_right = BASE_PWM - 0.6f * tof_correction - 0.4f * encoder_correction;
+        pwm_left  = BASE_PWM + 0.65f * tof_correction + 0.35f * encoder_correction;
+        pwm_right = BASE_PWM - 0.65f * tof_correction - 0.35f * encoder_correction;
 
         pwm_left  = constrain(pwm_left,  70, 240);
         pwm_right = constrain(pwm_right, 70, 240);
