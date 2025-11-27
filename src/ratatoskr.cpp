@@ -141,7 +141,7 @@ void Ratatoskr::moveForward(int distance) {
 
     // PID(Kp, Ki, Kd)
     PID pid_encoders(0.75, 0.8, 0.1);
-    PID pid_distance(1.0, 0.05, 0.4);
+    PID pid_distance(0.8, 0.05, 0.4);
     while (true) {
         // ---- 1) FRONT STOP CHECK (runs EVERY iteration) ----
         uint16_t fl = m_tof_front_left.get_reading();
