@@ -110,6 +110,9 @@ bool Ratatoskr::too_close_front(uint16_t fl, uint16_t fr) {
     return res;
 }
 
+// lord forgive me for what I'm about to do (constexpr in cpp)
+constexpr float MAX_PWM_CORRECTION = 30.0f;
+
 /**
  * move @distance cells forward with PID control
  */
@@ -143,7 +146,7 @@ void Ratatoskr::moveForward(int distance) {
     PID pid_encoders(0.75, 0.8, 0.1);
     PID pid_distance(0.8, 0.05, 0.4);
     while (true) {
-        // ---- 1) FRONT STOP CHECK (runs EVERY iteration) ----
+        // ---- FRONT STOP CHECK ----
         uint16_t fl = m_tof_front_left.get_reading();
         uint16_t fr = m_tof_front_right.get_reading();
 
@@ -152,7 +155,7 @@ void Ratatoskr::moveForward(int distance) {
         //     break;
         // }
 
-        // ---- 2) ENCODER PROGRESS / EXIT ON DISTANCE ----
+        // ---- ENCODER PROGRESS / EXIT ON DISTANCE ----
         left_encoder_prev  = left_encoder;
         right_encoder_prev = right_encoder;
         left_encoder       = m_motor_left.get_encoder_count();
@@ -160,7 +163,7 @@ void Ratatoskr::moveForward(int distance) {
 
         long avg_counts = (left_encoder + right_encoder) / 2;
 
-        // If we already reached requested distance, stop even if no wall
+        // If we already reached requested distance, stop
         if (avg_counts >= target_counts) {
             break;
         }
@@ -168,7 +171,7 @@ void Ratatoskr::moveForward(int distance) {
         int left_encoder_diff  = left_encoder - left_encoder_prev;
         int right_encoder_diff = right_encoder - right_encoder_prev;
 
-        // ---- 3) SIDE ToF ----
+        // ---- SIDE ToF ----
         left_tof  = constrain(m_tof_left.get_reading(), 0, 50);
         right_tof = constrain(m_tof_right.get_reading(), 0, 50);
 
@@ -177,14 +180,15 @@ void Ratatoskr::moveForward(int distance) {
 
         // ---- 4) TIME STEP ----
         t_now = millis();
-        float t_diff = (t_now - t_prev) / 100.0f;   // your original scaling
+        float t_diff = (t_now - t_prev) / 100.0f;
         t_prev = t_now;
 
-        // ---- 5) PID UPDATES ----
+        // ---- PID UPDATES ----
         float encoder_correction = pid_encoders.update(t_diff, encoder_error);
         float tof_correction     = pid_distance.update(t_diff, tof_error);
 
-        // ---- 6) PWM COMPUTATION (always ToF + encoders) ----
+        // tof_correction = constrain(tof_correction, -MAX_PWM_CORRECTION, MAX_PWM_CORRECTION); doesnt even work lmao
+        // ---- PWM COMPUTATION ----
         pwm_left  = BASE_PWM + 0.6f * tof_correction + 0.4f * encoder_correction;
         pwm_right = BASE_PWM - 0.6f * tof_correction - 0.4f * encoder_correction;
 
@@ -196,6 +200,7 @@ void Ratatoskr::moveForward(int distance) {
 
         delay(loop_delay);
     }
+    // Dark magic brake so that motors don't shit themselves
     coast();
     delay(5);
     stop();
