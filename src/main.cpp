@@ -11,7 +11,7 @@ const uint8_t TOF_FRONT_LEFT_ADDRESS = 0x31;
 const uint8_t TOF_FRONT_RIGHT_ADDRESS = 0x32;
 const uint8_t TOF_RIGHT_ADDRESS = 0x33;
 
-const MODE mode = RUN;  // TODO: Right now you have to change this by hand.
+const MODE mode = TESTING;  // TODO: Right now you have to change this by hand.
 
 ToF tof_left = ToF(LEFT, TOF_LEFT_ADDRESS, TOF_LEFT_XSHUT);
 ToF tof_front_left =
@@ -103,11 +103,23 @@ void setup() {
                 delay(1000);
                 // rat.turn(45);
                 // delay(3000);
-                rat.turn(-90);
+                // rat.turn(-90);
                 // delay(3000);
                 // rat.turn(180);
                 // delay(3000);
                 // rat.calibrateEncoders();
+                rat.moveForward(4);
+                // delay(1000);
+                // rat.moveForward(1);
+                // delay(1000);
+                // rat.moveForward(1);
+                // delay(1000);
+                // rat.moveForward(1);
+                // delay(1000);
+                rat.turn(90);
+                delay(1000);
+                rat.moveForward(1);
+                delay(10000);
             }
         }
     }

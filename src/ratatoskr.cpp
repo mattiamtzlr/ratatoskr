@@ -48,8 +48,7 @@ void Ratatoskr::calibrateEncoders() {
     }
 }
 
-constexpr int MIN_TURN_PWM = 185;
-constexpr int MAX_TURN_PWM = 195;
+
 constexpr int TURN_TIME_LIMIT = 2000;
 constexpr float TURN_TRESHOLD = 0.2f;
 
@@ -103,11 +102,10 @@ void Ratatoskr::turn(int angle) {
     delay(1);
     stop();
 }
-
 bool Ratatoskr::too_close_front(uint16_t fl, uint16_t fr) {
     bool res = (fl != 0) && (fr != 0) &&
-           ((fl < STOP_DISTANCE && fr < STOP_DISTANCE + 20) ||
-            (fl < STOP_DISTANCE + 20 && fr < STOP_DISTANCE));
+          (fl < STOP_DISTANCE ||
+           fr < STOP_DISTANCE);
     // log("Too close?" + res ? " YES" : " NO");
     return res;
 }
@@ -119,72 +117,93 @@ void Ratatoskr::moveForward(int distance) {
     Mouse::moveForward(distance);
     distance *= CELL_SIZE_MM;
     long target_counts = (long)(distance * ENCODER_COUNTS_PER_MM);
-    const int BASE_PWM = 200;
+
+    const int BASE_PWM = FORWARD_PWM;
 
     m_motor_left.reset_encoder_count();
     m_motor_right.reset_encoder_count();
 
-    long left_encoder = 0;
-    long right_encoder = 0;
-    long left_encoder_prev = 0;
+    long left_encoder       = 0;
+    long right_encoder      = 0;
+    long left_encoder_prev  = 0;
     long right_encoder_prev = 0;
 
-    uint16_t left_tof = 0;
+    uint16_t left_tof  = 0;
     uint16_t right_tof = 0;
 
-    float pwm_left = BASE_PWM;
+    float pwm_left  = BASE_PWM;
     float pwm_right = BASE_PWM;
 
     const int loop_delay = 20;
 
-    int t_now = millis();
+    int t_now  = millis();
     int t_prev = t_now;
 
-    // TODO: This is also not very clean like this
+    // PID(Kp, Ki, Kd)
     PID pid_encoders(0.75, 0.8, 0.1);
-    PID pid_distance(0.8, 0.2, 0.5);
-    while (!too_close_front(m_tof_front_left.get_reading(),
-                            m_tof_front_right.get_reading()) &&
-           (left_encoder + right_encoder) / 2 < target_counts) {
-        left_encoder_prev = left_encoder;
-        right_encoder_prev = right_encoder;
-        left_encoder = m_motor_left.get_encoder_count();
-        right_encoder = m_motor_right.get_encoder_count();
+    PID pid_distance(1.0, 0.05, 0.4);
+    while (true) {
+        // ---- 1) FRONT STOP CHECK (runs EVERY iteration) ----
+        uint16_t fl = m_tof_front_left.get_reading();
+        uint16_t fr = m_tof_front_right.get_reading();
 
-        int left_encoder_diff = left_encoder - left_encoder_prev;
+        // if (too_close_front(fl, fr)) {
+        //     // We are at about 40mm -> stop now
+        //     break;
+        // }
+
+        // ---- 2) ENCODER PROGRESS / EXIT ON DISTANCE ----
+        left_encoder_prev  = left_encoder;
+        right_encoder_prev = right_encoder;
+        left_encoder       = m_motor_left.get_encoder_count();
+        right_encoder      = m_motor_right.get_encoder_count();
+
+        long avg_counts = (left_encoder + right_encoder) / 2;
+
+        // If we already reached requested distance, stop even if no wall
+        if (avg_counts >= target_counts) {
+            break;
+        }
+
+        int left_encoder_diff  = left_encoder - left_encoder_prev;
         int right_encoder_diff = right_encoder - right_encoder_prev;
 
-        left_tof = constrain(m_tof_left.get_reading(), 0, 90);
-        right_tof = constrain(m_tof_right.get_reading(), 0, 90);
+        // ---- 3) SIDE ToF ----
+        left_tof  = constrain(m_tof_left.get_reading(), 0, 50);
+        right_tof = constrain(m_tof_right.get_reading(), 0, 50);
 
-        // Prepare errors
-        float tof_error = 0 - (left_tof - right_tof);
-        float encoder_error = 0 - (left_encoder_diff - right_encoder_diff);
+        float encoder_error = 0.0f - (left_encoder_diff - right_encoder_diff);
+        float tof_error     = 0.0f - (left_tof - right_tof);
 
+        // ---- 4) TIME STEP ----
         t_now = millis();
-        float t_diff = (t_now - t_prev) / 100.0;
+        float t_diff = (t_now - t_prev) / 100.0f;   // your original scaling
         t_prev = t_now;
 
-        // Update PID controllers
+        // ---- 5) PID UPDATES ----
         float encoder_correction = pid_encoders.update(t_diff, encoder_error);
-        float tof_correction = pid_distance.update(t_diff, tof_error);
+        float tof_correction     = pid_distance.update(t_diff, tof_error);
 
-        // Calculate new PWM
-        pwm_left = BASE_PWM + .6 * tof_correction + .4 * encoder_correction;
-        pwm_right = BASE_PWM - .6 * tof_correction - .4 * encoder_correction;
+        // ---- 6) PWM COMPUTATION (always ToF + encoders) ----
+        pwm_left  = BASE_PWM + 0.6f * tof_correction + 0.4f * encoder_correction;
+        pwm_right = BASE_PWM - 0.6f * tof_correction - 0.4f * encoder_correction;
 
-        pwm_left = constrain(pwm_left, 70, 240);
+        pwm_left  = constrain(pwm_left,  70, 240);
         pwm_right = constrain(pwm_right, 70, 240);
 
-        // Apply motor commands
         m_motor_left.spin_cw(pwm_left);
         m_motor_right.spin_ccw(pwm_right);
 
         delay(loop_delay);
     }
+    coast();
+    delay(5);
     stop();
-    delay(1000);
+    delay(20);
+    coast();
+    // delay(1000);
 }
+
 
 /**
  * SLAM THE BRAKES!
