@@ -26,8 +26,8 @@ class Ratatoskr : public Mouse {
               ToF &tof_front_left, ToF &tof_front_right, ToF &tof_right,
               MPU6050 &gyro /*, LEDMatrix &screen*/);
 
-    static const int MIN_TURN_PWM = 185;
-    static const int MAX_TURN_PWM = 195;
+    static const int MIN_TURN_PWM = 180;
+    static const int MAX_TURN_PWM = 190;
     
     static const int STOP_DISTANCE = 40;
     
@@ -54,6 +54,9 @@ class Ratatoskr : public Mouse {
     static const uint16_t SIDE_WALL_MM = 90;
 
     virtual void moveForward(int distance = 1);
+    public:
+    void moveStraightMM(float mm);
+
     virtual void turn(int angle);
 
     void calibrateEncoders();

@@ -101,6 +101,9 @@ void Ratatoskr::turn(int angle) {
     coast(); // Kinda fixes that large overshoot
     delay(1);
     stop();
+    moveStraightMM(-30.0f);
+    coast();
+
 }
 bool Ratatoskr::too_close_front(uint16_t fl, uint16_t fr) {
     bool res = (fl != 0) && (fr != 0) &&
@@ -119,6 +122,10 @@ constexpr float MAX_PWM_CORRECTION = 30.0f;
 void Ratatoskr::moveForward(int distance) {
     Mouse::moveForward(distance);
     coast(); // This is to reset any previous motor commands (might help with starts)
+    delay(5);
+    stop();
+    delay(5);
+    coast();
     distance *= CELL_SIZE_MM;
     long target_counts = (long)(distance * ENCODER_COUNTS_PER_MM);
 
@@ -208,6 +215,82 @@ void Ratatoskr::moveForward(int distance) {
     delay(20);
     coast();
     // delay(1000);
+}
+
+void Ratatoskr::moveStraightMM(float mm) {
+    // Distance in encoder counts (always positive)
+    long target_counts = (long)(fabs(mm) * ENCODER_COUNTS_PER_MM);
+
+    // Reset encoders so we measure this move cleanly
+    m_motor_left.reset_encoder_count();
+    m_motor_right.reset_encoder_count();
+
+    long left_encoder       = 0;
+    long right_encoder      = 0;
+    long left_encoder_prev  = 0;
+    long right_encoder_prev = 0;
+
+    // Direction: +1 = forward, -1 = backward
+    int dir = (mm >= 0.0f) ? 1 : -1;
+
+    const int loop_delay = 10;  // shorter loop, it's a tiny move
+
+    int t_now  = millis();
+    int t_prev = t_now;
+
+    // Same encoder PID as moveForward
+    PID pid_encoders(0.75, 0.8, 0.1);
+
+    while (true) {
+        // Read encoders
+        left_encoder_prev  = left_encoder;
+        right_encoder_prev = right_encoder;
+
+        left_encoder  = m_motor_left.get_encoder_count();
+        right_encoder = m_motor_right.get_encoder_count();
+
+        // Progress based on absolute counts (works for forward/backward)
+        long avg_counts = (labs(left_encoder) + labs(right_encoder)) / 2;
+        if (avg_counts >= target_counts) {
+            break;
+        }
+
+        int left_encoder_diff  = left_encoder - left_encoder_prev;
+        int right_encoder_diff = right_encoder - right_encoder_prev;
+
+        // Time step
+        t_now = millis();
+        float t_diff = (t_now - t_prev) / 100.0f;
+        t_prev = t_now;
+
+        // Encoder PID (same sign convention as moveForward)
+        float encoder_error      = 0.0f - (left_encoder_diff - right_encoder_diff);
+        float encoder_correction = pid_encoders.update(t_diff, encoder_error);
+
+        // Basic PWM with encoder correction
+        float pwm_left  = FORWARD_PWM + 0.4f * encoder_correction;
+        float pwm_right = FORWARD_PWM - 0.4f * encoder_correction;
+
+        pwm_left  = constrain(pwm_left,  70, 240);
+        pwm_right = constrain(pwm_right, 70, 240);
+
+        // Apply direction (forward/backward) but keep same differential
+        if (dir > 0) {
+            // Forward (same as your moveForward)
+            m_motor_left.spin_cw(pwm_left);
+            m_motor_right.spin_ccw(pwm_right);
+        } else {
+            // Backward: reverse motor directions
+            m_motor_left.spin_ccw(pwm_left);
+            m_motor_right.spin_cw(pwm_right);
+        }
+
+        delay(loop_delay);
+    }
+
+    coast();
+    delay(2);
+    stop();
 }
 
 
