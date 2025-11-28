@@ -5,8 +5,9 @@
 #include <iostream>
 #include <map>
 
-const int MOVE_COST = 1;
-const int TURN_COST = 5;
+const int MOVE_COST = 2;
+const int HALF_MOVE_COST = 1;
+const int TURN_COST = 10;
 
 std::vector<Position> Maze::valid_neighbors(Position mouse_pos) {
     std::vector<Position> neigh;
@@ -133,6 +134,7 @@ std::vector<std::vector<Position>> Maze::find_diagonal_paths(
                     (right) ? rotate_right(dir_for_neighbor(neighbor, pos))
                             : rotate_left(dir_for_neighbor(neighbor, pos));
 
+                std::cerr << "out" << std::endl;
                 while (!exists_wall(neighbor, dir) &&
                        std::find(path.begin(), path.end(), neighbor) !=
                            path.end()) {
@@ -153,11 +155,9 @@ std::vector<std::vector<Position>> Maze::find_diagonal_paths(
     return all_paths;
 }
 
-std::map<GraphCoordinate, std::vector<Edge>> Maze::get_adj_list() {
-    std::map<GraphCoordinate, std::vector<Edge>> adj_list;
 std::map<GraphCoordinate, std::set<Edge>> Maze::get_adj_list() {
     std::map<GraphCoordinate, std::set<Edge>> adj_list;
-    std::vector<GraphCoordinate> all_coords;
+    std::set<GraphCoordinate> halfway_nodes;
 
     for (int x = 0; x < MAZE_WIDTH; x++) {
         for (int y = 0; y < MAZE_HEIGHT; y++) {
@@ -166,28 +166,39 @@ std::map<GraphCoordinate, std::set<Edge>> Maze::get_adj_list() {
             // no neighbors
             for (Position n : valid_neighbors(Position(p.x, p.y))) {
                 GraphCoordinate neighbor = GraphCoordinate(n);
+                GraphCoordinate inbetween =
+                    GraphCoordinate((n.x + p.x) / 2, (n.y + p.y) / 2);
+
                 Edge e = {neighbor, MOVE_COST};
                 Edge e_back = {p, MOVE_COST};
-                adj_list[p].push_back(e);
-                adj_list[neighbor].push_back(e_back);
+                Edge e_half = {inbetween, HALF_MOVE_COST};
+                Edge e_back_half = {p, HALF_MOVE_COST};
+
+                adj_list[inbetween].insert(e_back_half);
+                adj_list[p].insert(e_half);
                 adj_list[p].insert(e);
-                adj_list[p].insert(e_back);
+                adj_list[neighbor].insert(e_back);
+                halfway_nodes.insert(inbetween);
             }
         }
     }
+
     /*
-    for (std::vector<Position> diagonal : find_diagonal_paths()) {
-        for (int i = 0; i < diagonal.size() - 1; i++) {
-            Position pos_1 = diagonal[i];
-            Position pos_2 = diagonal[i + 1];
-            Edge edge_1_to_2 = {pos_2,
-                                MOVE_COST};  // TODO: bit harder to
-    calculate
-                                             // cost of turns for diagonals
-            Edge edge_2_to_1 = {pos_1, MOVE_COST};
+     *
+     */
+    for (GraphCoordinate node : halfway_nodes) {
+        for (Direction d : {NORTH_EAST, SOUTH_EAST, SOUTH_WEST, NORTH_WEST}) {
+            GraphCoordinate diag_neighbor = get_diag_neighbor(node, d);
+            if (std::find(halfway_nodes.begin(), halfway_nodes.end(),
+                          diag_neighbor) != halfway_nodes.end()) {
+                Edge e = {diag_neighbor, HALF_MOVE_COST};
+                Edge e_back = {node, HALF_MOVE_COST};
+
+                adj_list[node].insert(e);
+                adj_list[diag_neighbor].insert(e_back);
+            }
         }
     }
-    */
 
     return adj_list;
 }

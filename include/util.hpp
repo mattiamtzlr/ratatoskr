@@ -85,8 +85,11 @@ Direction rotate_half(Direction dir);
 Direction dir_for_neighbor(Position pos_n, Position pos_m);
 Direction dir_for_neighbor(GraphCoordinate pos_n, GraphCoordinate pos_m);
 
+bool isInteger(double n);
 int dx(Direction d);
 int dy(Direction d);
 
 Position get_neighbor(Position pos, Direction d);
 Position get_diag_neighbor(Position pos, Direction d);
+GraphCoordinate get_diag_neighbor(GraphCoordinate pos, Direction d);
+double L2_distance_squared(GraphCoordinate c_1, GraphCoordinate c_2);

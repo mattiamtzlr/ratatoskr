@@ -93,14 +93,6 @@ void Solver::solve() {
         }
     }
 }
-bool isInteger(double n) {
-    int x = n;
-
-    if (((double)(n - x)) > 0) {
-        return false;
-    }
-    return true;
-}
 
 std::vector<GraphCoordinate> Solver::dijkstra(GraphCoordinate start) {
     std::map<GraphCoordinate, std::set<Edge>> adj_list = m_maze.get_adj_list();
@@ -121,7 +113,6 @@ std::vector<GraphCoordinate> Solver::dijkstra(GraphCoordinate start) {
 
     GraphCoordinate found_target = start;
     bool found = false;
-
     while (!pq.empty()) {
         const std::pair<int, GraphCoordinate> top = pq.top();
         int d = top.first;
@@ -138,7 +129,7 @@ std::vector<GraphCoordinate> Solver::dijkstra(GraphCoordinate start) {
         std::set<Edge> edges = adj_list[u];
 
         for (Edge e : edges) {
-            int alt = dist[u] + e.weight /* + Vertex weight*/;
+            int alt = dist[u] + e.weight;
             if (alt < dist[e.target]) {
                 dist[e.target] = alt;
                 // update predecessor without requiring default-constructible
@@ -221,12 +212,23 @@ std::vector<Position> get_diag(std::vector<std::vector<Position>> diagonals,
 
 void Solver::run(std::vector<GraphCoordinate> solved,
                  std::vector<std::vector<Position>> diagonals) {
-    bool on_diag = false;
+    GraphCoordinate mouse_coordinate;
     for (GraphCoordinate next_coordinate : solved) {
-        if (next_coordinate.x == (float)m_mouse.getPosition().x &&
-            next_coordinate.y == (float)m_mouse.getPosition().y)
+        if (next_coordinate.x == mouse_coordinate.x &&
+            next_coordinate.y == mouse_coordinate.y)
             continue;
-        face(dir_for_neighbor(next_coordinate, m_mouse.getPosition()));
-        m_mouse.moveForward();
+        Direction next_dir =
+            dir_for_neighbor(next_coordinate, mouse_coordinate);
+        face(next_dir);
+        double dist = L2_distance_squared(mouse_coordinate, next_coordinate);
+        std::cerr << "dist: " << std::to_string(dist)
+                  << " dir: " << std::to_string(next_dir) << std::endl;
+        if (dist == 1.0) {
+            m_mouse.moveForward();
+        } else {
+            m_mouse.moveForwardHalf();
+        }
+
+        mouse_coordinate = next_coordinate;
     }
 }
