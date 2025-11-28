@@ -66,6 +66,7 @@ void Ratatoskr::turn(int angle) {
                 m_motor_right.spin_cw(pwm);
             }
         }
+        update_screen(yaw);
     }
     safe_stop();
     moveStraightMM(-10);
@@ -162,8 +163,11 @@ void Ratatoskr::moveForward(int distance_cells) {
 
         /*  ------------------ TIME STEP ------------------ */
         t_now = millis();
-        float t_diff =
-            (t_now - t_prev) / 100.0f; /*  same time scaling as before */
+        /*  same time scaling as before */
+        float t_diff = (t_now - t_prev) / 100.0f;
+
+        float gyro_angle = m_gyro.getAngle(t_now, t_prev);
+        update_screen(gyro_angle);
         t_prev = t_now;
 
         /*  ------------------ PID UPDATES ------------------ */
@@ -208,8 +212,6 @@ void Ratatoskr::moveForward(int distance_cells) {
         right_encoder = m_motor_right.get_encoder_count();
 
         avg_counts = (left_encoder + right_encoder) / 2;
-
-        update_screen();
     }
     safe_stop();
 }
@@ -326,16 +328,13 @@ bool Ratatoskr::wallLeft() {
     return (distance_left > 0) && (distance_left < SIDE_WALL_MM);
 }
 
-void Ratatoskr::update_screen() {
+void Ratatoskr::update_screen(float gyro_angle) {
     m_oled.clear();
     switch (m_oled.mode) {
         case DEBUG: {
-            unsigned long millis_now = millis();
-            int16_t gyro_angle = floor(m_gyro.getAngle(millis_now, m_oled.last_millis));
-
             uint16_t left_rpm = m_motor_left.get_rpm();
             uint16_t right_rpm = m_motor_right.get_rpm();
-            m_oled.update_status_bar(gyro_angle, left_rpm, right_rpm);
+            m_oled.update_status_bar(floor(fabsf(gyro_angle)), left_rpm, right_rpm);
 
             uint16_t tof_left = m_tof_left.read();
             uint16_t tof_front_left = m_tof_front_left.read();
@@ -343,7 +342,6 @@ void Ratatoskr::update_screen() {
             uint16_t tof_right = m_tof_right.read();
             m_oled.update_ToFs(tof_left, tof_front_left, tof_front_right, tof_right);
 
-            m_oled.last_millis = millis_now;
             break;
         }
 

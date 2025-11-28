@@ -1,5 +1,6 @@
 #pragma once
 #include <Arduino.h>
+#include <cstdint>
 
 #include "ToF.hpp"
 #include "esp_logger.hpp"
@@ -63,7 +64,7 @@ class Ratatoskr : public Mouse {
      */
     virtual bool wallLeft();
 
-    void update_screen();
+    void update_screen(float gyro_angle);
     virtual void update_visuals(Maze &maze);
     virtual void log(std::string msg);
 
