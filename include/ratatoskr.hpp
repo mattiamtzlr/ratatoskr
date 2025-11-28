@@ -30,8 +30,8 @@ class Ratatoskr : public Mouse {
               ToF &tof_front_left, ToF &tof_front_right, ToF &tof_right,
               MPU6050 &gyro /*, LEDMatrix &screen*/);
 
-    static const int MIN_TURN_PWM = 180;
-    static const int MAX_TURN_PWM = 190;
+    static const int MIN_TURN_PWM = 185;
+    static const int MAX_TURN_PWM = 195;
     
     static const int STOP_DISTANCE = 40;
     
@@ -44,7 +44,7 @@ class Ratatoskr : public Mouse {
 
     // So encooder counts per mm = counts per rev / (WHEEL_DIAMETER_MM * pi)
     static constexpr float ENCODER_COUNTS_PER_MM =
-        180.0f / (WHEEL_DIAMETER_MM * PI);
+        190.0f / (WHEEL_DIAMETER_MM * PI);
 
     static constexpr float MM_PER_CELL = 180.0;
 
