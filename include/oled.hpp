@@ -3,7 +3,7 @@
 /* SSD1306 with a resolution of 128x64 pixels */
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
-#include <GFX_fonts/Font5x5Fixed.h>
+#include <GFX_fonts/Font5x7FixedMono.h>
 
 #include <map>
 
@@ -12,9 +12,9 @@
 
 #define SSD1306_NO_SPLASH /* this disables the splash screen */
 
-#define FONT &Font5x5Fixed
+#define FONT &Font5x7FixedMono
 #define FONT_WIDTH 5 /* set manually */
-#define FONT_HEIGHT 5 /* set manually */
+#define FONT_HEIGHT 7 /* set manually */
 
 enum TextSize { SMALL = 1, MEDIUM = 2, LARGE = 3, HUGE = 4 };
 enum Face { MAD, NEUTRAL, HAPPY, BLINK };
@@ -33,10 +33,9 @@ class OLED {
     Adafruit_SSD1306 m_oled =
         Adafruit_SSD1306(m_width, m_height, &Wire, m_reset);
 
-    unsigned long last_micros = 0;
-
    public:
     MODE mode = RUN;
+    unsigned long last_millis = 0;
 
     OLED(uint8_t addr = 0x3C);
     void begin();

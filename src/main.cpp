@@ -114,7 +114,9 @@ void setup() {
         case TESTING: {
             oled.mode = DEBUG;
             while (true) {
-                rat.moveForward(180);
+                rat.moveForward(1);
+                delay(500);
+                rat.turn(90);
                 delay(2000);
             }
         }

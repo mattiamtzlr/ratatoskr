@@ -330,7 +330,9 @@ void Ratatoskr::update_screen() {
     m_oled.clear();
     switch (m_oled.mode) {
         case DEBUG: {
-            int16_t gyro_angle = floor(m_gyro.getAngle(micros(), 0));
+            unsigned long millis_now = millis();
+            int16_t gyro_angle = floor(m_gyro.getAngle(millis_now, m_oled.last_millis));
+
             uint16_t left_rpm = m_motor_left.get_rpm();
             uint16_t right_rpm = m_motor_right.get_rpm();
             m_oled.update_status_bar(gyro_angle, left_rpm, right_rpm);
@@ -340,6 +342,8 @@ void Ratatoskr::update_screen() {
             uint16_t tof_front_right = m_tof_front_right.read();
             uint16_t tof_right = m_tof_right.read();
             m_oled.update_ToFs(tof_left, tof_front_left, tof_front_right, tof_right);
+
+            m_oled.last_millis = millis_now;
             break;
         }
 
