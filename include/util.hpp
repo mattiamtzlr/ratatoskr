@@ -17,6 +17,16 @@ enum Direction {
     NORTH_WEST = 7,
 };
 
+enum Instruction {
+    MOVE_FORWARD,
+    MOVE_FORWARD_HALF,
+    TURN_LEFT_45,
+    TURN_LEFT_90,
+    TURN_RIGHT_45,
+    TURN_RIGHT_90,
+
+};
+
 enum MODE { RUN, DUMP_LOG, TESTING };
 
 static std::map<Direction, char> dirToCardinalChar = {

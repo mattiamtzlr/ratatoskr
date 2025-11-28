@@ -210,25 +210,39 @@ std::vector<Position> get_diag(std::vector<std::vector<Position>> diagonals,
     return {};
 }
 
-void Solver::run(std::vector<GraphCoordinate> solved,
-                 std::vector<std::vector<Position>> diagonals) {
+std::vector<Instruction> Solver::parse_path(std::vector<GraphCoordinate> path) {
     GraphCoordinate mouse_coordinate;
-    for (GraphCoordinate next_coordinate : solved) {
+    Direction mouse_direction = NORTH;
+    std::vector<Instruction> instructions;
+    for (GraphCoordinate next_coordinate : path) {
         if (next_coordinate.x == mouse_coordinate.x &&
             next_coordinate.y == mouse_coordinate.y)
             continue;
         Direction next_dir =
             dir_for_neighbor(next_coordinate, mouse_coordinate);
-        face(next_dir);
-        double dist = L2_distance_squared(mouse_coordinate, next_coordinate);
-        std::cerr << "dist: " << std::to_string(dist)
-                  << " dir: " << std::to_string(next_dir) << std::endl;
-        if (dist == 1.0) {
-            m_mouse.moveForward();
+
+        int diff = (next_dir - mouse_direction + 8) % 8;
+        if (diff >= 5) {
+            int i;
+            for (i = 0; i < 7 - diff; i += 2)
+                instructions.push_back(TURN_LEFT_90);
+            if (i < 8 - diff) instructions.push_back(TURN_LEFT_45);
         } else {
-            m_mouse.moveForwardHalf();
+            int i;
+            for (i = 0; i < diff - 1; i += 2)
+                instructions.push_back(TURN_RIGHT_90);
+            if (i < diff) instructions.push_back(TURN_RIGHT_45);
         }
 
+        double dist = L2_distance_squared(mouse_coordinate, next_coordinate);
+        if (dist == 1.0) {
+            instructions.push_back(MOVE_FORWARD);
+        } else {
+            instructions.push_back(MOVE_FORWARD_HALF);
+        }
+
+        mouse_direction = next_dir;
         mouse_coordinate = next_coordinate;
     }
+    return instructions;
 }

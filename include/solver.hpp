@@ -23,8 +23,7 @@ class Solver {
    public:
     void solve();
     void finalize_discovery();
-    void run(std::vector<GraphCoordinate> solved,
-             std::vector<std::vector<Position>> diagonals);
+    std::vector<Instruction> parse_path(std::vector<GraphCoordinate> path);
     std::vector<Position> bfs_shortest_path(Position start);
     std::vector<GraphCoordinate> dijkstra(GraphCoordinate start);
     Solver(Mouse &mouse, Maze &maze);
