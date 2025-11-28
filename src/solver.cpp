@@ -246,3 +246,29 @@ std::vector<Instruction> Solver::parse_path(std::vector<GraphCoordinate> path) {
     }
     return instructions;
 }
+void Solver::run(std::vector<Instruction> instructions) {
+    face(NORTH);
+    for (Instruction next_instruction : instructions) {
+        std::cerr << inst_to_str[next_instruction] << std::endl;
+        switch (next_instruction) {
+            case MOVE_FORWARD:
+                m_mouse.moveForward();
+                break;
+            case MOVE_FORWARD_HALF:
+                m_mouse.moveForwardHalf();
+                break;
+            case TURN_LEFT_45:
+                m_mouse.turnLeft45();
+                break;
+            case TURN_LEFT_90:
+                m_mouse.turnLeft();
+                break;
+            case TURN_RIGHT_45:
+                m_mouse.turnRight45();
+                break;
+            case TURN_RIGHT_90:
+                m_mouse.turnRight();
+                break;
+        }
+    }
+}

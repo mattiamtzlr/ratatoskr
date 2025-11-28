@@ -10,7 +10,10 @@ int main(int argc, char* argv[]) {
     Maze maze;
     Solver solver(mouse, maze);
 
-    maze.targets.push_back(Position(2, 2));
+    maze.targets.push_back(Position(7, 7));
+    maze.targets.push_back(Position(7, 8));
+    maze.targets.push_back(Position(8, 7));
+    maze.targets.push_back(Position(8, 8));
 
     solver.solve();  // Run from start to target
 
@@ -20,7 +23,10 @@ int main(int argc, char* argv[]) {
     solver.solve();  // Run from target to start
 
     maze.targets.clear();
-    maze.targets.push_back(Position(2, 2));
+    maze.targets.push_back(Position(7, 7));
+    maze.targets.push_back(Position(7, 8));
+    maze.targets.push_back(Position(8, 7));
+    maze.targets.push_back(Position(8, 8));
 
     solver.finalize_discovery();
     /*
@@ -35,15 +41,6 @@ int main(int argc, char* argv[]) {
     */
 
     std::vector<GraphCoordinate> solved = solver.dijkstra(GraphCoordinate());
-
-    std::vector<std::vector<Position>> diag_paths = {};
-    // maze.find_diagonal_paths(2, solved);
-
-    std::vector<char> colors = {'r', 'g', 'b', 'y', 'R', 'G'};
-    // Color diagonals of blue
-    for (const GraphCoordinate& p : solved) {
-        std::cerr << "x: " << p.x << " y:" << p.y << std::endl;
-    }
-
-    solver.run(solved, diag_paths);
+    std::vector<Instruction> instr = solver.parse_path(solved);
+    solver.run(instr);
 }

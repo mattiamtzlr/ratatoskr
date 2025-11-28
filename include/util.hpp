@@ -1,6 +1,7 @@
 #pragma once
 #include <map>
 #include <queue>
+#include <string>
 #include <vector>
 
 constexpr int CELL_SIZE_MM = 180;     // 18 cm
@@ -24,6 +25,13 @@ enum Instruction {
     TURN_LEFT_90,
     TURN_RIGHT_45,
     TURN_RIGHT_90,
+
+};
+
+static std::map<Instruction, std::string> inst_to_str = {
+    {MOVE_FORWARD, "MOVE_FORWARD"},   {MOVE_FORWARD_HALF, "MOVE_FORWARD_HALF"},
+    {TURN_LEFT_45, "TURN_LEFT_45"},   {TURN_LEFT_90, "TURN_LEFT_90"},
+    {TURN_RIGHT_45, "TURN_RIGHT_45"}, {TURN_RIGHT_90, "TURN_RIGHT_90"},
 
 };
 

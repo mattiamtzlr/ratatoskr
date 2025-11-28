@@ -21,10 +21,12 @@ class Solver {
     void detect_and_set_walls();
 
    public:
+    Solver(Mouse &mouse, Maze &maze);
+
     void solve();
     void finalize_discovery();
-    std::vector<Instruction> parse_path(std::vector<GraphCoordinate> path);
     std::vector<Position> bfs_shortest_path(Position start);
     std::vector<GraphCoordinate> dijkstra(GraphCoordinate start);
-    Solver(Mouse &mouse, Maze &maze);
+    std::vector<Instruction> parse_path(std::vector<GraphCoordinate> path);
+    void run(std::vector<Instruction> instructions);
 };
