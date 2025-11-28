@@ -10,6 +10,10 @@ void Mouse::turnLeft() {
     turn(90);
     dir = rotate_left(dir);
 }
+void Mouse::turn180() {
+    turn(180);
+    dir = rotate_half(dir);
+}
 
 void Mouse::turnRight() {
     turn(-90);

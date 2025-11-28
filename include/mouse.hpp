@@ -15,6 +15,7 @@ class Mouse {
     void turnRight();
     void turnRight45();
     void turnLeft45();
+    void turn180();
 
     void setPosition(int x, int y);
     Position getPosition();

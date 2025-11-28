@@ -15,9 +15,12 @@ Solver::Solver(Mouse &mouse, Maze &maze) : m_mouse(mouse), m_maze(maze) {
 }
 
 void Solver::face(Direction target_dir) {
+	/* TODO: The control flow needs some comments */
     int diff = (target_dir - m_mouse.getDirection() + 8) % 8;
     int i;
-    if (diff >= 5) {
+    if (diff == 4) {
+        m_mouse.turn180();
+    } else if (diff >= 5) {
         for (i = 0; i < 7 - diff; i += 2) m_mouse.turnLeft();
         if (i < 8 - diff) m_mouse.turnLeft45();
     } else {
