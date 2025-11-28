@@ -54,6 +54,8 @@ public:
     Vector3D readScaledGyro(); // Rerturns deg/s
     Vector3D readScaledAccel(); // Returns G's
 
+    // Get previous read of gyro angle
+    float getAngle();
     // Get current angle in deg (around z axis)
     float getAngle(unsigned long t_now, unsigned long t_last);
 
