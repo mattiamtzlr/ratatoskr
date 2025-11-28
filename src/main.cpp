@@ -45,7 +45,7 @@ void setup() {
     pinMode(TOF_LEFT_XSHUT, OUTPUT);
     pinMode(TOF_FRONT_LEFT_XSHUT, OUTPUT);
     pinMode(TOF_RIGHT_XSHUT, OUTPUT);
-    pinMode(TOF_FRONT_RIGHT_XSHUT, OUTPUT);
+    pinMode(TOF_FRONT_RIGHT_XSHUT, OUTPUT); 
 
     Wire.begin();
     Serial.begin(115200);
@@ -108,7 +108,7 @@ void setup() {
                 // rat.turn(180);
                 // delay(3000);
                 // rat.calibrateEncoders();
-                rat.moveForward(4);
+                // rat.moveForward(4);
                 
                 // rat.turn(90);
                 // delay(1000);
@@ -121,8 +121,20 @@ void setup() {
                 // delay(1000);
                 // rat.moveForward(1);
                 // delay(1000);
+                // rat.turn(90);
+                // delay(1000);
+                // rat.moveForward(1);
+                // delay(10000);
+                rat.moveForward(1);
+                rat.moveForward(1);
+                rat.turn(-90);
+                rat.moveForward(1);
+                rat.moveForward(1);
+                rat.turn(180);
+                rat.moveForward(1);
+                rat.moveForward(1);
                 rat.turn(90);
-                delay(1000);
+                rat.moveForward(1);
                 rat.moveForward(1);
                 delay(10000);
             }

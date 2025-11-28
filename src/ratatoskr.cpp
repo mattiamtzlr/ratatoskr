@@ -57,6 +57,10 @@ constexpr float TURN_TRESHOLD = 0.2f;
  * turn @angle degrees in counterclockwise direction
  */
 void Ratatoskr::turn(int angle) {
+    // Reset PIDs when turning
+    m_pid_encoders.reset();
+    m_pid_distance.reset();
+    
     unsigned long t_start = millis();
     unsigned long t_now   = micros();
     unsigned long t_last  = t_now;
@@ -150,9 +154,7 @@ void Ratatoskr::moveForward(int distance) {
     int t_now  = millis();
     int t_prev = t_now;
 
-    // PID(Kp, Ki, Kd)
-    PID pid_encoders(0.75, 0.8, 0.1);
-    PID pid_distance(0.9, 0.05, 0.45);
+    // Use class member PIDs
     while (true) {
         // ---- FRONT STOP CHECK ----
         uint16_t fl = m_tof_front_left.get_reading();
@@ -192,8 +194,8 @@ void Ratatoskr::moveForward(int distance) {
         t_prev = t_now;
 
         // ---- PID UPDATES ----
-        float encoder_correction = pid_encoders.update(t_diff, encoder_error);
-        float tof_correction     = pid_distance.update(t_diff, tof_error);
+        float encoder_correction = m_pid_encoders.update(t_diff, encoder_error);
+        float tof_correction     = m_pid_distance.update(t_diff, tof_error);
 
         // tof_correction = constrain(tof_correction, -MAX_PWM_CORRECTION, MAX_PWM_CORRECTION); doesnt even work lmao
         // ---- PWM COMPUTATION ----

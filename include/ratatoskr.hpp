@@ -9,6 +9,7 @@
 #include "maze.hpp"
 #include "mouse.hpp"
 #include "util.hpp"
+#include "pid.hpp"
 
 class Ratatoskr : public Mouse {
    private:
@@ -20,6 +21,9 @@ class Ratatoskr : public Mouse {
     ToF &m_tof_right;
     MPU6050 &m_gyro;
     bool too_close_front(uint16_t front_left_dist, uint16_t front_right_dist);
+    
+    PID m_pid_encoders{0.75, 0.8, 0.1};
+    PID m_pid_distance{0.9, 0.05, 0.45};
 
    public:
     Ratatoskr(GearMotor &motor_left, GearMotor &motor_right, ToF &tof_left,
@@ -31,7 +35,7 @@ class Ratatoskr : public Mouse {
     
     static const int STOP_DISTANCE = 40;
     
-    static const u_int8_t FORWARD_PWM = 200;  // TODO: we set this arbiturarily
+    static const u_int8_t FORWARD_PWM = 180;  // TODO: we set this arbiturarily
 
     static const u_int8_t WIDTH_MM = 68;
 
@@ -40,7 +44,7 @@ class Ratatoskr : public Mouse {
 
     // So encooder counts per mm = counts per rev / (WHEEL_DIAMETER_MM * pi)
     static constexpr float ENCODER_COUNTS_PER_MM =
-        170.0f / (WHEEL_DIAMETER_MM * PI);
+        180.0f / (WHEEL_DIAMETER_MM * PI);
 
     static constexpr float MM_PER_CELL = 180.0;
 
