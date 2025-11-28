@@ -60,6 +60,8 @@ void Ratatoskr::turn(int angle) {
     // Reset PIDs when turning
     m_pid_encoders.reset();
     m_pid_distance.reset();
+
+    angle = snapToAngle(angle);
     
     unsigned long t_start = millis();
     unsigned long t_now   = micros();
@@ -337,6 +339,12 @@ bool Ratatoskr::wallRight() {
 bool Ratatoskr::wallLeft() {
     uint16_t distance_left = m_tof_left.read();
     return (distance_left > 0) && (distance_left < SIDE_WALL_MM);
+}
+
+int Ratatoskr::snapToAngle(int target){
+    float previous_angle = m_gyro.getAngle();
+    int new_target = ((int)previous_angle + target) % 90;
+    return target - new_target;
 }
 
 void Ratatoskr::update_visuals(Maze &maze) {}

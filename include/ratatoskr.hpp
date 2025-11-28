@@ -62,6 +62,7 @@ class Ratatoskr : public Mouse {
     void moveStraightMM(float mm);
 
     virtual void turn(int angle);
+    int snapToAngle(int target);
 
     void calibrateEncoders();
 
