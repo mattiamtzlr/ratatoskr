@@ -214,6 +214,9 @@ void MPU6050::calibrateGyro() {
     log("Offsets (deg/s) X: " + std::to_string(X_OFFSET) + " Y: " + std::to_string(Y_OFFSET) + " Z: " + std::to_string(Z_OFFSET));
 }
 
+float MPU6050::getAngle(){
+    return m_angle;
+}
 
 float MPU6050::getAngle(unsigned long t_now, unsigned long t_last) {
     Vector3D velocities = readScaledGyro();
