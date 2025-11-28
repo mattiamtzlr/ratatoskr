@@ -103,8 +103,7 @@ bool isInteger(double n) {
 }
 
 std::vector<GraphCoordinate> Solver::dijkstra(GraphCoordinate start) {
-    std::map<GraphCoordinate, std::vector<Edge>> adj_list =
-        m_maze.get_adj_list();
+    std::map<GraphCoordinate, std::set<Edge>> adj_list = m_maze.get_adj_list();
 
     // prio queue of (distance, position) with comparator on distance only
     p_queue pq;
@@ -114,7 +113,7 @@ std::vector<GraphCoordinate> Solver::dijkstra(GraphCoordinate start) {
     std::map<GraphCoordinate, GraphCoordinate> prev;
 
     // initialize distances for all vertices (keys) and for all edge targets
-    for (std::pair<GraphCoordinate, std::vector<Edge>> kv : adj_list)
+    for (std::pair<GraphCoordinate, std::set<Edge>> kv : adj_list)
         dist[kv.first] = UBOUND_DIST;
 
     dist[start] = 0;
@@ -136,7 +135,7 @@ std::vector<GraphCoordinate> Solver::dijkstra(GraphCoordinate start) {
             break;
         }
 
-        std::vector<Edge> edges = adj_list[u];
+        std::set<Edge> edges = adj_list[u];
 
         for (Edge e : edges) {
             int alt = dist[u] + e.weight /* + Vertex weight*/;

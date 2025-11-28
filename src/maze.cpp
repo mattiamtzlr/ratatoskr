@@ -155,6 +155,9 @@ std::vector<std::vector<Position>> Maze::find_diagonal_paths(
 
 std::map<GraphCoordinate, std::vector<Edge>> Maze::get_adj_list() {
     std::map<GraphCoordinate, std::vector<Edge>> adj_list;
+std::map<GraphCoordinate, std::set<Edge>> Maze::get_adj_list() {
+    std::map<GraphCoordinate, std::set<Edge>> adj_list;
+    std::vector<GraphCoordinate> all_coords;
 
     for (int x = 0; x < MAZE_WIDTH; x++) {
         for (int y = 0; y < MAZE_HEIGHT; y++) {
@@ -167,6 +170,8 @@ std::map<GraphCoordinate, std::vector<Edge>> Maze::get_adj_list() {
                 Edge e_back = {p, MOVE_COST};
                 adj_list[p].push_back(e);
                 adj_list[neighbor].push_back(e_back);
+                adj_list[p].insert(e);
+                adj_list[p].insert(e_back);
             }
         }
     }
@@ -180,8 +185,6 @@ std::map<GraphCoordinate, std::vector<Edge>> Maze::get_adj_list() {
     calculate
                                              // cost of turns for diagonals
             Edge edge_2_to_1 = {pos_1, MOVE_COST};
-            adj_list[pos_1].push_back(edge_1_to_2);
-            adj_list[pos_2].push_back(edge_2_to_1);
         }
     }
     */

@@ -15,6 +15,12 @@ struct Edge {
     unsigned int weight;
 };
 
+inline bool operator<(const Edge& lhs, const Edge& rhs) {
+    if (lhs.target.x != rhs.target.x) return lhs.target.x < rhs.target.x;
+    if (lhs.target.y != rhs.target.y) return lhs.target.y < rhs.target.y;
+    return lhs.weight < rhs.weight;
+}
+
 class Maze {
    private:
     int m_wall_storage[MAZE_HEIGHT][MAZE_WIDTH] = {};
@@ -45,7 +51,7 @@ class Maze {
     std::vector<Position> valid_diag_neighbors(Position mouse_pos);
     std::vector<std::vector<Position>> find_diagonal_paths(
         int min_length, std::vector<GraphCoordinate> path);
-    std::map<GraphCoordinate, std::vector<Edge>> get_adj_list();
+    std::map<GraphCoordinate, std::set<Edge>> get_adj_list();
     bool in_visited(Position pos);  // TODO: I know that this can be than using
                                     // cpp functionality but I dont trust it
 };

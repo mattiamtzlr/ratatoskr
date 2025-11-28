@@ -29,10 +29,17 @@ int main(int argc, char* argv[]) {
     maze.targets.push_back(Position(8, 8));
 
     solver.finalize_discovery();
+    std::map<GraphCoordinate, std::set<Edge>> adj = maze.get_adj_list();
+    for (std::pair<GraphCoordinate, std::set<Edge>> kv : adj) {
+        std::cerr << "x: " << kv.first.x << " y:" << kv.first.y << std::endl;
+        for (Edge e : kv.second) {
+            std::cerr << "- x: " << e.target.x << " y:" << e.target.y
+                      << std::endl;
+        }
+    }
+
     std::vector<GraphCoordinate> solved = solver.dijkstra(GraphCoordinate());
 
-    std::vector<std::vector<Position>> diag_paths =
-        maze.find_diagonal_paths(2, solved);
 
     std::vector<char> colors = {'r', 'g', 'b', 'y', 'R', 'G'};
     // Color diagonals of blue
