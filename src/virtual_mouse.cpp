@@ -27,6 +27,10 @@ void VirtualMouse::turn(int angle) {
         API::turnLeft45();
     else if (angle == -45)
         API::turnRight45();
+    else if (angle == 180) {
+        API::turnLeft();
+        API::turnLeft();
+    }
     // TODO: Some sort of logging indicating that turning non-90 is not possible
     // in MMS
     // NOTE: YES IT IS THERE IS API::TURN45DEGREES
