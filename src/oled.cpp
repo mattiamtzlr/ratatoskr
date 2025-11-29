@@ -8,8 +8,6 @@ void OLED::begin() {
         while (true);
     }
 
-    last_millis = millis();
-
     m_oled.clearDisplay();
     m_oled.setTextColor(WHITE);
     m_oled.setFont(FONT);

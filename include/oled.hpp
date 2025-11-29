@@ -35,7 +35,6 @@ class OLED {
 
    public:
     MODE mode = RUN;
-    unsigned long last_millis = 0;
 
     OLED(uint8_t addr = 0x3C);
     void begin();

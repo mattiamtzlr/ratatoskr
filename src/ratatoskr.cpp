@@ -166,6 +166,8 @@ void Ratatoskr::moveForward(int distance_cells) {
         /*  same time scaling as before */
         float t_diff = (t_now - t_prev) / 100.0f;
 
+        /* NOTE: this version of getAngle is used on purpose, as the angle
+         * wouldn't update otherwise */
         float gyro_angle = m_gyro.getAngle(t_now, t_prev);
         update_screen(gyro_angle);
         t_prev = t_now;
@@ -334,7 +336,7 @@ void Ratatoskr::update_screen(float gyro_angle) {
         case DEBUG: {
             uint16_t left_rpm = m_motor_left.get_rpm();
             uint16_t right_rpm = m_motor_right.get_rpm();
-            m_oled.update_status_bar(floor(fabsf(gyro_angle)), left_rpm, right_rpm);
+            m_oled.update_status_bar(abs(floor(gyro_angle)), left_rpm, right_rpm);
 
             uint16_t tof_left = m_tof_left.read();
             uint16_t tof_front_left = m_tof_front_left.read();
