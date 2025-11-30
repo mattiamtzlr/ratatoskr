@@ -57,7 +57,7 @@ constexpr float TURN_TRESHOLD = 0.2f;
  * turn @angle degrees in counterclockwise direction
  */
 void Ratatoskr::turn(int angle) {
-    moveStraightMM(20);
+    moveStraightMM(19);
     int requested_turn = angle;
     // Reset PIDs when turning
     m_pid_encoders.reset();
@@ -112,7 +112,7 @@ void Ratatoskr::turn(int angle) {
     delay(1);
     stop();
 
-    moveStraightMM(-20);
+    moveStraightMM(-10);
     coast();
 }
 int Ratatoskr::snapToAngle(int target) {
@@ -162,15 +162,20 @@ constexpr uint16_t MAX_TOF_VALID_MM = 120;  // beyond this: treat as "no wall"
 /**
  * move @distance cells forward with PID control
  */
-void Ratatoskr::moveForward(int distance) {
-    Mouse::moveForward(distance);
-    coast(); // This is to reset any previous motor commands (might help with starts)
+void Ratatoskr::moveForward(int distance_cells) {
+    // Keep maze state in sync
+    Mouse::moveForward(distance_cells);
+
+    // Soft reset of previous motor commands
+    coast();
     delay(5);
     stop();
     delay(5);
     coast();
-    distance *= CELL_SIZE_MM;
-    long target_counts = (long)(distance * ENCODER_COUNTS_PER_MM);
+
+    // Convert cells to mm and then to encoder counts
+    int distance_mm    = distance_cells * CELL_SIZE_MM;
+    long target_counts = (long)(distance_mm * ENCODER_COUNTS_PER_MM);
 
     const int BASE_PWM = FORWARD_PWM;
 
@@ -185,31 +190,32 @@ void Ratatoskr::moveForward(int distance) {
     float pwm_left  = BASE_PWM;
     float pwm_right = BASE_PWM;
 
-    const int loop_delay = 20;
+    const int loop_delay_ms = 20;
 
     int t_now  = millis();
     int t_prev = t_now;
 
-    // Use class member PIDs
-    while (true) {
-        // ---- FRONT STOP CHECK ----
-        uint16_t fl = m_tof_front_left.get_reading();
-        uint16_t fr = m_tof_front_right.get_reading();
+    // Track whether we had any usable side wall on previous loop
+    bool had_side_wall_prev = false;
 
+    while (true) {
+        // ------------------ FRONT STOP (optional) ------------------
+        // uint16_t fl = m_tof_front_left.get_reading();
+        // uint16_t fr = m_tof_front_right.get_reading();
         // if (too_close_front(fl, fr)) {
-        //     // We are at about 40mm -> stop now
         //     break;
         // }
 
-        // ---- ENCODER PROGRESS / EXIT ON DISTANCE ----
+        // ------------------ ENCODER PROGRESS ------------------
         left_encoder_prev  = left_encoder;
         right_encoder_prev = right_encoder;
-        left_encoder       = m_motor_left.get_encoder_count();
-        right_encoder      = m_motor_right.get_encoder_count();
+
+        left_encoder  = m_motor_left.get_encoder_count();
+        right_encoder = m_motor_right.get_encoder_count();
 
         long avg_counts = (left_encoder + right_encoder) / 2;
 
-        // If we already reached requested distance, stop
+        // Reached requested distance
         if (avg_counts >= target_counts) {
             break;
         }
@@ -217,74 +223,86 @@ void Ratatoskr::moveForward(int distance) {
         int left_encoder_diff  = left_encoder - left_encoder_prev;
         int right_encoder_diff = right_encoder - right_encoder_prev;
 
-        // ---- SIDE ToF ----
+        // ------------------ SIDE ToF READING ------------------
         uint16_t left_raw  = m_tof_left.get_reading();
         uint16_t right_raw = m_tof_right.get_reading();
 
         bool left_ok  = (left_raw  > 0 && left_raw  < MAX_TOF_VALID_MM);
         bool right_ok = (right_raw > 0 && right_raw < MAX_TOF_VALID_MM);
 
-        static int prev_wall_config = -1;  // -1 = uninitialized
-        int curr_wall_config = (left_ok ? 1 : 0) | (right_ok ? 2 : 0);
-        // 0 = no walls, 1 = left only, 2 = right only, 3 = both walls
+        bool has_side_wall = left_ok && right_ok;
 
-        if (prev_wall_config != -1 && prev_wall_config != curr_wall_config) {
+        // If we just lost all side walls, reset the distance PID
+        if (!has_side_wall && had_side_wall_prev) {
             m_pid_distance.reset();
         }
-        prev_wall_config = curr_wall_config;
+
+        // ------------------ ERRORS ------------------
         float encoder_error = 0.0f - (left_encoder_diff - right_encoder_diff);
         float tof_error     = 0.0f;
 
-        if (left_ok && right_ok) {
-            // Case 1: corridor, both walls visible -> center between them
-            // Same convention as before: tof_error = right - left
-            tof_error = (float)right_raw - (float)left_raw;
-        } else if (right_ok && !left_ok) {
-            // Case 2: only right wall -> follow at TARGET_SIDE_MM
-            // Too far from wall (reading big) => positive error => steer right
-            tof_error = (float)right_raw - (float)TARGET_SIDE_MM;
-        } else if (left_ok && !right_ok) {
-            // Case 3: only left wall -> follow at TARGET_SIDE_MM
-            // Too far from left wall (reading big) => positive error => steer right (towards wall)
-            tof_error = (float)left_raw - (float)TARGET_SIDE_MM;
+        if (has_side_wall) {
+            if (left_ok && right_ok) {
+                // Corridor: center between walls
+                tof_error = (float)right_raw - (float)left_raw;
+            } else if (right_ok && !left_ok) {
+                // Only right wall: keep right distance at TARGET_SIDE_MM
+                tof_error = (float)right_raw - (float)TARGET_SIDE_MM;
+            } else if (left_ok && !right_ok) {
+                // Only left wall: keep left distance at TARGET_SIDE_MM
+                tof_error = (float)left_raw - (float)TARGET_SIDE_MM;
+            }
         } else {
-            // Case 4: no usable side walls -> ToF gives no correction
+            // No usable side walls -> no side correction
             tof_error = 0.0f;
         }
 
-        // ---- 4) TIME STEP ----
+        // ------------------ TIME STEP ------------------
         t_now = millis();
-        float t_diff = (t_now - t_prev) / 100.0f;
+        float t_diff = (t_now - t_prev) / 100.0f; // same time scaling as before
         t_prev = t_now;
 
-        // ---- PID UPDATES ----
+        // ------------------ PID UPDATES ------------------
         float encoder_correction = m_pid_encoders.update(t_diff, encoder_error);
-        float tof_correction     = m_pid_distance.update(t_diff, tof_error);
 
-        // // Optional clamp to keep side corrections sane
-        // tof_correction = constrain(tof_correction,
-        //                            -MAX_PWM_CORRECTION,
-        //                            +MAX_PWM_CORRECTION);
+        float tof_correction = 0.0f;
+        if (has_side_wall) {
+            tof_correction = m_pid_distance.update(t_diff, tof_error);
 
-        // ---- PWM COMPUTATION ----
-        pwm_left  = BASE_PWM + 0.65f * tof_correction + 0.35f * encoder_correction;
-        pwm_right = BASE_PWM - 0.65f * tof_correction - 0.35f * encoder_correction;
+            // Clamp side correction so it can't yank PWM too hard
+            tof_correction = constrain(
+                tof_correction,
+                -MAX_PWM_CORRECTION,
+                +MAX_PWM_CORRECTION
+            );
+        } else {
+            // No wall: distance PID output forced to 0
+            tof_correction = 0.0f;
+        }
+
+        // ------------------ PWM COMPUTATION ------------------
+        // Encoders are always active; ToF only when a wall exists
+        pwm_left  = BASE_PWM + 0.6f * tof_correction + 0.4f * encoder_correction;
+        pwm_right = BASE_PWM - 0.6f * tof_correction - 0.4f * encoder_correction;
 
         pwm_left  = constrain(pwm_left,  70, 240);
         pwm_right = constrain(pwm_right, 70, 240);
 
+        // Same direction convention as before (forward)
         m_motor_left.spin_cw(pwm_left);
         m_motor_right.spin_ccw(pwm_right);
 
-        delay(loop_delay);
+        had_side_wall_prev = has_side_wall;
+
+        delay(loop_delay_ms);
     }
+
     // Dark magic brake so that motors don't shit themselves
     coast();
     delay(5);
     stop();
     delay(20);
     coast();
-    // delay(1000);
 }
 
 

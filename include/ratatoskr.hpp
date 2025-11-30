@@ -23,7 +23,7 @@ class Ratatoskr : public Mouse {
     bool too_close_front(uint16_t front_left_dist, uint16_t front_right_dist);
     
     PID m_pid_encoders{0.75, 0.8, 0.1};
-    PID m_pid_distance{0.9, 0.05, 0.45};
+    PID m_pid_distance{1.1, 0.05, 0.4};
 
    public:
     Ratatoskr(GearMotor &motor_left, GearMotor &motor_right, ToF &tof_left,
