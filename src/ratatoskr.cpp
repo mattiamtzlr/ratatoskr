@@ -57,15 +57,14 @@ constexpr float TURN_TRESHOLD = 0.2f;
  * turn @angle degrees in counterclockwise direction
  */
 void Ratatoskr::turn(int angle) {
-    // Keep a copy of the requested logical grid turn (e.g., ±90)
+    moveStraightMM(20);
     int requested_turn = angle;
-
     // Reset PIDs when turning
     m_pid_encoders.reset();
     m_pid_distance.reset();
 
     // Adjust angle so that final heading is snapped to a cardinal direction
-    angle = snapToAngle(angle);
+    // angle = snapToAngle(angle);
 
     unsigned long t_start = millis();
     unsigned long t_now   = micros();
@@ -113,11 +112,7 @@ void Ratatoskr::turn(int angle) {
     delay(1);
     stop();
 
-    // Only back up 30 mm for 90° grid turns
-    if (abs(requested_turn) == 90) {
-        moveStraightMM(-20.0f);
-    }
-
+    moveStraightMM(-20);
     coast();
 }
 int Ratatoskr::snapToAngle(int target) {
@@ -242,8 +237,8 @@ void Ratatoskr::moveForward(int distance) {
             tof_error = (float)right_raw - (float)TARGET_SIDE_MM;
         } else if (left_ok && !right_ok) {
             // Case 3: only left wall -> follow at TARGET_SIDE_MM
-            // Too far from left wall (reading big) => negative error => steer left
-            tof_error = (float)TARGET_SIDE_MM - (float)left_raw;
+            // Too far from left wall (reading big) => positive error => steer right (towards wall)
+            tof_error = (float)left_raw - (float)TARGET_SIDE_MM;
         } else {
             // Case 4: no usable side walls -> ToF gives no correction
             tof_error = 0.0f;
