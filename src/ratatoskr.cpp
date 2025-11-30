@@ -224,6 +224,14 @@ void Ratatoskr::moveForward(int distance) {
         bool left_ok  = (left_raw  > 0 && left_raw  < MAX_TOF_VALID_MM);
         bool right_ok = (right_raw > 0 && right_raw < MAX_TOF_VALID_MM);
 
+        static int prev_wall_config = -1;  // -1 = uninitialized
+        int curr_wall_config = (left_ok ? 1 : 0) | (right_ok ? 2 : 0);
+        // 0 = no walls, 1 = left only, 2 = right only, 3 = both walls
+
+        if (prev_wall_config != -1 && prev_wall_config != curr_wall_config) {
+            m_pid_distance.reset();
+        }
+        prev_wall_config = curr_wall_config;
         float encoder_error = 0.0f - (left_encoder_diff - right_encoder_diff);
         float tof_error     = 0.0f;
 
@@ -331,8 +339,8 @@ void Ratatoskr::moveStraightMM(float mm) {
         float encoder_correction = pid_encoders.update(t_diff, encoder_error);
 
         // Basic PWM with encoder correction
-        float pwm_left  = FORWARD_PWM + 0.4f * encoder_correction;
-        float pwm_right = FORWARD_PWM - 0.4f * encoder_correction;
+        float pwm_left  = FORWARD_PWM + 20 + 0.4f * encoder_correction;
+        float pwm_right = FORWARD_PWM + 20 - 0.4f * encoder_correction;
 
         pwm_left  = constrain(pwm_left,  70, 240);
         pwm_right = constrain(pwm_right, 70, 240);
