@@ -127,15 +127,15 @@ void setup() {
                 // delay(10000);
                 rat.moveForward(1);
                 rat.moveForward(1);
-                rat.turn(-90);
+                // rat.turn(-90);
                 rat.moveForward(1);
                 // rat.moveForward(1);
                 rat.turn(180);
                 rat.moveForward(1);
-                rat.turn(-90);
+                // rat.turn(-90);
                 rat.moveForward(1);
-                rat.turn(180);
-                rat.moveForward(3);
+                // rat.turn(180);
+                // rat.moveForward(3);
                 rat.turn(180);
                 delay(10000);
             }

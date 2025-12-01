@@ -227,7 +227,7 @@ void Ratatoskr::moveForward(int distance_cells) {
         bool left_ok = (left_raw > 0 && left_raw < MAX_TOF_VALID_MM);
         bool right_ok = (right_raw > 0 && right_raw < MAX_TOF_VALID_MM);
 
-        bool has_side_wall = left_ok && right_ok;
+        bool has_side_wall = left_ok || right_ok;
 
         // If we just lost all side walls, reset the distance PID
         if (!has_side_wall && had_side_wall_prev) {
@@ -247,7 +247,7 @@ void Ratatoskr::moveForward(int distance_cells) {
                 tof_error = (float)right_raw - (float)TARGET_SIDE_MM;
             } else if (left_ok && !right_ok) {
                 // Only left wall: keep left distance at TARGET_SIDE_MM
-                tof_error = (float)left_raw - (float)TARGET_SIDE_MM;
+                tof_error = (float)TARGET_SIDE_MM - (float)left_raw;
             }
         } else {
             // No usable side walls -> no side correction
