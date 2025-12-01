@@ -45,7 +45,7 @@ void setup() {
     pinMode(TOF_LEFT_XSHUT, OUTPUT);
     pinMode(TOF_FRONT_LEFT_XSHUT, OUTPUT);
     pinMode(TOF_RIGHT_XSHUT, OUTPUT);
-    pinMode(TOF_FRONT_RIGHT_XSHUT, OUTPUT);
+    pinMode(TOF_FRONT_RIGHT_XSHUT, OUTPUT); 
 
     Wire.begin();
     Serial.begin(115200);
@@ -77,10 +77,10 @@ void setup() {
     switch (mode) {
         case RUN: {
             // Push target to maze
-            maze.targets.push_back(Position(7, 7));
-            maze.targets.push_back(Position(7, 8));
-            maze.targets.push_back(Position(8, 7));
-            maze.targets.push_back(Position(8, 8));
+            maze.targets.push_back(Position(2, 2));
+            // maze.targets.push_back(Position(7, 8));
+            // maze.targets.push_back(Position(8, 7));
+            // maze.targets.push_back(Position(8, 8));
 
             solver.solve();  // Run from start to target
 
@@ -101,12 +101,43 @@ void setup() {
         case TESTING: {
             while (true) {
                 delay(1000);
-                rat.turn(45);
-                delay(3000);
-                rat.turn(90);
-                delay(3000);
+                // rat.turn(45);
+                // delay(3000);
+                // rat.turn(-90);
+                // delay(3000);
+                // rat.turn(180);
+                // delay(3000);
+                // rat.calibrateEncoders();
+                // rat.moveForward(4);
+                
+                // rat.turn(90);
+                // delay(1000);
+
+                // rat.moveForward(1);
+                // delay(1000);
+                // rat.moveForward(1);
+                // delay(1000);
+                // rat.moveForward(1);
+                // delay(1000);
+                // rat.moveForward(1);
+                // delay(1000);
+                // rat.turn(90);
+                // delay(1000);
+                // rat.moveForward(1);
+                // delay(10000);
+                rat.moveForward(1);
+                rat.moveForward(1);
+                // rat.turn(-90);
+                rat.moveForward(1);
+                // rat.moveForward(1);
                 rat.turn(180);
-                delay(3000);
+                rat.moveForward(1);
+                // rat.turn(-90);
+                rat.moveForward(1);
+                // rat.turn(180);
+                // rat.moveForward(3);
+                rat.turn(180);
+                delay(10000);
             }
         }
     }

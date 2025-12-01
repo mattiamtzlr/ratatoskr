@@ -220,10 +220,14 @@ float MPU6050::getAngle(){
 
 float MPU6050::getAngle(unsigned long t_now, unsigned long t_last) {
     Vector3D velocities = readScaledGyro();
-    float dt = (float)(t_now - t_last) * 1e-6f;
-    float change = velocities.z * dt;  // degrees
-    if (fabsf(change) > 0.1f && dt > 0.0f) {
-        m_angle += change;
+    float dt = (float)(t_now - t_last) * 1e-6f;  // t_now/t_last must be micros()
+
+    if (dt <= 0.0f) {
+        return m_angle;
     }
+
+    float change = velocities.z * dt;  // degrees
+    m_angle += change;
     return m_angle;
 }
+
