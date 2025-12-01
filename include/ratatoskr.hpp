@@ -1,17 +1,18 @@
 #pragma once
 #include <Arduino.h>
+
 #include "ToF.hpp"
+#include "esp_logger.hpp"
 #include "gear_motor.hpp"
 #include "gyro.hpp"
 #include "led_matrix.hpp"
-#include "esp_logger.hpp"
 #include "maze.hpp"
 #include "mouse.hpp"
-#include "util.hpp"
 #include "pid.hpp"
+#include "util.hpp"
 
 class Ratatoskr : public Mouse {
-    private:
+   private:
     GearMotor &m_motor_left;
     GearMotor &m_motor_right;
     ToF &m_tof_left;
@@ -24,7 +25,7 @@ class Ratatoskr : public Mouse {
     inline void stop();
     inline void coast();
     inline void safe_stop();
-    
+
     PID m_pid_encoders{0.75, 0.8, 0.1};
     PID m_pid_tof_sides{1.1, 0.05, 0.4};
 
@@ -35,17 +36,17 @@ class Ratatoskr : public Mouse {
 
     static const int MIN_TURN_PWM = 185;
     static const int MAX_TURN_PWM = 195;
-    
+
     static const int STOP_DISTANCE = 40;
-    
+
     static const u_int8_t FORWARD_PWM = 190;
 
     static const u_int8_t WIDTH_MM = 68;
 
-    // So one revolution is 31*pi mm = 97.4 mm
+    /*  So one revolution is 31*pi mm = 97.4 mm */
     static const u_int8_t WHEEL_DIAMETER_MM = 31;
 
-    // So encooder counts per mm = counts per rev / (WHEEL_DIAMETER_MM * pi)
+    /*  So encooder counts per mm = counts per rev / (WHEEL_DIAMETER_MM * pi) */
     static constexpr float ENCODER_COUNTS_PER_MM =
         190.0f / (WHEEL_DIAMETER_MM * PI);
 
@@ -53,19 +54,21 @@ class Ratatoskr : public Mouse {
 
     static constexpr float PWM_UPDATE_RATIO = .6f;
 
-    // front considered blocked if any front ToF < this
+    /*  front considered blocked if any front ToF < this */
     static const uint16_t FRONT_WALL_MM = 110;
 
-    // side considered blocked if side ToF < this
+    /*  side considered blocked if side ToF < this */
     static const uint16_t SIDE_WALL_MM = 90;
 
     static constexpr float MAX_PWM_CORRECTION = 30.0f;
-    static constexpr uint16_t TARGET_SIDE_MM = 50;     // desired side distance at sensor
-    static constexpr uint16_t MAX_TOF_VALID_MM = 120;  // beyond this: treat as "no wall"
-        
+    static constexpr uint16_t TARGET_SIDE_MM =
+        50; /*  desired side distance at sensor */
+    static constexpr uint16_t MAX_TOF_VALID_MM =
+        120; /*  beyond this: treat as "no wall" */
+
     static constexpr int TURN_TIME_LIMIT = 1500;
     static constexpr float TURN_TRESHOLD = 0.2f;
-    
+
     /**
      * move @distance cells forward with PID control
      */
@@ -81,12 +84,12 @@ class Ratatoskr : public Mouse {
      * than FRONT_WALL_MM. Ignores zero readings (sensor not ready).
      */
     virtual bool wallFront();
-    
+
     /**
      * Detect if a wall is towards the right.
      */
     virtual bool wallRight();
-    
+
     /**
      * Detect if a wall is towards the left.
      */
