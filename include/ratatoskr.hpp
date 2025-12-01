@@ -38,6 +38,12 @@ class Ratatoskr : public Mouse {
               ToF &tof_front_left, ToF &tof_front_right, ToF &tof_right,
               MPU6050 &gyro, OLED &oled);
 
+
+    /**
+     * move @distance cells forward diagonally with PID control
+     */
+    void moveDiagonal(int distance = 1);
+    
     /**
      * move @distance cells forward with PID control
      */

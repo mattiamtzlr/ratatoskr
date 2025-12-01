@@ -17,6 +17,112 @@ Ratatoskr::Ratatoskr(GearMotor &motor_left, GearMotor &motor_right,
 
 /* ============================[ MOVEMENT ]================================== */
 
+
+void Ratatoskr::moveDiagonal(int distance){
+
+    /*  Convert cells to mm and then to encoder counts */
+    int distance_mm = distance * CELL_SIZE_MM;
+    long target_counts = (long)(distance_mm * ENCODER_COUNTS_PER_MM);
+
+    const int BASE_PWM = FORWARD_PWM;
+
+    m_motor_left.reset_encoder_count();
+    m_motor_right.reset_encoder_count();
+
+    long left_encoder = 0;
+    long right_encoder = 0;
+    long left_encoder_prev = 0;
+    long right_encoder_prev = 0;
+
+    const float DIST_BETWEEN_SENSORS = 46.0f;
+    const float MAX_DIST = 100.0f;
+    const float threshold = 10.0f;
+
+    bool is_end = false;
+
+    float pwm_left = BASE_PWM;
+    float pwm_right = BASE_PWM;
+
+    const int loop_delay_ms = 20;
+
+    int t_now = millis();
+    int t_prev = t_now;
+
+    /*  Track whether we had any usable side wall on previous loop */
+    bool had_side_wall_prev = false;
+
+    long avg_counts = (left_encoder + right_encoder) / 2;
+
+    while (avg_counts < target_counts) {
+        /*  ------------------ FRONT STOP ------------------ */
+        /*  uint16_t fl = m_tof_front_left.get_reading(); */
+        /*  uint16_t fr = m_tof_front_right.get_reading(); */
+        /*  if (too_close_front(fl, fr)) { */
+        /*      break; */
+        /*  } */
+
+        /*  ------------------ ENCODER PROGRESS ------------------ */
+        int left_encoder_diff = left_encoder - left_encoder_prev;
+        int right_encoder_diff = right_encoder - right_encoder_prev;
+
+        /*  ------------------ SIDE ToF READING ------------------ */
+        uint16_t left_raw = m_tof_front_left.get_reading();
+        uint16_t right_raw = m_tof_front_right.get_reading();
+
+        float left_dist = constrain(left_raw, 0, MAX_DIST);
+        float right_dist = constrain(right_raw, 0, MAX_DIST);
+
+        is_end = fabs(left_dist - right_dist) < DIST_BETWEEN_SENSORS - threshold;
+        
+         /*  ------------------ ERRORS ------------------ */
+        float encoder_error = 0.0f - (left_encoder_diff - right_encoder_diff);
+        float tof_error = 0.0f - (left_dist - right_dist);
+
+        /*  ------------------ TIME STEP ------------------ */
+        t_now = millis();
+        float t_diff =
+            (t_now - t_prev) / 100.0f; /*  same time scaling as before */
+        t_prev = t_now;
+
+        /*  ------------------ PID UPDATES ------------------ */
+        float encoder_correction = m_pid_encoders.update(t_diff, encoder_error);
+        float tof_correction = m_pid_tof_front_diagonals.update(t_diff, tof_error);
+
+        if (!is_end) {
+            pwm_left = BASE_PWM + PWM_UPDATE_RATIO * tof_correction +
+                       (1 - PWM_UPDATE_RATIO) * encoder_correction;
+            pwm_right = BASE_PWM - PWM_UPDATE_RATIO * tof_correction -
+                        (1 - PWM_UPDATE_RATIO) * encoder_correction;
+        } else {
+            /*  No wall: sides PID output forced to 0 */
+            tof_correction = 0.0f;
+            pwm_left = BASE_PWM + encoder_correction;
+            pwm_right = BASE_PWM - encoder_correction;
+        }
+
+        /*  ------------------ PWM COMPUTATION ------------------ */
+        /*  Encoders are always active; ToF only when a wall exists */
+
+        pwm_left = constrain(pwm_left, 70, 240);
+        pwm_right = constrain(pwm_right, 70, 240);
+
+        m_motor_left.spin_cw(pwm_left);
+        m_motor_right.spin_ccw(pwm_right);
+
+        delay(loop_delay_ms);
+
+        /*  ------------------ ENCODER PROGRESS ------------------ */
+        left_encoder_prev = left_encoder;
+        right_encoder_prev = right_encoder;
+
+        left_encoder = m_motor_left.get_encoder_count();
+        right_encoder = m_motor_right.get_encoder_count();
+
+        avg_counts = (left_encoder + right_encoder) / 2;
+    }
+    safe_stop();
+}
+
 void Ratatoskr::turn(int angle) {
     moveStraightMM(5);
     int requested_turn = angle;
