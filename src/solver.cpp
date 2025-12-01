@@ -1,6 +1,7 @@
 #include "solver.hpp"
 
 #include <algorithm>
+#include <cmath>
 #include <deque>
 #include <iostream>
 #include <map>
@@ -246,29 +247,50 @@ std::vector<Instruction> Solver::parse_path(std::vector<GraphCoordinate> path) {
     }
     return instructions;
 }
+
+void Solver::accumulative_forward(double steps) {
+    std::cerr << "Forward for: " << std::to_string(steps) << std::endl;
+    int full_steps = std::floor(steps);
+    if (full_steps > 0) {
+        m_mouse.moveForward(full_steps);
+    }
+    if (steps - (double)full_steps > 0.0) {
+        m_mouse.moveForwardHalf();
+    }
+}
+
 void Solver::run(std::vector<Instruction> instructions) {
     face(NORTH);
+    double move_forward_for = 0.0;
     for (Instruction next_instruction : instructions) {
-        std::cerr << inst_to_str[next_instruction] << std::endl;
         switch (next_instruction) {
             case MOVE_FORWARD:
-                m_mouse.moveForward();
+                move_forward_for += 1;
                 break;
             case MOVE_FORWARD_HALF:
-                m_mouse.moveForwardHalf();
+                move_forward_for += 0.5;
                 break;
             case TURN_LEFT_45:
+                accumulative_forward(move_forward_for);
+                move_forward_for = 0;
                 m_mouse.turnLeft45();
                 break;
             case TURN_LEFT_90:
+                accumulative_forward(move_forward_for);
+                move_forward_for = 0;
                 m_mouse.turnLeft();
                 break;
             case TURN_RIGHT_45:
+                accumulative_forward(move_forward_for);
+                move_forward_for = 0;
                 m_mouse.turnRight45();
                 break;
             case TURN_RIGHT_90:
+                accumulative_forward(move_forward_for);
+                move_forward_for = 0;
                 m_mouse.turnRight();
                 break;
         }
     }
+    m_mouse.moveForward();
 }

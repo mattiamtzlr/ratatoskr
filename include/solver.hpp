@@ -19,6 +19,7 @@ class Solver {
     void bfs();
     void face(Direction target_dir);
     void detect_and_set_walls();
+    void accumulative_forward(double steps);
 
    public:
     Solver(Mouse &mouse, Maze &maze);
