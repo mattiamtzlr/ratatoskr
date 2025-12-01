@@ -212,7 +212,6 @@ std::vector<Position> get_diag(std::vector<std::vector<Position>> diagonals,
 
 void Solver::filter_turns(std::vector<Instruction> &instr) {
     for (int i = 0; i < instr.size() - 2; i++) {
-
         if (instr[i] == TURN_LEFT_45 && instr[i + 1] == MOVE_FORWARD_HALF &&
             instr[i + 2] == TURN_LEFT_45) {
             instr[i] = MOVE_FORWARD_HALF;
@@ -269,7 +268,6 @@ std::vector<Instruction> Solver::parse_path(std::vector<GraphCoordinate> path) {
 }
 
 void Solver::accumulative_forward(double steps) {
-    std::cerr << "Forward for: " << std::to_string(steps) << std::endl;
     int full_steps = std::floor(steps);
     if (full_steps > 0) {
         m_mouse.moveForward(full_steps);
@@ -312,5 +310,5 @@ void Solver::run(std::vector<Instruction> instructions) {
                 break;
         }
     }
-    m_mouse.moveForward();
+    accumulative_forward(move_forward_for);
 }
