@@ -78,6 +78,24 @@ Direction dir_for_neighbor(GraphCoordinate coord_n, GraphCoordinate coord_m) {
         return NORTH;
 }
 
+bool operator<(const GraphCoordinate& lhs, const GraphCoordinate& rhs) {
+    if (lhs.x != rhs.x) return lhs.x < rhs.x;
+    return lhs.y < rhs.y;
+}
+
+bool operator==(const GraphCoordinate& lhs, const GraphCoordinate& rhs) {
+    return lhs.x == rhs.x && lhs.y == rhs.y;
+}
+
+bool operator<(const Position& lhs, const Position& rhs) {
+    if (lhs.x != rhs.x) return lhs.x < rhs.x;
+    return lhs.y < rhs.y;
+}
+
+bool operator==(const Position& lhs, const Position& rhs) {
+    return lhs.x == rhs.x && lhs.y == rhs.y;
+}
+
 double L2_distance_squared(GraphCoordinate c_1, GraphCoordinate c_2) {
     return (c_1.x - c_2.x) * (c_1.x - c_2.x) +
            (c_1.y - c_2.y) * (c_1.y - c_2.y);

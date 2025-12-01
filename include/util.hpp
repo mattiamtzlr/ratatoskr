@@ -56,16 +56,12 @@ struct Position {
     int y;
     Position(size_t x, size_t y) : x(x), y(y) {};
     Position() : x(0), y(0) {};
+
 };
 
-inline bool operator<(const Position& lhs, const Position& rhs) {
-    if (lhs.x != rhs.x) return lhs.x < rhs.x;
-    return lhs.y < rhs.y;
-}
+bool operator<(const Position& lhs, const Position& rhs);
 
-inline bool operator==(const Position& lhs, const Position& rhs) {
-    return lhs.x == rhs.x && lhs.y == rhs.y;
-}
+bool operator==(const Position& lhs, const Position& rhs);
 
 struct GraphCoordinate {
     float x;
@@ -75,14 +71,10 @@ struct GraphCoordinate {
     GraphCoordinate() : x(0), y(0) {}
 };
 
-inline bool operator<(const GraphCoordinate& lhs, const GraphCoordinate& rhs) {
-    if (lhs.x != rhs.x) return lhs.x < rhs.x;
-    return lhs.y < rhs.y;
-}
+bool operator<(const GraphCoordinate& lhs, const GraphCoordinate& rhs);
 
-inline bool operator==(const GraphCoordinate& lhs, const GraphCoordinate& rhs) {
-    return lhs.x == rhs.x && lhs.y == rhs.y;
-}
+bool operator==(const GraphCoordinate& lhs, const GraphCoordinate& rhs);
+
 struct PQCmp {
     bool operator()(const std::pair<int, GraphCoordinate>& a,
                     const std::pair<int, GraphCoordinate>& b) const {
