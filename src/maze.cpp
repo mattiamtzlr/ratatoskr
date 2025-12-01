@@ -9,6 +9,10 @@ const int MOVE_COST = 2;
 const int HALF_MOVE_COST = 1;
 const int TURN_COST = 10;
 
+Maze::Maze() {
+    set_border_walls();
+}
+
 std::vector<Position> Maze::valid_neighbors(Position mouse_pos) {
     std::vector<Position> neigh;
     for (Direction k : {NORTH, EAST, SOUTH, WEST}) {
@@ -77,16 +81,6 @@ bool Maze::exists_wall(Position pos, Direction dir) {
     return (bool)(get_walls(pos) & 0b1 << dir);
 }
 
-bool Maze::is_dead_end(Position pos) {
-    for (Direction d : {NORTH, EAST, SOUTH, WEST}) {
-        if (!exists_wall(pos, d) &&
-            (get_distance(get_neighbor(pos, d)) < get_distance(pos))) {
-            return false;
-        }
-    }
-    return true;
-}
-
 bool Maze::can_move_diag(Position pos, Direction dir) {
     Position target_diag = get_diag_neighbor(pos, dir);
     if (!in_bounds(target_diag)) return false;
@@ -98,61 +92,6 @@ bool Maze::can_move_diag(Position pos, Direction dir) {
                             diagDirFirst[dir])
 
         ;
-}
-
-std::vector<Position> Maze::valid_diag_neighbors(Position mouse_pos) {
-    std::vector<Position> neigh;
-    for (Direction k : {NORTH_EAST, SOUTH_EAST, SOUTH_WEST, NORTH_WEST}) {
-        if (can_move_diag(mouse_pos, k)) {
-            neigh.push_back(get_diag_neighbor(mouse_pos, k));
-        }
-    }
-    return neigh;
-}
-
-std::vector<std::vector<Position>> Maze::find_diagonal_paths(
-    int min_length, std::vector<GraphCoordinate> path) {
-    std::vector<std::vector<Position>> all_paths;
-
-    bool diag_path_visited[MAZE_WIDTH][MAZE_HEIGHT] = {};
-
-    for (GraphCoordinate coord : path) {
-        Position pos = Position(coord.x, coord.y);
-        if (diag_path_visited[pos.x][pos.y]) {
-            continue;
-        }
-        for (Position neighbor : valid_neighbors(pos)) {
-            Position starting_neighbor = neighbor;
-            if (std::find(path.begin(), path.end(), neighbor) == path.end())
-                continue;
-            for (int i = 0; i < 2; i++) {  // Right diag and left diag
-                std::vector<Position> current_path;
-                current_path.push_back(pos);
-                current_path.push_back(neighbor);
-                bool right = i == 0;
-                Direction dir =
-                    (right) ? rotate_right(dir_for_neighbor(neighbor, pos))
-                            : rotate_left(dir_for_neighbor(neighbor, pos));
-
-                std::cerr << "out" << std::endl;
-                while (!exists_wall(neighbor, dir) &&
-                       std::find(path.begin(), path.end(), neighbor) !=
-                           path.end()) {
-                    neighbor = get_neighbor(neighbor, dir);
-                    right = !right;
-                    dir = (right) ? rotate_right(dir) : rotate_left(dir);
-                    diag_path_visited[neighbor.x][neighbor.y] = true;
-                    current_path.push_back(neighbor);
-                }
-                if (current_path.size() > min_length * 2) {
-                    all_paths.push_back(current_path);
-                    diag_path_visited[starting_neighbor.x]
-                                     [starting_neighbor.y] = true;
-                }
-            }
-        }
-    }
-    return all_paths;
 }
 
 std::map<GraphCoordinate, std::set<Edge>> Maze::get_adj_list() {
@@ -203,12 +142,7 @@ std::map<GraphCoordinate, std::set<Edge>> Maze::get_adj_list() {
     return adj_list;
 }
 bool Maze::in_visited(Position pos) {
-    for (Position checked : visited) {
-        if (checked.x == pos.x && checked.y == pos.y) {
-            return true;
-        }
-    }
-    return false;
+    return std::find(visited.begin(), visited.end(), pos) != visited.end();
 }
 float Maze::distance_to_target_L2(Position pos) {
     float min_distance = .0;
