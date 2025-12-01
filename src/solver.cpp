@@ -211,6 +211,24 @@ std::vector<Position> get_diag(std::vector<std::vector<Position>> diagonals,
     return {};
 }
 
+void Solver::filter_turns(std::vector<Instruction> &instr) {
+    for (int i = 0; i < instr.size() - 2; i++) {
+
+        if (instr[i] == TURN_LEFT_45 && instr[i + 1] == MOVE_FORWARD_HALF &&
+            instr[i + 2] == TURN_LEFT_45) {
+            instr[i] = MOVE_FORWARD_HALF;
+            instr[i + 1] = TURN_LEFT_90;
+            instr[i + 2] = MOVE_FORWARD_HALF;
+
+        } else if (instr[i] == TURN_RIGHT_45 &&
+                   instr[i + 1] == MOVE_FORWARD_HALF &&
+                   instr[i + 2] == TURN_RIGHT_45) {
+            instr[i] = MOVE_FORWARD_HALF;
+            instr[i + 1] = TURN_RIGHT_90;
+            instr[i + 2] = MOVE_FORWARD_HALF;
+        }
+    }
+}
 std::vector<Instruction> Solver::parse_path(std::vector<GraphCoordinate> path) {
     GraphCoordinate mouse_coordinate;
     Direction mouse_direction = NORTH;
@@ -245,6 +263,9 @@ std::vector<Instruction> Solver::parse_path(std::vector<GraphCoordinate> path) {
         mouse_direction = next_dir;
         mouse_coordinate = next_coordinate;
     }
+
+    filter_turns(instructions);
+
     return instructions;
 }
 

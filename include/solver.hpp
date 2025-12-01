@@ -20,6 +20,7 @@ class Solver {
     void face(Direction target_dir);
     void detect_and_set_walls();
     void accumulative_forward(double steps);
+    void filter_turns(std::vector<Instruction> &instr);
 
    public:
     Solver(Mouse &mouse, Maze &maze);
