@@ -19,12 +19,16 @@ class Solver {
     void bfs();
     void face(Direction target_dir);
     void detect_and_set_walls();
+    void accumulative_forward(double steps);
+    void filter_turns(std::vector<Instruction> &instr);
 
    public:
+    Solver(Mouse &mouse, Maze &maze);
+
     void solve();
     void finalize_discovery();
-    void run(std::vector<Position> solved);
     std::vector<Position> bfs_shortest_path(Position start);
-    std::vector<Position> dijkstra(Position start);
-    Solver(Mouse &mouse, Maze &maze);
+    std::vector<GraphCoordinate> dijkstra(GraphCoordinate start);
+    std::vector<Instruction> parse_path(std::vector<GraphCoordinate> path);
+    void run(std::vector<Instruction> instructions);
 };
