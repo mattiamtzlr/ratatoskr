@@ -1,4 +1,7 @@
 #include "ratatoskr.hpp"
+#include "config.hpp"
+
+using namespace Config;
 
 Ratatoskr::Ratatoskr(GearMotor &motor_left, GearMotor &motor_right,
                      ToF &tof_left, ToF &tof_front_left, ToF &tof_front_right,
