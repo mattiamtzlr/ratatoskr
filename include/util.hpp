@@ -35,7 +35,7 @@ static std::map<Instruction, std::string> inst_to_str = {
 
 };
 
-enum MODE { RUN, DUMP_LOG, TESTING };
+enum MODE { DEBUG, RUN, DUMP_LOG, TESTING };
 
 static std::map<Direction, char> dirToCardinalChar = {
     {NORTH, 'n'}, {EAST, 'e'}, {SOUTH, 's'}, {WEST, 'w'}};

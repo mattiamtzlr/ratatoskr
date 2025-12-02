@@ -1,9 +1,12 @@
 #include <Arduino.h>
 
 #include "esp32-hal-ledc.h"
+#include "esp32-hal.h"
+#include "oled.hpp"
 #include "pins.hpp"
 #include "ratatoskr.hpp"
 #include "solver.hpp"
+#include "util.hpp"
 
 // I2C addresses for the ToF sensors
 const uint8_t TOF_LEFT_ADDRESS = 0x30;
@@ -22,6 +25,8 @@ ToF tof_right = ToF(RIGHT, TOF_RIGHT_ADDRESS, TOF_RIGHT_XSHUT);
 
 MPU6050 gyro = MPU6050();
 
+OLED oled = OLED();
+
 // encoder_sign is the last argument (default = 1). Determines the direction
 GearMotor motor_left(MOTOR_L_IN1, MOTOR_L_IN2, 0, 1,  // PWM channels
                      ENC_L_OUT1, ENC_L_OUT2,
@@ -37,7 +42,7 @@ GearMotor motor_right(MOTOR_R_IN1, MOTOR_R_IN2, 2, 3,  // PWM channels
 
 Maze maze;
 Ratatoskr rat(motor_left, motor_right, tof_left, tof_front_left,
-              tof_front_right, tof_right, gyro);
+              tof_front_right, tof_right, gyro, oled);
 Solver solver(rat, maze);
 
 void setup() {
@@ -48,9 +53,13 @@ void setup() {
     pinMode(TOF_FRONT_RIGHT_XSHUT, OUTPUT); 
 
     Wire.begin();
+    delay(500);
     Serial.begin(115200);
+    delay(500);
     gyro.begin();
-    delay(1000);
+    delay(500);
+    oled.begin();
+    delay(500);
 
     tof_left.begin();
     tof_front_left.begin();
@@ -75,6 +84,11 @@ void setup() {
 #endif
 
     switch (mode) {
+        case DEBUG: {
+            oled.mode = DEBUG;
+            /* WARN: no break on purpose cause we want to fall through to RUN */
+        }
+
         case RUN: {
             // Push target to maze
             maze.targets.push_back(Position(2, 2));
@@ -100,44 +114,14 @@ void setup() {
 
         case TESTING: {
             while (true) {
-                delay(1000);
-                // rat.turn(45);
-                // delay(3000);
-                // rat.turn(-90);
-                // delay(3000);
-                // rat.turn(180);
-                // delay(3000);
-                // rat.calibrateEncoders();
-                // rat.moveForward(4);
-                
-                // rat.turn(90);
-                // delay(1000);
-
-                // rat.moveForward(1);
-                // delay(1000);
-                // rat.moveForward(1);
-                // delay(1000);
-                // rat.moveForward(1);
-                // delay(1000);
-                // rat.moveForward(1);
-                // delay(1000);
-                // rat.turn(90);
-                // delay(1000);
-                // rat.moveForward(1);
-                // delay(10000);
                 rat.moveForward(1);
+                delay(500);
+                rat.turnLeft();
+                delay(500);
                 rat.moveForward(1);
-                // rat.turn(-90);
-                rat.moveForward(1);
-                // rat.moveForward(1);
-                rat.turn(180);
-                rat.moveForward(1);
-                // rat.turn(-90);
-                rat.moveForward(1);
-                // rat.turn(180);
-                // rat.moveForward(3);
-                rat.turn(180);
-                delay(10000);
+                delay(500);
+                rat.turnRight();
+                delay(500);
             }
         }
     }

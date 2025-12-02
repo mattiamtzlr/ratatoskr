@@ -1,5 +1,6 @@
 #pragma once
 #include <Arduino.h>
+#include <cstdint>
 
 #include "ToF.hpp"
 #include "esp_logger.hpp"
@@ -10,6 +11,7 @@
 #include "mouse.hpp"
 #include "pid.hpp"
 #include "util.hpp"
+#include "oled.hpp"
 
 class Ratatoskr : public Mouse {
    private:
@@ -20,6 +22,8 @@ class Ratatoskr : public Mouse {
     ToF &m_tof_front_right;
     ToF &m_tof_right;
     MPU6050 &m_gyro;
+    OLED &m_oled;
+
     bool too_close_front(uint16_t front_left_dist, uint16_t front_right_dist);
     void moveStraightMM(float mm);
     inline void stop();
@@ -32,7 +36,7 @@ class Ratatoskr : public Mouse {
    public:
     Ratatoskr(GearMotor &motor_left, GearMotor &motor_right, ToF &tof_left,
               ToF &tof_front_left, ToF &tof_front_right, ToF &tof_right,
-              MPU6050 &gyro /*, LEDMatrix &screen*/);
+              MPU6050 &gyro, OLED &oled);
 
     /**
      * move @distance cells forward with PID control
@@ -60,6 +64,7 @@ class Ratatoskr : public Mouse {
      */
     virtual bool wallLeft();
 
+    void update_screen(float gyro_angle, Face face = NEUTRAL);
     virtual void update_visuals(Maze &maze);
     virtual void log(std::string msg);
 

@@ -5,7 +5,7 @@ using namespace Config;
 
 Ratatoskr::Ratatoskr(GearMotor &motor_left, GearMotor &motor_right,
                      ToF &tof_left, ToF &tof_front_left, ToF &tof_front_right,
-                     ToF &tof_right, MPU6050 &gyro)
+                     ToF &tof_right, MPU6050 &gyro, OLED &oled)
     : Mouse(),
       m_motor_left(motor_left),
       m_motor_right(motor_right),
@@ -13,7 +13,8 @@ Ratatoskr::Ratatoskr(GearMotor &motor_left, GearMotor &motor_right,
       m_tof_front_left(tof_front_left),
       m_tof_front_right(tof_front_right),
       m_tof_right(tof_right),
-      m_gyro(gyro) {}
+      m_gyro(gyro),
+      m_oled(oled) {}
 
 /* ===============================[ MOVEMENT
  * ]==================================== */
@@ -40,6 +41,7 @@ void Ratatoskr::turn(int angle) {
     while (millis() - t_start < TURN_TIME_LIMIT * (abs(angle) / 180.0f)) {
         t_now = micros();
         float yaw = m_gyro.getAngle(t_now, t_last);
+        update_screen(yaw, angle < 0 ? LOOK_RIGHT : LOOK_LEFT);
         t_last = t_now;
 
         float err = target - yaw;
@@ -161,8 +163,13 @@ void Ratatoskr::moveForward(int distance_cells) {
 
         /*  ------------------ TIME STEP ------------------ */
         t_now = millis();
-        float t_diff =
-            (t_now - t_prev) / 100.0f; /*  same time scaling as before */
+        /*  same time scaling as before */
+        float t_diff = (t_now - t_prev) / 100.0f;
+
+        /* NOTE: this version of getAngle is used on purpose, as the angle
+         * wouldn't update otherwise */
+        float gyro_angle = m_gyro.getAngle(t_now, t_prev);
+        update_screen(gyro_angle);
         t_prev = t_now;
 
         /*  ------------------ PID UPDATES ------------------ */
@@ -323,8 +330,30 @@ bool Ratatoskr::wallLeft() {
     return (distance_left > 0) && (distance_left < SIDE_WALL_MM);
 }
 
-void Ratatoskr::update_visuals(Maze &maze) {}
+void Ratatoskr::update_screen(float gyro_angle, Face face) {
+    m_oled.clear();
+    switch (m_oled.mode) {
+        case DEBUG: {
+            uint16_t left_rpm = m_motor_left.get_rpm();
+            uint16_t right_rpm = m_motor_right.get_rpm();
+            m_oled.update_status_bar(abs(floor(gyro_angle)), left_rpm, right_rpm);
 
+            uint16_t tof_left = m_tof_left.read();
+            uint16_t tof_front_left = m_tof_front_left.read();
+            uint16_t tof_front_right = m_tof_front_right.read();
+            uint16_t tof_right = m_tof_right.read();
+            m_oled.update_ToFs(tof_left, tof_front_left, tof_front_right, tof_right);
+
+            break;
+        }
+
+        default:
+            m_oled.draw_face(face);
+    }
+    m_oled.display();
+}
+
+void Ratatoskr::update_visuals(Maze &maze) {}
 bool Ratatoskr::wasReset() { return false; }
 void Ratatoskr::ackReset() {}
 
