@@ -48,6 +48,7 @@ class Ratatoskr : public Mouse {
      * move @distance cells forward with PID control
      */
     virtual void moveForward(int distance = 1);
+    void moveForward(float distance = 0.5f);
 
     /**
      * turn @angle degrees in counterclockwise direction

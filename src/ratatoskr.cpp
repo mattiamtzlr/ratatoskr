@@ -187,10 +187,13 @@ bool Ratatoskr::too_close_front(uint16_t fl, uint16_t fr) {
 /*  - Cell: 16 cm -> half-cell = 8 cm = 80 mm */
 /*  - Sensor offset from center: 30 mm */
 /*  => ideal sensor–wall distance when centered = 80 - 30 = 50 mm */
-
 void Ratatoskr::moveForward(int distance_cells) {
-    /*  Keep maze state in sync */
     Mouse::moveForward(distance_cells);
+    moveForward(distance_cells);
+}
+
+void Ratatoskr::moveForward(float distance_cells) {
+    /*  Keep maze state in sync */
 
     /*  Convert cells to mm and then to encoder counts */
     int distance_mm = distance_cells * CELL_SIZE_MM;
