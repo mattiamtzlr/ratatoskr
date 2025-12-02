@@ -1,4 +1,5 @@
 #include "ratatoskr.hpp"
+#include "config.hpp"
 
 using namespace Config;
 
@@ -17,11 +18,9 @@ Ratatoskr::Ratatoskr(GearMotor &motor_left, GearMotor &motor_right,
 
 /* ============================[ MOVEMENT ]================================== */
 
-
-void Ratatoskr::moveDiagonal(int distance){
-
+void Ratatoskr::moveDiagonal(int distance) {
     /*  Convert cells to mm and then to encoder counts */
-    int distance_mm = distance * CELL_SIZE_MM;
+    int distance_mm = distance * CELL_SIZE_MM * sqrt(2);
     long target_counts = (long)(distance_mm * ENCODER_COUNTS_PER_MM);
 
     const int BASE_PWM = FORWARD_PWM;
@@ -72,9 +71,10 @@ void Ratatoskr::moveDiagonal(int distance){
         float left_dist = constrain(left_raw, 0, MAX_DIST);
         float right_dist = constrain(right_raw, 0, MAX_DIST);
 
-        is_end = fabs(left_dist - right_dist) < DIST_BETWEEN_SENSORS - threshold;
-        
-         /*  ------------------ ERRORS ------------------ */
+        is_end =
+            fabs(left_dist - right_dist) < DIST_BETWEEN_SENSORS - threshold;
+
+        /*  ------------------ ERRORS ------------------ */
         float encoder_error = 0.0f - (left_encoder_diff - right_encoder_diff);
         float tof_error = 0.0f - (left_dist - right_dist);
 
@@ -86,7 +86,8 @@ void Ratatoskr::moveDiagonal(int distance){
 
         /*  ------------------ PID UPDATES ------------------ */
         float encoder_correction = m_pid_encoders.update(t_diff, encoder_error);
-        float tof_correction = m_pid_tof_front_diagonals.update(t_diff, tof_error);
+        float tof_correction =
+            m_pid_tof_front_diagonals.update(t_diff, tof_error);
 
         if (!is_end) {
             pwm_left = BASE_PWM + PWM_UPDATE_RATIO * tof_correction +
@@ -153,6 +154,7 @@ void Ratatoskr::turn(int angle) {
             /*  Inside band: stop and shrink speed so next corrections are
              * softer */
             coast();
+            delay(1);
             if (turn_speed > MIN_TURN_PWM) {
                 turn_speed -= 3;
                 if (turn_speed < MIN_TURN_PWM) turn_speed = MIN_TURN_PWM;
@@ -411,7 +413,8 @@ void Ratatoskr::safe_stop() {
     coast();
 }
 
-/* ===============================[ SENSING ]==================================== */
+/* ===============================[ SENSING
+ * ]==================================== */
 bool Ratatoskr::wallFront() {
     uint16_t distance_front_left = m_tof_front_left.get_reading();
     uint16_t distance_front_right = m_tof_front_right.get_reading();
@@ -436,7 +439,8 @@ void Ratatoskr::update_screen(float gyro_angle, Face face) {
         case DEBUG: {
             uint16_t left_rpm = m_motor_left.get_rpm();
             uint16_t right_rpm = m_motor_right.get_rpm();
-            m_oled.update_status_bar(abs(floor(gyro_angle)), left_rpm, right_rpm);
+            m_oled.update_status_bar(abs(floor(gyro_angle)), left_rpm,
+                                     right_rpm);
 
             uint16_t tof_left = m_tof_left.get_reading();
             uint16_t tof_front_left = m_tof_front_left.get_reading();

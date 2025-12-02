@@ -117,6 +117,7 @@ void setup() {
         }
 
         case TESTING: {
+            oled.mode = DEBUG;
             while (true) {
                 /*Serial.printf("left: %ld\nright: %ld\n\n",
                               motor_left.get_encoder_count(),
@@ -124,17 +125,12 @@ void setup() {
                 delay(1000);*/
 
                 rat.turnRight();
-                rat.moveForward();
+                delay(1000);
+                rat.turn180();
+                delay(1000);
                 rat.turnLeft();
-                rat.moveForward();
-                rat.turnRight();
-                rat.moveForward();
-                rat.turnRight();
-                rat.moveForward();
-                rat.turnLeft();
-                rat.moveForward();
-                rat.turnLeft();
-                rat.moveForward();
+                delay(1000);
+                rat.turnLeft45();
             }
         }
     }
