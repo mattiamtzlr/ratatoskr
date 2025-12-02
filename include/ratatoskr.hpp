@@ -64,7 +64,7 @@ class Ratatoskr : public Mouse {
      */
     virtual bool wallLeft();
 
-    void update_screen(float gyro_angle);
+    void update_screen(float gyro_angle, Face face = NEUTRAL);
     virtual void update_visuals(Maze &maze);
     virtual void log(std::string msg);
 

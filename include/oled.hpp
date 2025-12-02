@@ -17,9 +17,14 @@
 #define FONT_HEIGHT 7 /* set manually */
 
 enum TextSize { SMALL = 1, MEDIUM = 2, LARGE = 3, HUGE = 4 };
-enum Face { MAD, NEUTRAL, HAPPY, BLINK };
-static std::map<Face, uint8_t*> face_map = {
+enum Face { HAPPY, NEUTRAL, DIAGONAL, LOOK_LEFT, LOOK_RIGHT};
+
+static std::map<Face, const uint8_t*> face_map = {
     {HAPPY, happy_bits},
+    {NEUTRAL, neutral_bits},
+    {DIAGONAL, diagonal_bits},
+    {LOOK_LEFT, look_left_bits},
+    {LOOK_RIGHT, look_right_bits}
 };
 
 class OLED {
@@ -49,5 +54,5 @@ class OLED {
                            uint16_t right_rpm);
     void update_ToFs(uint16_t tof_left, uint16_t tof_front_left,
                      uint16_t tof_front_right, uint16_t tof_right);
-    void idle();
+    void draw_face(Face face);
 };

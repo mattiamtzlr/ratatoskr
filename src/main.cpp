@@ -112,7 +112,7 @@ void setup() {
         }
 
         case TESTING: {
-            oled.mode = DEBUG;
+            /*oled.mode = DEBUG;*/
             while (true) {
                 rat.moveForward(1);
                 delay(500);

@@ -41,6 +41,7 @@ void Ratatoskr::turn(int angle) {
     while (millis() - t_start < TURN_TIME_LIMIT * (abs(angle) / 180.0f)) {
         t_now = micros();
         float yaw = m_gyro.getAngle(t_now, t_last);
+        update_screen(yaw, angle < 0 ? LOOK_RIGHT : LOOK_LEFT);
         t_last = t_now;
 
         float err = target - yaw;
@@ -66,7 +67,6 @@ void Ratatoskr::turn(int angle) {
                 m_motor_right.spin_cw(pwm);
             }
         }
-        update_screen(yaw);
     }
     safe_stop();
     moveStraightMM(-10);
@@ -330,7 +330,7 @@ bool Ratatoskr::wallLeft() {
     return (distance_left > 0) && (distance_left < SIDE_WALL_MM);
 }
 
-void Ratatoskr::update_screen(float gyro_angle) {
+void Ratatoskr::update_screen(float gyro_angle, Face face) {
     m_oled.clear();
     switch (m_oled.mode) {
         case DEBUG: {
@@ -348,7 +348,7 @@ void Ratatoskr::update_screen(float gyro_angle) {
         }
 
         default:
-            m_oled.idle();
+            m_oled.draw_face(face);
     }
     m_oled.display();
 }

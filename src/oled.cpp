@@ -75,11 +75,6 @@ void OLED::update_ToFs(uint16_t tof_left, uint16_t tof_front_left,
     m_oled.printf("%03d", tof_front_left);
 }
 
-void OLED::idle() {
-    m_oled.drawXBitmap(0, 0, face_map[HAPPY], m_width, m_height, WHITE);
-    /*set_text_size(HUGE);
-    m_oled.setCursor(15, FONT_HEIGHT * HUGE + 5);
-    m_oled.print(">OwO<");
-    m_oled.setCursor(20, 20);
-    m_oled.print(">-w-<");*/
+void OLED::draw_face(Face face) {
+    m_oled.drawXBitmap(0, 0, face_map[face], m_width, m_height, WHITE);
 }
