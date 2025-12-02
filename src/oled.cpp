@@ -1,10 +1,13 @@
 #include "oled.hpp"
+#include "esp_logger.hpp"
+
+using namespace ESPLogger;
 
 OLED::OLED(uint8_t addr) : m_addr(addr) {}
 
 void OLED::begin() {
     if (!m_oled.begin(SSD1306_SWITCHCAPVCC, m_addr)) {
-        Serial.println("OLED initialisation failed!");
+        log("OLED initialisation failed, aborting.");
         while (true);
     }
 
