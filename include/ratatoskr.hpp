@@ -49,6 +49,7 @@ class Ratatoskr : public Mouse {
      */
     virtual void moveForward(int distance = 1);
     void moveForward(float distance = 0.5f);
+    void moveForwardHalf();
 
     /**
      * turn @angle degrees in counterclockwise direction

@@ -192,6 +192,10 @@ void Ratatoskr::moveForward(int distance_cells) {
     moveForward((float)distance_cells);
 }
 
+void Ratatoskr::moveForwardHalf(){
+    moveForward(0.5f);
+}
+
 void Ratatoskr::moveForward(float distance_cells) {
     /*  Keep maze state in sync */
 
