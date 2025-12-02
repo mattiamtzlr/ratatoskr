@@ -94,8 +94,8 @@ bool Maze::can_move_diag(Position pos, Direction dir) {
         ;
 }
 
-std::map<GraphCoordinate, std::set<Edge>> Maze::get_adj_list() {
-    std::map<GraphCoordinate, std::set<Edge>> adj_list;
+std::map<GraphCoordinate, std::set<Edge>>& Maze::get_adj_list(
+    std::map<GraphCoordinate, std::set<Edge>>& adj_list) {
     std::set<GraphCoordinate> halfway_nodes;
 
     for (int x = 0; x < MAZE_WIDTH; x++) {

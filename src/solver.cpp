@@ -98,7 +98,8 @@ void Solver::solve() {
 }
 
 std::vector<GraphCoordinate> Solver::dijkstra(GraphCoordinate start) {
-    std::map<GraphCoordinate, std::set<Edge>> adj_list = m_maze.get_adj_list();
+    std::map<GraphCoordinate, std::set<Edge>> adj_list;
+    m_maze.get_adj_list(adj_list);
 
     // prio queue of (distance, position) with comparator on distance only
     p_queue pq;

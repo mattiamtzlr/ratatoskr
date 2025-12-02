@@ -48,7 +48,6 @@ class Maze {
     bool at_target(Position pos);
     bool exists_wall(Position pos, Direction dir);
     void finalize_discovery();
-    std::map<GraphCoordinate, std::set<Edge>> get_adj_list();
+    std::map<GraphCoordinate, std::set<Edge>>& get_adj_list(std::map<GraphCoordinate, std::set<Edge>>& adj_list);
     bool in_visited(Position pos);
-                                    
 };
