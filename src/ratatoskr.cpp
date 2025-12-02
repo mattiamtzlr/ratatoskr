@@ -189,7 +189,7 @@ bool Ratatoskr::too_close_front(uint16_t fl, uint16_t fr) {
 /*  => ideal sensor–wall distance when centered = 80 - 30 = 50 mm */
 void Ratatoskr::moveForward(int distance_cells) {
     Mouse::moveForward(distance_cells);
-    moveForward(distance_cells);
+    moveForward((float)distance_cells);
 }
 
 void Ratatoskr::moveForward(float distance_cells) {
