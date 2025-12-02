@@ -1,6 +1,7 @@
 #include <Arduino.h>
 
 #include "esp32-hal-ledc.h"
+#include "esp32-hal.h"
 #include "oled.hpp"
 #include "pins.hpp"
 #include "ratatoskr.hpp"
@@ -112,12 +113,15 @@ void setup() {
         }
 
         case TESTING: {
-            /*oled.mode = DEBUG;*/
             while (true) {
                 rat.moveForward(1);
                 delay(500);
-                rat.turn(90);
-                delay(2000);
+                rat.turnLeft();
+                delay(500);
+                rat.moveForward(1);
+                delay(500);
+                rat.turnRight();
+                delay(500);
             }
         }
     }
