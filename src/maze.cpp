@@ -55,9 +55,7 @@ void Maze::reset_distances() {
             m_distances[x][y] = MAZE_WIDTH * MAZE_HEIGHT + 1;
 }
 
-int Maze::maze_height() { return MAZE_HEIGHT; }
 
-int Maze::maze_width() { return MAZE_WIDTH; }
 
 bool Maze::at_target(Position pos) {
     for (int i = 0; i < targets.size(); i++) {

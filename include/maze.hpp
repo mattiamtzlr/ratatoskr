@@ -39,8 +39,6 @@ class Maze {
     void set_wall(Position pos, Direction d);
     void set_distance(Position pos, int value);
     int get_distance(Position pos);
-    int maze_width();
-    int maze_height();
     float distance_to_target_L2(Position pos);
     bool at_target(Position pos);
     bool exists_wall(Position pos, Direction dir);
