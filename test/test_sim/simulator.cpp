@@ -39,8 +39,11 @@ int main(int argc, char* argv[]) {
         }
     }
     */
-
-    std::vector<GraphCoordinate> solved = solver.dijkstra(GraphCoordinate());
-    std::vector<Instruction> instr = solver.parse_path(solved);
-    solver.run(instr);
+    std::vector<Instruction>* instr = new std::vector<Instruction>;
+    std::vector<GraphCoordinate>* solved = new std::vector<GraphCoordinate>;
+    solver.dijkstra(*solved);
+    solver.parse_path(*solved, *instr);
+    delete solved;
+    solver.run(*instr);
+    delete instr;
 }

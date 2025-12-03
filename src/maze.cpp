@@ -9,9 +9,7 @@ const int MOVE_COST = 2;
 const int HALF_MOVE_COST = 1;
 const int TURN_COST = 10;
 
-Maze::Maze() {
-    set_border_walls();
-}
+Maze::Maze() { set_border_walls(); }
 
 std::vector<Position> Maze::valid_neighbors(Position mouse_pos) {
     std::vector<Position> neigh;
@@ -96,7 +94,7 @@ bool Maze::can_move_diag(Position pos, Direction dir) {
 
 std::map<GraphCoordinate, std::set<Edge>>& Maze::get_adj_list(
     std::map<GraphCoordinate, std::set<Edge>>& adj_list) {
-    std::set<GraphCoordinate> halfway_nodes;
+    std::set<GraphCoordinate>* halfway_nodes = new std::set<GraphCoordinate>;
 
     for (int x = 0; x < MAZE_WIDTH; x++) {
         for (int y = 0; y < MAZE_HEIGHT; y++) {
@@ -117,19 +115,16 @@ std::map<GraphCoordinate, std::set<Edge>>& Maze::get_adj_list(
                 adj_list[p].insert(e_half);
                 adj_list[p].insert(e);
                 adj_list[neighbor].insert(e_back);
-                halfway_nodes.insert(inbetween);
+                (*halfway_nodes).insert(inbetween);
             }
         }
     }
 
-    /*
-     *
-     */
-    for (GraphCoordinate node : halfway_nodes) {
+    for (const GraphCoordinate& node : (*halfway_nodes)) {
         for (Direction d : {NORTH_EAST, SOUTH_EAST, SOUTH_WEST, NORTH_WEST}) {
             GraphCoordinate diag_neighbor = get_diag_neighbor(node, d);
-            if (std::find(halfway_nodes.begin(), halfway_nodes.end(),
-                          diag_neighbor) != halfway_nodes.end()) {
+            if (std::find((*halfway_nodes).begin(), (*halfway_nodes).end(),
+                          diag_neighbor) != (*halfway_nodes).end()) {
                 Edge e = {diag_neighbor, HALF_MOVE_COST};
                 Edge e_back = {node, HALF_MOVE_COST};
 
