@@ -55,16 +55,18 @@ void Maze::reset_distances() {
             m_distances[x][y] = MAZE_WIDTH * MAZE_HEIGHT + 1;
 }
 
+void Maze::set_targets(const std::vector<Position>& targets) {
+    m_targets = targets;
+}
 
+const std::vector<Position>& Maze::get_targets() const {
+    return m_targets;
+}
 
 bool Maze::at_target(Position pos) {
-    for (int i = 0; i < targets.size(); i++) {
-        if (targets[i].x == pos.x && targets[i].y == pos.y) {
-            return true;
-        }
-    }
-    return false;
+    return std::find(m_targets.begin(), m_targets.end(), pos) != m_targets.end();
 }
+
 void Maze::set_distance(Position pos, int value) {
     m_distances[pos.x][pos.y] = value;
 }
@@ -142,7 +144,7 @@ bool Maze::in_visited(Position pos) {
 }
 float Maze::distance_to_target_L2(Position pos) {
     float min_distance = .0;
-    for (Position target : targets) {
+    for (Position target : m_targets) {
         float distance = std::sqrt(std::pow((pos.x - target.x), 2) +
                                    std::pow((pos.y - target.y), 2));
         if (min_distance < distance) {

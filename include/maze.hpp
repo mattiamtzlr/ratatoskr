@@ -1,12 +1,12 @@
 #pragma once
 
-#include "config.hpp"
 #include <array>
 #include <cstddef>
 #include <cstdint>
 #include <set>
 #include <vector>
 
+#include "config.hpp"
 #include "util.hpp"
 
 struct Edge {
@@ -24,6 +24,7 @@ class Maze {
    private:
     uint8_t m_wall_storage[Config::MAZE_HEIGHT][Config::MAZE_WIDTH] = {};
     int m_distances[Config::MAZE_HEIGHT][Config::MAZE_WIDTH] = {};
+    std::vector<Position> m_targets;
     void clear_wall(Position pos, Direction d);
     int get_walls(Position pos);
     bool in_bounds(Position pos);
@@ -31,9 +32,10 @@ class Maze {
     bool can_move_diag(Position pos, Direction dir);
 
    public:
-    std::vector<Position> targets;
     std::set<Position> visited = {};
     Maze();
+    void set_targets(const std::vector<Position>& targets);
+    const std::vector<Position>& get_targets() const;
     std::vector<Position> valid_neighbors(Position mouse_pos);
     void reset_distances();
     void set_wall(Position pos, Direction d);

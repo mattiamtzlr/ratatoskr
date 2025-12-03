@@ -3,10 +3,7 @@
 #include <algorithm>
 #include <cmath>
 #include <deque>
-#include <iostream>
 #include <map>
-#include <queue>
-#include <tuple>
 #include "config.hpp"
 
 using namespace Config;
@@ -49,7 +46,7 @@ void Solver::bfs() {
     m_maze.reset_distances();
     std::deque<Position>* q = new std::deque<Position>;
 
-    for (Position& g : m_maze.targets) {
+    for (const Position& g : m_maze.get_targets()) {
         m_maze.set_distance(g, 0);
         q->push_back(g);
     }

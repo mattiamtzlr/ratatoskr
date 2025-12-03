@@ -1,6 +1,6 @@
 #include <Arduino.h>
 
-#include "config.h"
+#include "config.hpp"
 #include "oled.hpp"
 #include "pins.hpp"
 #include "ratatoskr.hpp"
@@ -88,17 +88,12 @@ void setup() {
 
         case RUN: {
             /* push target to maze */
-            maze.targets.push_back(Position(2, 2));
-            // maze.targets.push_back(Position(7, 8));
-            // maze.targets.push_back(Position(8, 7));
-            // maze.targets.push_back(Position(8, 8));
+            maze.set_targets(Config::END_POINTS);
 
             solver.solve(); /* run from start to target */
 
             /* push start to maze */
-            maze.targets.clear();
-            maze.targets.push_back(Position(0, 0));
-
+            maze.set_targets(Config::START_POINTS);
             solver.solve(); /* run from target to start */
             break;
         }
