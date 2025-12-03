@@ -1,5 +1,6 @@
 #pragma once
 
+#include "config.hpp"
 #include <array>
 #include <cstddef>
 #include <cstdint>
@@ -7,9 +8,6 @@
 #include <vector>
 
 #include "util.hpp"
-
-constexpr int MAZE_WIDTH = 16;
-constexpr int MAZE_HEIGHT = 16;
 
 struct Edge {
     GraphCoordinate target;
@@ -24,8 +22,8 @@ inline bool operator<(const Edge& lhs, const Edge& rhs) {
 
 class Maze {
    private:
-    uint8_t m_wall_storage[MAZE_HEIGHT][MAZE_WIDTH] = {};
-    int m_distances[MAZE_HEIGHT][MAZE_WIDTH] = {};
+    uint8_t m_wall_storage[Config::MAZE_HEIGHT][Config::MAZE_WIDTH] = {};
+    int m_distances[Config::MAZE_HEIGHT][Config::MAZE_WIDTH] = {};
     void clear_wall(Position pos, Direction d);
     int get_walls(Position pos);
     bool in_bounds(Position pos);

@@ -1,7 +1,8 @@
 #include "mouse.hpp"
 
-#include "maze.hpp"
 #include "util.hpp"
+
+using namespace Config;
 
 int Mouse::mazeWidth() { return MAZE_WIDTH; }
 int Mouse::mazeHeight() { return MAZE_HEIGHT; }

@@ -1,4 +1,5 @@
 #include "maze.hpp"
+#include "config.hpp"
 
 #include <algorithm>
 #include <cmath>
@@ -8,6 +9,8 @@
 const int MOVE_COST = 2;
 const int HALF_MOVE_COST = 1;
 const int TURN_COST = 10;
+
+using namespace Config;
 
 Maze::Maze() { set_border_walls(); }
 

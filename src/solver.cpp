@@ -8,6 +8,8 @@
 #include <queue>
 #include <tuple>
 
+using namespace Config;
+
 Solver::Solver(Mouse& mouse, Maze& maze) : m_mouse(mouse), m_maze(maze) {
     width = m_maze.maze_width();
     height = m_maze.maze_height();
