@@ -2,6 +2,7 @@
 
 #include <array>
 #include <cstddef>
+#include <cstdint>
 #include <set>
 #include <vector>
 
@@ -23,7 +24,7 @@ inline bool operator<(const Edge& lhs, const Edge& rhs) {
 
 class Maze {
    private:
-    int m_wall_storage[MAZE_HEIGHT][MAZE_WIDTH] = {};
+    uint8_t m_wall_storage[MAZE_HEIGHT][MAZE_WIDTH] = {};
     int m_distances[MAZE_HEIGHT][MAZE_WIDTH] = {};
     void clear_wall(Position pos, Direction d);
     int get_walls(Position pos);
@@ -34,8 +35,6 @@ class Maze {
    public:
     std::vector<Position> targets;
     std::set<Position> visited = {};
-    std::set<Position> diags = {};
-    std::set<Position> turns = {};
     Maze();
     std::vector<Position> valid_neighbors(Position mouse_pos);
     void reset_distances();
@@ -48,6 +47,7 @@ class Maze {
     bool at_target(Position pos);
     bool exists_wall(Position pos, Direction dir);
     void finalize_discovery();
-    std::map<GraphCoordinate, std::set<Edge>>& get_adj_list(std::map<GraphCoordinate, std::set<Edge>>& adj_list);
+    std::map<GraphCoordinate, std::set<Edge>>& get_adj_list(
+        std::map<GraphCoordinate, std::set<Edge>>& adj_list);
     bool in_visited(Position pos);
 };

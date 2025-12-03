@@ -44,24 +44,25 @@ void Solver::detect_and_set_walls() {
 // Flood-fill bfs_recompute
 void Solver::bfs() {
     m_maze.reset_distances();
-    std::deque<Position> q;
+    std::deque<Position>* q = new std::deque<Position>;
 
     for (Position& g : m_maze.targets) {
         m_maze.set_distance(g, 0);
-        q.push_back(g);
+        q->push_back(g);
     }
 
-    while (!q.empty()) {
-        Position pos = q.front();
-        q.pop_front();
+    while (!q->empty()) {
+        Position pos = q->front();
+        q->pop_front();
         for (Position neighbor : m_maze.valid_neighbors(pos)) {
             int new_distance = m_maze.get_distance(pos) + 1;
             if (new_distance < m_maze.get_distance(neighbor)) {
                 m_maze.set_distance(neighbor, new_distance);
-                q.emplace_back(neighbor);
+                q->emplace_back(neighbor);
             }
         }
     }
+    delete q;
 };
 
 void Solver::solve() {
@@ -91,9 +92,6 @@ void Solver::solve() {
         face(best_dir);
         m_mouse.moveForward();
         m_maze.visited.insert(m_mouse.getPosition());
-        if (best_dir != curr_dir) {
-            m_maze.turns.insert(pos_before);
-        }
     }
 }
 
@@ -140,8 +138,8 @@ std::vector<GraphCoordinate>& Solver::dijkstra(
                 (*dist)[e.target] = alt;
                 // update predecessor without requiring default-constructible
                 // GraphCoordinate
-                (*prev).erase(e.target);
-                (*prev).insert(std::make_pair(e.target, u));
+                prev->erase(e.target);
+                prev->insert(std::make_pair(e.target, u));
                 pq.push(std::make_pair(alt, e.target));
             }
         }
