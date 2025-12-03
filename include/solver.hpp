@@ -27,7 +27,6 @@ class Solver {
 
     void solve();
     void finalize_discovery();
-    std::vector<Position> bfs_shortest_path(Position start);
     std::vector<GraphCoordinate> &dijkstra(std::vector<GraphCoordinate> &path);
     std::vector<Instruction> &parse_path(
         std::vector<GraphCoordinate> &path,
