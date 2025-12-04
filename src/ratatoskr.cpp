@@ -192,9 +192,7 @@ void Ratatoskr::moveForward(int distance_cells) {
     moveForward((float)distance_cells);
 }
 
-void Ratatoskr::moveForwardHalf(){
-    moveForward(0.5f);
-}
+void Ratatoskr::moveForwardHalf() { moveForward(0.5f); }
 
 void Ratatoskr::moveForward(float distance_cells) {
     /*  Keep maze state in sync */
@@ -253,7 +251,11 @@ void Ratatoskr::moveForward(float distance_cells) {
 
         /*  ------------------ ERRORS ------------------ */
         float encoder_error = 0.0f - (left_encoder_diff - right_encoder_diff);
-        float tof_error = 0.0f;
+
+        right_raw = (right_ok) ? right_raw : TARGET_SIDE_MM;
+        left_raw = (left_ok) ? left_raw : TARGET_SIDE_MM;
+
+        float tof_error = 0.0f - (left_raw - right_raw);
 
         if (has_side_wall) {
             if (left_ok && right_ok) {
@@ -283,24 +285,21 @@ void Ratatoskr::moveForward(float distance_cells) {
 
         /*  ------------------ PID UPDATES ------------------ */
         float encoder_correction = m_pid_encoders.update(t_diff, encoder_error);
-        float tof_correction = 0.0f;
+        float tof_correction = m_pid_tof_sides.update(t_diff, tof_error);
+
+        float enc_tof_ratio = 0.0f;
+        tof_correction = 0.0f;
 
         if (has_side_wall) {
-            tof_correction = m_pid_tof_sides.update(t_diff, tof_error);
-
-            /*  Clamp side correction so it can't yank PWM too hard */
+            float enc_tof_ratio = PWM_UPDATE_RATIO;
             tof_correction = constrain(tof_correction, -MAX_PWM_CORRECTION,
                                        +MAX_PWM_CORRECTION);
-            pwm_left = BASE_PWM + PWM_UPDATE_RATIO * tof_correction +
-                       (1 - PWM_UPDATE_RATIO) * encoder_correction;
-            pwm_right = BASE_PWM - PWM_UPDATE_RATIO * tof_correction -
-                        (1 - PWM_UPDATE_RATIO) * encoder_correction;
-        } else {
-            /*  No wall: sides PID output forced to 0 */
-            tof_correction = 0.0f;
-            pwm_left = BASE_PWM + encoder_correction;
-            pwm_right = BASE_PWM - encoder_correction;
         }
+
+        pwm_left = BASE_PWM + enc_tof_ratio * tof_correction +
+                   (1 - enc_tof_ratio) * encoder_correction;
+        pwm_right = BASE_PWM - enc_tof_ratio * tof_correction -
+                    (1 - enc_tof_ratio) * encoder_correction;
 
         /*  ------------------ PWM COMPUTATION ------------------ */
         /*  Encoders are always active; ToF only when a wall exists */
