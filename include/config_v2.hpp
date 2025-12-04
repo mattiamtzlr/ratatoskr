@@ -21,7 +21,7 @@ static constexpr int MAX_TURN_PWM = 200;
 static constexpr int TURN_TIME_LIMIT = 1500;
 static constexpr float TURN_TRESHOLD = 0.2f;
 
-static constexpr u_int8_t FORWARD_PWM = 200;
+static constexpr u_int8_t FORWARD_PWM = 190;
 static constexpr int STOP_DISTANCE = 40;
 
 

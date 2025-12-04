@@ -88,12 +88,12 @@ void setup() {
 
         case RUN: {
             /* push target to maze */
-            maze.set_targets(Config::END_POINTS);
+            maze.set_targets(END_POINTS);
 
             solver.solve(); /* run from start to target */
 
             /* push start to maze */
-            maze.set_targets(Config::START_POINTS);
+            maze.set_targets(START_POINTS);
             solver.solve(); /* run from target to start */
             break;
         }

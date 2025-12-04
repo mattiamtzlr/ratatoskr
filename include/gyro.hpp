@@ -55,9 +55,9 @@ public:
     Vector3D readScaledAccel(); // Returns G's
 
     // Get previous read of gyro angle
-    float getAngle();
-    // Get current angle in deg (around z axis)
-    float getAngle(unsigned long t_now, unsigned long t_last);
+    float get_next_angle();
+    float get_current_angle();
+    void update();
 
     // Calc offsets
     void calibrateGyro();
@@ -67,6 +67,8 @@ private:
     float m_angle;
     float m_accelScale; // Sensitivity scale factor
     float m_gyroScale;  // Sensitivity scale factor
+    unsigned long m_t_now;
+    unsigned long m_t_last;
     
     // Low-level helper functions for I2C communication
     void writeByte(uint8_t reg, uint8_t data);
