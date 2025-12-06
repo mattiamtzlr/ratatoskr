@@ -1,5 +1,4 @@
 #include "ratatoskr.hpp"
-#include "config.hpp"
 
 using namespace Config;
 
@@ -150,11 +149,11 @@ void Ratatoskr::moveForward(int distance_cells) {
                 /*  Corridor: center between walls */
                 tof_error = (float)right_raw - (float)left_raw;
             } else if (right_ok && !left_ok) {
-                /*  Only right wall: keep right distance at TARGET_SIDE_MM */
-                tof_error = (float)right_raw - (float)TARGET_SIDE_MM;
+                /*  Only right wall: keep right distance at TOF_SIDE_EXPECTED_MM */
+                tof_error = (float)right_raw - (float)TOF_SIDE_EXPECTED_MM;
             } else if (left_ok && !right_ok) {
-                /*  Only left wall: keep left distance at TARGET_SIDE_MM */
-                tof_error = (float)TARGET_SIDE_MM - (float)left_raw;
+                /*  Only left wall: keep left distance at TOF_SIDE_EXPECTED_MM */
+                tof_error = (float)TOF_SIDE_EXPECTED_MM - (float)left_raw;
             }
         } else {
             /*  No usable side walls -> no side correction */

@@ -1,7 +1,7 @@
 #include "gear_motor.hpp"
+#include "config.hpp"
 
-#define GEARING      31.5
-#define ENCODERMULT  6
+using namespace Config;
 
 void IRAM_ATTR GearMotor::isr_trampoline(void *obj) {
     ((GearMotor *)obj)->encoder_interrupt();
@@ -72,17 +72,17 @@ void IRAM_ATTR GearMotor::encoder_interrupt() {
  * Get the rpm of the motor
  */
 int GearMotor::get_rpm() {
-    // Avoid division by zero
+    /* avoid division by zero */
     if (m_delta_time == 0) {
         return 0;
     }
 
-    float revolutions = static_cast<float>(m_delta_time);  // µs
-    revolutions = 1.0f / revolutions;                      // rev per µs
-    revolutions *= 1000000.0f;                             // rev per sec
-    revolutions *= 60.0f;                                  // rev per min
-    revolutions /= GEARING;                                // account for gear ratio
-    revolutions /= ENCODERMULT;                            // ticks per rotation
+    float revolutions = static_cast<float>(m_delta_time); /* µs */
+    revolutions = 1.0f / revolutions;                     /* rev per µs */
+    revolutions *= 1000000.0f;                            /* rev per sec */
+    revolutions *= 60.0f;                                 /* rev per min */
+    revolutions /= GEARING;            /* account for gear ratio */
+    revolutions /= ENCODER_MULTIPLIER; /* ticks per rotation */
 
     return static_cast<int>(revolutions);
 }
