@@ -1,8 +1,20 @@
 #pragma once
 
 #include <Arduino.h>
+#include <vector>
+
+#include "util.hpp"
 
 namespace Config {
+/* ================================== maze ================================== */
+constexpr int MAZE_WIDTH = 8;
+constexpr int MAZE_HEIGHT = 8;
+
+const std::vector<Position> START_POINTS = {Position(0, 0)};
+const std::vector<Position> END_POINTS = {Position(3, 3), Position(4, 3),
+                                          Position(3, 4), Position(4, 4)};
+
+
 /* ================================ movement ================================ */
 static constexpr int MIN_TURN_PWM = 185;
 static constexpr int MAX_TURN_PWM = 195;

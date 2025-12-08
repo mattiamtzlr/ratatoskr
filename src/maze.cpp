@@ -1,4 +1,5 @@
 #include "maze.hpp"
+#include "config.hpp"
 
 #include <algorithm>
 #include <cmath>
@@ -9,9 +10,9 @@ const int MOVE_COST = 2;
 const int HALF_MOVE_COST = 1;
 const int TURN_COST = 10;
 
-Maze::Maze() {
-    set_border_walls();
-}
+using namespace Config;
+
+Maze::Maze() { set_border_walls(); }
 
 std::vector<Position> Maze::valid_neighbors(Position mouse_pos) {
     std::vector<Position> neigh;
@@ -54,18 +55,18 @@ void Maze::reset_distances() {
             m_distances[x][y] = MAZE_WIDTH * MAZE_HEIGHT + 1;
 }
 
-int Maze::maze_height() { return MAZE_HEIGHT; }
+void Maze::set_targets(const std::vector<Position>& targets) {
+    m_targets = targets;
+}
 
-int Maze::maze_width() { return MAZE_WIDTH; }
+const std::vector<Position>& Maze::get_targets() const {
+    return m_targets;
+}
 
 bool Maze::at_target(Position pos) {
-    for (int i = 0; i < targets.size(); i++) {
-        if (targets[i].x == pos.x && targets[i].y == pos.y) {
-            return true;
-        }
-    }
-    return false;
+    return std::find(m_targets.begin(), m_targets.end(), pos) != m_targets.end();
 }
+
 void Maze::set_distance(Position pos, int value) {
     m_distances[pos.x][pos.y] = value;
 }
@@ -94,9 +95,9 @@ bool Maze::can_move_diag(Position pos, Direction dir) {
         ;
 }
 
-std::map<GraphCoordinate, std::set<Edge>> Maze::get_adj_list() {
-    std::map<GraphCoordinate, std::set<Edge>> adj_list;
-    std::set<GraphCoordinate> halfway_nodes;
+std::map<GraphCoordinate, std::set<Edge>>& Maze::get_adj_list(
+    std::map<GraphCoordinate, std::set<Edge>>& adj_list) {
+    std::set<GraphCoordinate>* halfway_nodes = new std::set<GraphCoordinate>;
 
     for (int x = 0; x < MAZE_WIDTH; x++) {
         for (int y = 0; y < MAZE_HEIGHT; y++) {
@@ -117,19 +118,16 @@ std::map<GraphCoordinate, std::set<Edge>> Maze::get_adj_list() {
                 adj_list[p].insert(e_half);
                 adj_list[p].insert(e);
                 adj_list[neighbor].insert(e_back);
-                halfway_nodes.insert(inbetween);
+                (*halfway_nodes).insert(inbetween);
             }
         }
     }
 
-    /*
-     *
-     */
-    for (GraphCoordinate node : halfway_nodes) {
+    for (const GraphCoordinate& node : (*halfway_nodes)) {
         for (Direction d : {NORTH_EAST, SOUTH_EAST, SOUTH_WEST, NORTH_WEST}) {
             GraphCoordinate diag_neighbor = get_diag_neighbor(node, d);
-            if (std::find(halfway_nodes.begin(), halfway_nodes.end(),
-                          diag_neighbor) != halfway_nodes.end()) {
+            if (std::find((*halfway_nodes).begin(), (*halfway_nodes).end(),
+                          diag_neighbor) != (*halfway_nodes).end()) {
                 Edge e = {diag_neighbor, HALF_MOVE_COST};
                 Edge e_back = {node, HALF_MOVE_COST};
 
@@ -146,7 +144,7 @@ bool Maze::in_visited(Position pos) {
 }
 float Maze::distance_to_target_L2(Position pos) {
     float min_distance = .0;
-    for (Position target : targets) {
+    for (Position target : m_targets) {
         float distance = std::sqrt(std::pow((pos.x - target.x), 2) +
                                    std::pow((pos.y - target.y), 2));
         if (min_distance < distance) {

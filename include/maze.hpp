@@ -2,13 +2,12 @@
 
 #include <array>
 #include <cstddef>
+#include <cstdint>
 #include <set>
 #include <vector>
 
+#include "config.hpp"
 #include "util.hpp"
-
-constexpr int MAZE_WIDTH = 16;
-constexpr int MAZE_HEIGHT = 16;
 
 struct Edge {
     GraphCoordinate target;
@@ -23,8 +22,9 @@ inline bool operator<(const Edge& lhs, const Edge& rhs) {
 
 class Maze {
    private:
-    int m_wall_storage[MAZE_HEIGHT][MAZE_WIDTH] = {};
-    int m_distances[MAZE_HEIGHT][MAZE_WIDTH] = {};
+    uint8_t m_wall_storage[Config::MAZE_HEIGHT][Config::MAZE_WIDTH] = {};
+    int m_distances[Config::MAZE_HEIGHT][Config::MAZE_WIDTH] = {};
+    std::vector<Position> m_targets;
     void clear_wall(Position pos, Direction d);
     int get_walls(Position pos);
     bool in_bounds(Position pos);
@@ -32,23 +32,20 @@ class Maze {
     bool can_move_diag(Position pos, Direction dir);
 
    public:
-    std::vector<Position> targets;
     std::set<Position> visited = {};
-    std::set<Position> diags = {};
-    std::set<Position> turns = {};
     Maze();
+    void set_targets(const std::vector<Position>& targets);
+    const std::vector<Position>& get_targets() const;
     std::vector<Position> valid_neighbors(Position mouse_pos);
     void reset_distances();
     void set_wall(Position pos, Direction d);
     void set_distance(Position pos, int value);
     int get_distance(Position pos);
-    int maze_width();
-    int maze_height();
     float distance_to_target_L2(Position pos);
     bool at_target(Position pos);
     bool exists_wall(Position pos, Direction dir);
     void finalize_discovery();
-    std::map<GraphCoordinate, std::set<Edge>> get_adj_list();
+    std::map<GraphCoordinate, std::set<Edge>>& get_adj_list(
+        std::map<GraphCoordinate, std::set<Edge>>& adj_list);
     bool in_visited(Position pos);
-                                    
 };

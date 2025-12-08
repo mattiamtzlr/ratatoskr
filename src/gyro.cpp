@@ -1,4 +1,5 @@
 #include "gyro.hpp"
+#include "esp32-hal.h"
 #include "esp_logger.hpp"
 
 #include <math.h>
@@ -42,7 +43,9 @@ MPU6050::MPU6050(uint8_t addr)
     : m_addr(addr),
       m_accelScale(ACCEL_SCALE_16G),
       m_gyroScale(GYRO_SCALE_250_DEG),
-      m_angle(0) {}
+      m_angle(0),
+      m_t_now(micros()),
+      m_t_last(micros()) {}
 
 
 bool MPU6050::begin() {
@@ -214,13 +217,18 @@ void MPU6050::calibrateGyro() {
     log("Offsets (deg/s) X: " + std::to_string(X_OFFSET) + " Y: " + std::to_string(Y_OFFSET) + " Z: " + std::to_string(Z_OFFSET));
 }
 
-float MPU6050::getAngle(){
+void MPU6050::update() {
+    m_t_last = m_t_now;
+    m_t_now = micros();
+}
+
+float MPU6050::get_current_angle() {
     return m_angle;
 }
 
-float MPU6050::getAngle(unsigned long t_now, unsigned long t_last) {
+float MPU6050::get_next_angle() {
     Vector3D velocities = readScaledGyro();
-    float dt = (float)(t_now - t_last) * 1e-6f;  // t_now/t_last must be micros()
+    float dt = (float)(m_t_now - m_t_last) * 1e-6f;  // t_now/t_last must be micros()
 
     if (dt <= 0.0f) {
         return m_angle;

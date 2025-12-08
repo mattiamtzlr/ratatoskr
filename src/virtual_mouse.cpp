@@ -6,6 +6,8 @@
 #include "API.hpp"
 #include "util.hpp"
 
+using namespace Config;
+
 void VirtualMouse::moveForward(int distance) {
     Mouse::moveForward(distance);
     API::moveForward(distance);
@@ -63,15 +65,15 @@ bool VirtualMouse::wallLeft() {
 void VirtualMouse::log(std::string msg) { std::cerr << msg << std::endl; }
 
 void VirtualMouse::update_visuals(Maze& maze) {
-    for (int x = 0; x < maze.maze_width(); ++x) {
-        for (int y = 0; y < maze.maze_height(); ++y) {
+    for (int x = 0; x < MAZE_WIDTH; ++x) {
+        for (int y = 0; y < MAZE_HEIGHT; ++y) {
             for (Direction d : {NORTH, EAST, SOUTH, WEST}) {
                 if (maze.exists_wall(Position(x, y), d)) {
                     API::setWall(x, y, dirToCardinalChar[d]);
                 }
             }
             if (maze.get_distance(Position(x, y)) <
-                maze.maze_height() * maze.maze_width() + 1) {
+                MAZE_HEIGHT * MAZE_WIDTH + 1) {
                 API::setText(x, y,
                              std::to_string(maze.get_distance(Position(x, y))));
             } else {
@@ -85,7 +87,7 @@ void VirtualMouse::update_visuals(Maze& maze) {
     Position pos = getPosition();
 
     while (!maze.at_target(pos)) {
-        int best_v = maze.maze_height() * maze.maze_width() + 1;
+        int best_v = MAZE_HEIGHT * MAZE_WIDTH + 1;
 
         for (Position neighbor : maze.valid_neighbors(pos)) {
             if (maze.get_distance(neighbor) < best_v) {

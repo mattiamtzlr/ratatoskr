@@ -3,19 +3,19 @@
 #include <algorithm>
 #include <cmath>
 #include <deque>
-#include <iostream>
 #include <map>
-#include <queue>
-#include <tuple>
+#include "config.hpp"
 
-Solver::Solver(Mouse &mouse, Maze &maze) : m_mouse(mouse), m_maze(maze) {
-    width = m_maze.maze_width();
-    height = m_maze.maze_height();
+using namespace Config;
+
+Solver::Solver(Mouse& mouse, Maze& maze) : m_mouse(mouse), m_maze(maze) {
+    width = MAZE_WIDTH;
+    height = MAZE_HEIGHT;
     UBOUND_DIST = height * width + 1;
 }
 
 void Solver::face(Direction target_dir) {
-	/* TODO: The control flow needs some comments */
+    /* TODO: The control flow needs some comments */
     int diff = (target_dir - m_mouse.getDirection() + 8) % 8;
     int i;
     if (diff == 4) {
@@ -44,24 +44,25 @@ void Solver::detect_and_set_walls() {
 // Flood-fill bfs_recompute
 void Solver::bfs() {
     m_maze.reset_distances();
-    std::deque<Position> q;
+    std::deque<Position>* q = new std::deque<Position>;
 
-    for (Position &g : m_maze.targets) {
+    for (const Position& g : m_maze.get_targets()) {
         m_maze.set_distance(g, 0);
-        q.push_back(g);
+        q->push_back(g);
     }
 
-    while (!q.empty()) {
-        Position pos = q.front();
-        q.pop_front();
+    while (!q->empty()) {
+        Position pos = q->front();
+        q->pop_front();
         for (Position neighbor : m_maze.valid_neighbors(pos)) {
             int new_distance = m_maze.get_distance(pos) + 1;
             if (new_distance < m_maze.get_distance(neighbor)) {
                 m_maze.set_distance(neighbor, new_distance);
-                q.emplace_back(neighbor);
+                q->emplace_back(neighbor);
             }
         }
     }
+    delete q;
 };
 
 void Solver::solve() {
@@ -91,33 +92,35 @@ void Solver::solve() {
         face(best_dir);
         m_mouse.moveForward();
         m_maze.visited.insert(m_mouse.getPosition());
-        if (best_dir != curr_dir) {
-            m_maze.turns.insert(pos_before);
-        }
     }
 }
 
-std::vector<GraphCoordinate> Solver::dijkstra(GraphCoordinate start) {
-    std::map<GraphCoordinate, std::set<Edge>> adj_list = m_maze.get_adj_list();
+std::vector<GraphCoordinate>& Solver::dijkstra(
+    std::vector<GraphCoordinate>& path) {
+    std::map<GraphCoordinate, std::set<Edge>>* adj_list =
+        new std::map<GraphCoordinate, std::set<Edge>>;
+    m_maze.get_adj_list(*adj_list);
 
     // prio queue of (distance, position) with comparator on distance only
     p_queue pq;
+    const GraphCoordinate start = GraphCoordinate(m_mouse.getPosition());
 
     // distance and predecessor maps
-    std::map<GraphCoordinate, int> dist;
-    std::map<GraphCoordinate, GraphCoordinate> prev;
+    std::map<GraphCoordinate, int>* dist = new std::map<GraphCoordinate, int>;
+    std::map<GraphCoordinate, GraphCoordinate>* prev =
+        new std::map<GraphCoordinate, GraphCoordinate>;
 
     // initialize distances for all vertices (keys) and for all edge targets
-    for (std::pair<GraphCoordinate, std::set<Edge>> kv : adj_list)
-        dist[kv.first] = UBOUND_DIST;
+    for (std::pair<GraphCoordinate, std::set<Edge>> kv : *adj_list)
+        (*dist)[kv.first] = UBOUND_DIST;
 
-    dist[start] = 0;
+    (*dist)[start] = 0;
     pq.push(std::make_pair(0, start));
 
     GraphCoordinate found_target = start;
     bool found = false;
     while (!pq.empty()) {
-        const std::pair<int, GraphCoordinate> top = pq.top();
+        std::pair<int, GraphCoordinate> top = pq.top();
         int d = top.first;
         GraphCoordinate u = top.second;
         pq.pop();
@@ -129,65 +132,41 @@ std::vector<GraphCoordinate> Solver::dijkstra(GraphCoordinate start) {
             break;
         }
 
-        std::set<Edge> edges = adj_list[u];
-
-        for (Edge e : edges) {
-            int alt = dist[u] + e.weight;
-            if (alt < dist[e.target]) {
-                dist[e.target] = alt;
+        for (const Edge& e : (*adj_list)[u]) {
+            int alt = (*dist)[u] + e.weight;
+            if (alt < (*dist)[e.target]) {
+                (*dist)[e.target] = alt;
                 // update predecessor without requiring default-constructible
                 // GraphCoordinate
-                prev.erase(e.target);
-                prev.insert(std::make_pair(e.target, u));
+                prev->erase(e.target);
+                prev->insert(std::make_pair(e.target, u));
                 pq.push(std::make_pair(alt, e.target));
             }
         }
     }
-
-    std::vector<GraphCoordinate> path;
+    delete dist;
+    delete adj_list;
 
     // reconstruct path from start -> found_target
     GraphCoordinate cur = found_target;
     while (!(cur.x == start.x && cur.y == start.y)) {
         path.push_back(cur);
-        cur = prev[cur];
+        cur = (*prev)[cur];
     }
+    delete prev;
 
     path.push_back(start);
     std::reverse(path.begin(), path.end());
     return path;
 }
 
-std::vector<Position> Solver::bfs_shortest_path(Position start) {
-    bfs();
-    std::vector<Position> route;
-    std::set<Position> seen;
-
-    Position pos = start;
-
-    while (!m_maze.at_target(pos)) {
-        int best_v = m_maze.maze_height() * m_maze.maze_width() + 1;
-
-        for (Position neighbor : m_maze.valid_neighbors(pos)) {
-            if (m_maze.get_distance(neighbor) < best_v) {
-                best_v = m_maze.get_distance(neighbor);
-                pos = neighbor;
-            }
-        }
-        if (seen.count(pos)) break;
-        seen.insert(pos);
-        route.emplace_back(pos);
-    }
-    return route;
-}
-
 void Solver::finalize_discovery() {
     /* Assume all unchecked wall positions to have walls. */
     for (int x = 0; x < MAZE_WIDTH; ++x) {
         for (int y = 0; y < MAZE_HEIGHT; ++y) {
-            Position pos = Position(x, y);
+            const Position pos = Position(x, y);
             if (!m_maze.in_visited(pos)) {
-                for (Position n : m_maze.valid_neighbors(pos)) {
+                for (const Position n : m_maze.valid_neighbors(pos)) {
                     if (!m_maze.in_visited(n))
                         m_maze.set_wall(n, dir_for_neighbor(pos, n));
                 }
@@ -197,23 +176,24 @@ void Solver::finalize_discovery() {
     m_mouse.update_visuals(m_maze);
 }
 
-bool in_diags(std::vector<std::vector<Position>> diagonals, Position pos) {
-    for (std::vector<Position> diagonal : diagonals) {
+bool in_diags(const std::vector<std::vector<Position>>& diagonals,
+              Position pos) {
+    for (const std::vector<Position>& diagonal : diagonals) {
         if (std::find(diagonal.begin(), diagonal.end(), pos) != diagonal.end())
             return true;
     }
     return false;
 }
-std::vector<Position> get_diag(std::vector<std::vector<Position>> diagonals,
-                               Position pos) {
-    for (std::vector<Position> diagonal : diagonals) {
+std::vector<Position> get_diag(
+    const std::vector<std::vector<Position>>& diagonals, Position pos) {
+    for (const std::vector<Position>& diagonal : diagonals) {
         if (std::find(diagonal.begin(), diagonal.end(), pos) != diagonal.end())
             return diagonal;
     }
     return {};
 }
 
-void Solver::filter_turns(std::vector<Instruction> &instr) {
+void Solver::filter_turns(std::vector<Instruction>& instr) {
     for (int i = 0; i < instr.size() - 2; i++) {
         if (instr[i] == TURN_LEFT_45 && instr[i + 1] == MOVE_FORWARD_HALF &&
             instr[i + 2] == TURN_LEFT_45) {
@@ -230,10 +210,11 @@ void Solver::filter_turns(std::vector<Instruction> &instr) {
         }
     }
 }
-std::vector<Instruction> Solver::parse_path(std::vector<GraphCoordinate> path) {
+std::vector<Instruction>& Solver::parse_path(
+    std::vector<GraphCoordinate>& path,
+    std::vector<Instruction>& instructions) {
     GraphCoordinate mouse_coordinate;
     Direction mouse_direction = NORTH;
-    std::vector<Instruction> instructions;
     for (GraphCoordinate next_coordinate : path) {
         if (next_coordinate.x == mouse_coordinate.x &&
             next_coordinate.y == mouse_coordinate.y)
@@ -280,10 +261,10 @@ void Solver::accumulative_forward(double steps) {
     }
 }
 
-void Solver::run(std::vector<Instruction> instructions) {
+void Solver::run(const std::vector<Instruction>& instructions) {
     face(NORTH);
     double move_forward_for = 0.0;
-    for (Instruction next_instruction : instructions) {
+    for (const Instruction& next_instruction : instructions) {
         switch (next_instruction) {
             case MOVE_FORWARD:
                 move_forward_for += 1;

@@ -14,24 +14,32 @@ Position get_neighbor(Position pos, Direction d) {
 }
 
 Position get_diag_neighbor(Position pos, Direction d) {
-    std::map<Direction, Position> dir_to_pos = {
-        {NORTH_EAST, Position(pos.x + 1, pos.y + 1)},
-        {SOUTH_EAST, Position(pos.x + 1, pos.y - 1)},
-        {NORTH_WEST, Position(pos.x - 1, pos.y + 1)},
-        {SOUTH_WEST, Position(pos.x - 1, pos.y - 1)},
+    switch (d) {
+        case NORTH_EAST:
+            return Position(pos.x + 1, pos.y + 1);
+        case SOUTH_EAST:
+            return Position(pos.x + 1, pos.y - 1);
+        case NORTH_WEST:
+            return Position(pos.x - 1, pos.y + 1);
+        case SOUTH_WEST:
+            return Position(pos.x - 1, pos.y - 1);
+        default:
+            return Position();
     };
-
-    return dir_to_pos.at(d);
 }
 GraphCoordinate get_diag_neighbor(GraphCoordinate pos, Direction d) {
-    std::map<Direction, GraphCoordinate> dir_to_pos = {
-        {NORTH_EAST, GraphCoordinate(pos.x + 0.5, pos.y + 0.5)},
-        {SOUTH_EAST, GraphCoordinate(pos.x + 0.5, pos.y - 0.5)},
-        {NORTH_WEST, GraphCoordinate(pos.x - 0.5, pos.y + 0.5)},
-        {SOUTH_WEST, GraphCoordinate(pos.x - 0.5, pos.y - 0.5)},
+    switch (d) {
+        case NORTH_EAST:
+            return GraphCoordinate(pos.x + 0.5, pos.y + 0.5);
+        case SOUTH_EAST:
+            return GraphCoordinate(pos.x + 0.5, pos.y - 0.5);
+        case NORTH_WEST:
+            return GraphCoordinate(pos.x - 0.5, pos.y + 0.5);
+        case SOUTH_WEST:
+            return GraphCoordinate(pos.x - 0.5, pos.y - 0.5);
+        default:
+            return GraphCoordinate();
     };
-
-    return dir_to_pos.at(d);
 }
 
 bool isInteger(double n) {

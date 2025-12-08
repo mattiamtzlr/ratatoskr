@@ -26,11 +26,10 @@ void Ratatoskr::turn(int angle) {
     m_pid_tof_sides.reset();
 
     unsigned long t_start = millis();
-    unsigned long t_now = micros();
-    unsigned long t_last = t_now;
+    m_gyro.update();
 
     /*  Read current heading and define absolute target */
-    float start_angle = m_gyro.getAngle(t_now, t_last);
+    float start_angle = m_gyro.get_current_angle();
     float target = start_angle + angle;
 
     /*  Initial turn speed */
@@ -38,10 +37,9 @@ void Ratatoskr::turn(int angle) {
     turn_speed = constrain(turn_speed, MIN_TURN_PWM, MAX_TURN_PWM);
 
     while (millis() - t_start < TURN_TIME_LIMIT * (abs(angle) / 180.0f)) {
-        t_now = micros();
-        float yaw = m_gyro.getAngle(t_now, t_last);
+        m_gyro.update();
+        float yaw = m_gyro.get_next_angle();
         update_screen(yaw, angle < 0 ? LOOK_RIGHT : LOOK_LEFT);
-        t_last = t_now;
 
         float err = target - yaw;
         float abs_err = fabs(err);
@@ -108,12 +106,12 @@ void Ratatoskr::moveForward(int distance_cells) {
 
     int t_now = millis();
     int t_prev = t_now;
+    m_gyro.update();
 
     /*  Track whether we had any usable side wall on previous loop */
     bool had_side_wall_prev = false;
 
     long avg_counts = (left_encoder + right_encoder) / 2;
-
     while (avg_counts < target_counts) {
         /*  ------------------ FRONT STOP ------------------ */
         /*  uint16_t fl = m_tof_front_left.get_reading(); */
@@ -165,9 +163,8 @@ void Ratatoskr::moveForward(int distance_cells) {
         /*  same time scaling as before */
         float t_diff = (t_now - t_prev) / 100.0f;
 
-        /* NOTE: this version of getAngle is used on purpose, as the angle
-         * wouldn't update otherwise */
-        float gyro_angle = m_gyro.getAngle(t_now, t_prev);
+        m_gyro.update();
+        float gyro_angle = m_gyro.get_next_angle();
         update_screen(gyro_angle);
         t_prev = t_now;
 
