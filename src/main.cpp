@@ -10,7 +10,7 @@
 using namespace Config;
 
 /* TODO: Right now you have to change this by hand. */
-const MODE mode = DEBUG;
+const MODE mode = RUN;
 
 ToF tof_left = ToF(LEFT, TOF_LEFT_ADDRESS, TOF_LEFT_XSHUT);
 ToF tof_front_left =

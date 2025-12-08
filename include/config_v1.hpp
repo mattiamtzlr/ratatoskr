@@ -13,6 +13,9 @@ constexpr int MAZE_HEIGHT = 5;
 const std::vector<Position> START_POINTS = {Position(0, 0)};
 const std::vector<Position> END_POINTS = {Position(6, 4)};
 
+constexpr int CELL_SIZE_MM = 180;
+constexpr int WALL_TO_WALL_MM = 160;
+
 
 /* ================================ movement ================================ */
 constexpr int MIN_TURN_PWM = 185;
