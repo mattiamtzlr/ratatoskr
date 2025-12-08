@@ -1,17 +1,18 @@
 #pragma once
 #include <Arduino.h>
+
 #include <cstdint>
 
 #include "ToF.hpp"
+#include "config.hpp"
 #include "esp_logger.hpp"
 #include "gear_motor.hpp"
 #include "gyro.hpp"
 #include "maze.hpp"
 #include "mouse.hpp"
+#include "oled.hpp"
 #include "pid.hpp"
 #include "util.hpp"
-#include "oled.hpp"
-#include "config.hpp"
 
 class Ratatoskr : public Mouse {
    private:
@@ -31,19 +32,19 @@ class Ratatoskr : public Mouse {
     inline void safe_stop();
 
     PID m_pid_encoders{0.75, 0.8, 0.1};
-    PID m_pid_tof_sides{0.5, 0.0, 0.0}; // 1.1, 0.05, 0.4
+    PID m_pid_tof_sides{0.5, 0.0, 0.0};
+    PID m_pid_tof_front_diagonals{0.8, 0.0, 0.0};
 
    public:
     Ratatoskr(GearMotor &motor_left, GearMotor &motor_right, ToF &tof_left,
               ToF &tof_front_left, ToF &tof_front_right, ToF &tof_right,
               MPU6050 &gyro, OLED &oled);
 
-
     /**
      * move @distance cells forward diagonally with PID control
      */
     void moveDiagonal(int distance = 1);
-    
+
     /**
      * move @distance cells forward with PID control
      */

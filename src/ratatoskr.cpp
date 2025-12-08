@@ -1,4 +1,5 @@
 #include "ratatoskr.hpp"
+
 #include "config.hpp"
 
 using namespace Config;
@@ -228,8 +229,7 @@ void Ratatoskr::moveForward(float distance_cells) {
         /*  ------------------ FRONT STOP ------------------ */
         uint16_t fl = m_tof_front_left.get_reading();
         uint16_t fr = m_tof_front_right.get_reading();
-        if (too_close_front(fl, fr))
-            break;
+        if (too_close_front(fl, fr)) break;
 
         /*  ------------------ ENCODER PROGRESS ------------------ */
         int left_encoder_diff = left_encoder - left_encoder_prev;
@@ -252,8 +252,8 @@ void Ratatoskr::moveForward(float distance_cells) {
         /*  ------------------ ERRORS ------------------ */
         float encoder_error = 0.0f - (left_encoder_diff - right_encoder_diff);
 
-        right_raw = (right_ok) ? right_raw : TARGET_SIDE_MM;
-        left_raw = (left_ok) ? left_raw : TARGET_SIDE_MM;
+        right_raw = (right_ok) ? right_raw : TOF_SIDE_EXPECTED_MM;
+        left_raw = (left_ok) ? left_raw : TOF_SIDE_EXPECTED_MM;
 
         float tof_error = 0.0f - (left_raw - right_raw);
 
@@ -262,10 +262,12 @@ void Ratatoskr::moveForward(float distance_cells) {
                 /*  Corridor: center between walls */
                 tof_error = (float)right_raw - (float)left_raw;
             } else if (right_ok && !left_ok) {
-                /*  Only right wall: keep right distance at TOF_SIDE_EXPECTED_MM */
+                /*  Only right wall: keep right distance at TOF_SIDE_EXPECTED_MM
+                 */
                 tof_error = (float)right_raw - (float)TOF_SIDE_EXPECTED_MM;
             } else if (left_ok && !right_ok) {
-                /*  Only left wall: keep left distance at TOF_SIDE_EXPECTED_MM */
+                /*  Only left wall: keep left distance at TOF_SIDE_EXPECTED_MM
+                 */
                 tof_error = (float)TOF_SIDE_EXPECTED_MM - (float)left_raw;
             }
         } else {
@@ -452,7 +454,8 @@ void Ratatoskr::update_screen(float gyro_angle, Face face) {
             uint16_t tof_front_left = m_tof_front_left.get_reading();
             uint16_t tof_front_right = m_tof_front_right.get_reading();
             uint16_t tof_right = m_tof_right.get_reading();
-            m_oled.update_ToFs(tof_left, tof_front_left, tof_front_right, tof_right);
+            m_oled.update_ToFs(tof_left, tof_front_left, tof_front_right,
+                               tof_right);
 
             break;
         }
