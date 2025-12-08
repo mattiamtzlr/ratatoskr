@@ -1,45 +1,46 @@
 #pragma once
 
-#include <Arduino.h>
 #include <vector>
 
 #include "util.hpp"
 
 namespace Config {
 /* ================================== maze ================================== */
-constexpr int MAZE_WIDTH = 8;
-constexpr int MAZE_HEIGHT = 8;
+constexpr int MAZE_WIDTH = 7;
+constexpr int MAZE_HEIGHT = 5;
 
 const std::vector<Position> START_POINTS = {Position(0, 0)};
-const std::vector<Position> END_POINTS = {Position(3, 3), Position(4, 3),
-                                          Position(3, 4), Position(4, 4)};
+const std::vector<Position> END_POINTS = {Position(6, 4)};
+
+constexpr int CELL_SIZE_MM = 180;
+constexpr int WALL_TO_WALL_MM = 160;
 
 
 /* ================================ movement ================================ */
-static constexpr int MIN_TURN_PWM = 180;
-static constexpr int MAX_TURN_PWM = 200;
+static constexpr int MIN_TURN_PWM = 185;
+static constexpr int MAX_TURN_PWM = 190;
 static constexpr int TURN_TIME_LIMIT = 1500;
 static constexpr float TURN_TRESHOLD = 0.2f;
 
-static constexpr u_int8_t FORWARD_PWM = 190;
+static constexpr uint8_t FORWARD_PWM = 180;
 static constexpr int STOP_DISTANCE = 40;
 
 
 /* =============================== dimensions =============================== */
-static constexpr u_int8_t WIDTH_MM = 70;
-static constexpr float MM_PER_CELL = 180.0;
+static constexpr uint8_t WIDTH_MM = 70;
 
 
 /* =============================== motor stuff ============================== */
-/*  one revolution is 31*pi mm = 97.4 mm */
-static constexpr u_int8_t WHEEL_DIAMETER_MM = 31;
-
 static constexpr uint8_t GEARING = 30;
 static constexpr uint8_t ENCODER_MULTIPLIER = 6;
 
-/*  So encooder counts per mm = counts per rev / (WHEEL_DIAMETER_MM * pi) */
+/* measured by pushing the mouse exactly one cell length */
+static constexpr uint16_t ENCODER_COUNTS_PER_CELL = 255;
+
+/*  encoder counts per mm = counts per cell / cell size */
 static constexpr float ENCODER_COUNTS_PER_MM =
-    190.0f / (WHEEL_DIAMETER_MM * PI);
+    static_cast<float>(ENCODER_COUNTS_PER_CELL) /
+    static_cast<float>(CELL_SIZE_MM);
 
 static constexpr float PWM_UPDATE_RATIO = .6f;
 static constexpr float MAX_PWM_CORRECTION = 30.0f;

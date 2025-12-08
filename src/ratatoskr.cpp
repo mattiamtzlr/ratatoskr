@@ -19,7 +19,7 @@ Ratatoskr::Ratatoskr(GearMotor &motor_left, GearMotor &motor_right,
  * ]==================================== */
 
 void Ratatoskr::turn(int angle) {
-    moveStraightMM(10);
+    moveStraightMM(5);
     int requested_turn = angle;
     /*  Reset PIDs when turning */
     m_pid_encoders.reset();
@@ -66,7 +66,7 @@ void Ratatoskr::turn(int angle) {
         }
     }
     safe_stop();
-    moveStraightMM(-10);
+    moveStraightMM(-5);
 }
 
 bool Ratatoskr::too_close_front(uint16_t fl, uint16_t fr) {
@@ -114,11 +114,11 @@ void Ratatoskr::moveForward(int distance_cells) {
     long avg_counts = (left_encoder + right_encoder) / 2;
     while (avg_counts < target_counts) {
         /*  ------------------ FRONT STOP ------------------ */
-        /*  uint16_t fl = m_tof_front_left.get_reading(); */
-        /*  uint16_t fr = m_tof_front_right.get_reading(); */
-        /*  if (too_close_front(fl, fr)) { */
-        /*      break; */
-        /*  } */
+        uint16_t fl = m_tof_front_left.get_reading();
+        uint16_t fr = m_tof_front_right.get_reading();
+        if (too_close_front(fl, fr)) {
+            break;
+        }
 
         /*  ------------------ ENCODER PROGRESS ------------------ */
         int left_encoder_diff = left_encoder - left_encoder_prev;

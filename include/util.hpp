@@ -4,9 +4,6 @@
 #include <string>
 #include <vector>
 
-constexpr int CELL_SIZE_MM = 180;     // 18 cm
-constexpr int WALL_TO_WALL_MM = 160;  // 16 cm
-
 enum Direction {
     NORTH = 0,
     NORTH_EAST = 1,
