@@ -3,6 +3,7 @@
 #include <Arduino.h>
 
 using namespace ESPLogger;
+using namespace Config;
 
 ToF::ToF(SensorPosition position, uint8_t i2c_address, uint8_t xshut_pin)
     : position(position),

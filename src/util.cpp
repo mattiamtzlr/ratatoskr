@@ -1,7 +1,5 @@
 #include "util.hpp"
 
-#include <cctype>
-
 Direction rotate_right(Direction dir) { return (Direction)((dir + 2) % 8); }
 Direction rotate_right45(Direction dir) { return (Direction)((dir + 1) % 8); }
 Direction rotate_half(Direction dir) { return (Direction)((dir + 4) % 8); }

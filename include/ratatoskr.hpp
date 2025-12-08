@@ -6,12 +6,12 @@
 #include "esp_logger.hpp"
 #include "gear_motor.hpp"
 #include "gyro.hpp"
-#include "led_matrix.hpp"
 #include "maze.hpp"
 #include "mouse.hpp"
 #include "pid.hpp"
 #include "util.hpp"
 #include "oled.hpp"
+#include "config.hpp"
 
 class Ratatoskr : public Mouse {
    private:
