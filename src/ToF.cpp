@@ -60,7 +60,8 @@ uint16_t ToF::read() {
 }
 uint16_t ToF::get_reading() {
     if (m_sensor.dataReady()) m_reading = read();
-    return m_reading;
+    /* only return value if it's sensible i.e. not underflown */
+    return m_reading > 60000 ? 0 : m_reading;
 }
 
 void ToF::calibrate_sensor(uint16_t expected_distance) {
