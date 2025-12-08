@@ -10,9 +10,11 @@ int ESPLogger::get_count() {
 }
 
 void ESPLogger::log(std::string msg) {
-    nvsDB.putPair(std::to_string(get_count()).c_str(), msg.c_str());
-    int next_count = get_count() + 1;
-    nvsDB.putPair("0", std::to_string(next_count).c_str());
+    if (enabled) {
+        nvsDB.putPair(std::to_string(get_count()).c_str(), msg.c_str());
+        int next_count = get_count() + 1;
+        nvsDB.putPair("0", std::to_string(next_count).c_str());
+    }
 }
 
 void ESPLogger::clear_logs() {

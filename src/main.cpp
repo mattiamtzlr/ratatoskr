@@ -87,6 +87,8 @@ void setup() {
         }
 
         case RUN: {
+            ESPLogger::enabled = false;
+
             /* push target to maze */
             maze.set_targets(END_POINTS);
 
@@ -111,12 +113,17 @@ void setup() {
                               motor_right.get_encoder_count());
                 delay(1000);*/
 
-                rat.moveForward();
                 rat.turnRight();
                 rat.moveForward();
                 rat.turnLeft();
                 rat.moveForward();
                 rat.turnRight();
+                rat.moveForward();
+                rat.turnRight();
+                rat.moveForward();
+                rat.turnLeft();
+                rat.moveForward();
+                rat.turnLeft();
                 rat.moveForward();
             }
         }
