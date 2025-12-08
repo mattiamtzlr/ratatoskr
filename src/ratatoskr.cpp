@@ -15,8 +15,7 @@ Ratatoskr::Ratatoskr(GearMotor &motor_left, GearMotor &motor_right,
       m_gyro(gyro),
       m_oled(oled) {}
 
-/* ===============================[ MOVEMENT
- * ]==================================== */
+/* ============================[ MOVEMENT ]================================== */
 
 void Ratatoskr::turn(int angle) {
     moveStraightMM(5);
@@ -116,9 +115,8 @@ void Ratatoskr::moveForward(int distance_cells) {
         /*  ------------------ FRONT STOP ------------------ */
         uint16_t fl = m_tof_front_left.get_reading();
         uint16_t fr = m_tof_front_right.get_reading();
-        if (too_close_front(fl, fr)) {
+        if (too_close_front(fl, fr))
             break;
-        }
 
         /*  ------------------ ENCODER PROGRESS ------------------ */
         int left_encoder_diff = left_encoder - left_encoder_prev;
