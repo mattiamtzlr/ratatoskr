@@ -10,7 +10,7 @@
 using namespace Config;
 
 /* TODO: Right now you have to change this by hand. */
-const MODE mode = TESTING;
+const MODE mode = RUN;
 
 ToF tof_left = ToF(LEFT, TOF_LEFT_ADDRESS, TOF_LEFT_XSHUT);
 ToF tof_front_left =
@@ -87,6 +87,8 @@ void setup() {
         }
 
         case RUN: {
+            ESPLogger::enabled = false;
+
             /* push target to maze */
             maze.set_targets(END_POINTS);
 
@@ -106,10 +108,23 @@ void setup() {
 
         case TESTING: {
             while (true) {
-                rat.moveForward(1);
-                delay(500);
+                /*Serial.printf("left: %ld\nright: %ld\n\n",
+                              motor_left.get_encoder_count(),
+                              motor_right.get_encoder_count());
+                delay(1000);*/
+
                 rat.turnRight();
-                delay(500);
+                rat.moveForward();
+                rat.turnLeft();
+                rat.moveForward();
+                rat.turnRight();
+                rat.moveForward();
+                rat.turnRight();
+                rat.moveForward();
+                rat.turnLeft();
+                rat.moveForward();
+                rat.turnLeft();
+                rat.moveForward();
             }
         }
     }

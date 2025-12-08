@@ -22,8 +22,8 @@ inline bool operator<(const Edge& lhs, const Edge& rhs) {
 
 class Maze {
    private:
-    uint8_t m_wall_storage[Config::MAZE_HEIGHT][Config::MAZE_WIDTH] = {};
-    int m_distances[Config::MAZE_HEIGHT][Config::MAZE_WIDTH] = {};
+    uint8_t m_wall_storage[Config::MAZE_WIDTH][Config::MAZE_HEIGHT] = {};
+    int m_distances[Config::MAZE_WIDTH][Config::MAZE_HEIGHT] = {};
     std::vector<Position> m_targets;
     void clear_wall(Position pos, Direction d);
     int get_walls(Position pos);

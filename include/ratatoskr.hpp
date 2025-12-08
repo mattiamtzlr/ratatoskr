@@ -31,7 +31,7 @@ class Ratatoskr : public Mouse {
     inline void safe_stop();
 
     PID m_pid_encoders{0.75, 0.8, 0.1};
-    PID m_pid_tof_sides{1.1, 0.05, 0.4};
+    PID m_pid_tof_sides{0.5, 0.0, 0.0}; // 1.1, 0.05, 0.4
 
    public:
     Ratatoskr(GearMotor &motor_left, GearMotor &motor_right, ToF &tof_left,
