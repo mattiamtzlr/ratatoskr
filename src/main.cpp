@@ -97,6 +97,16 @@ void setup() {
             /* push start to maze */
             maze.set_targets(START_POINTS);
             solver.solve(); /* run from target to start */
+
+            maze.set_targets(END_POINTS);
+            solver.finalize_discovery();
+            std::vector<Instruction>* instr = new std::vector<Instruction>;
+            std::vector<GraphCoordinate>* solved = new std::vector<GraphCoordinate>;
+            solver.dijkstra(*solved);
+            solver.parse_path(*solved, *instr);
+            delete solved;
+            solver.run(*instr);
+            delete instr;
             break;
         }
 
