@@ -307,20 +307,20 @@ void Ratatoskr::safe_stop() {
 
 /* ===============================[ SENSING ]==================================== */
 bool Ratatoskr::wallFront() {
-    uint16_t distance_front_left = m_tof_front_left.read();
-    uint16_t distance_front_right = m_tof_front_right.read();
+    uint16_t distance_front_left = m_tof_front_left.get_reading();
+    uint16_t distance_front_right = m_tof_front_right.get_reading();
 
     return (distance_front_left > 0) && (distance_front_left < FRONT_WALL_MM) ||
            (distance_front_right > 0) && (distance_front_right < FRONT_WALL_MM);
 }
 
 bool Ratatoskr::wallRight() {
-    uint16_t distance_right = m_tof_right.read();
+    uint16_t distance_right = m_tof_right.get_reading();
     return (distance_right > 0) && (distance_right < SIDE_WALL_MM);
 }
 
 bool Ratatoskr::wallLeft() {
-    uint16_t distance_left = m_tof_left.read();
+    uint16_t distance_left = m_tof_left.get_reading();
     return (distance_left > 0) && (distance_left < SIDE_WALL_MM);
 }
 
@@ -332,10 +332,10 @@ void Ratatoskr::update_screen(float gyro_angle, Face face) {
             uint16_t right_rpm = m_motor_right.get_rpm();
             m_oled.update_status_bar(abs(floor(gyro_angle)), left_rpm, right_rpm);
 
-            uint16_t tof_left = m_tof_left.read();
-            uint16_t tof_front_left = m_tof_front_left.read();
-            uint16_t tof_front_right = m_tof_front_right.read();
-            uint16_t tof_right = m_tof_right.read();
+            uint16_t tof_left = m_tof_left.get_reading();
+            uint16_t tof_front_left = m_tof_front_left.get_reading();
+            uint16_t tof_front_right = m_tof_front_right.get_reading();
+            uint16_t tof_right = m_tof_right.get_reading();
             m_oled.update_ToFs(tof_left, tof_front_left, tof_front_right, tof_right);
 
             break;
