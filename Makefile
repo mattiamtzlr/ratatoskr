@@ -11,6 +11,7 @@ format:
 	@find . -regex '.*\.\(cpp\|hpp\|cu\|cuh\|c\|h\)' -exec clang-format -style=file -i {} \;
 
 docs:
+	git submodule update
 	doxygen Doxyfile
 	xdg-open docs/html/index.html
 
