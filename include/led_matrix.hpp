@@ -3,11 +3,12 @@
 
 #pragma once
 
-#include "util.hpp"
 #include <Adafruit_GFX.h>
+
 #include <cstdint>
 
 #include "Adafruit_LEDBackpack.h"
+#include "util.hpp"
 
 class LEDMatrix {
    private:

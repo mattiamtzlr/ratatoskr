@@ -2,15 +2,14 @@
 #include <VL53L1X.h>
 #include <Wire.h>
 
-#include "esp_logger.hpp"
 #include "config.hpp"
+#include "esp_logger.hpp"
 #include "util.hpp"
 
 // Valid timing budgets: 15, 20, 33, 50, 100, 200 and 500ms! (from lib)
 constexpr uint32_t TIMING_BUDGET = 20;  // in ms
 constexpr uint32_t TOF_CALIBRATION_DURATION_MS = 3000;
 constexpr uint32_t TOF_CALIBRATION_SAMPLE_INTERVAL_MS = 10;
-
 
 enum SensorPosition {
     LEFT = 0,         // side-left
