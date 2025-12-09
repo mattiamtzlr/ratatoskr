@@ -1,6 +1,7 @@
 #include <Arduino.h>
 
 #include "config.hpp"
+#include "esp_logger.hpp"
 #include "oled.hpp"
 #include "pins.hpp"
 #include "ratatoskr.hpp"
@@ -84,25 +85,27 @@ void setup() {
         }
 
         case RUN: {
-
-            /* push target to maze */
-            maze.set_targets(END_POINTS);
-
-            solver.solve(); /* run from start to target */
-
-            /* push start to maze */
-            maze.set_targets(START_POINTS);
-            solver.solve(); /* run from target to start */
-
-            maze.set_targets(END_POINTS);
-            solver.finalize_discovery();
             std::vector<Instruction>* instr = new std::vector<Instruction>;
-            std::vector<GraphCoordinate>* solved =
-                new std::vector<GraphCoordinate>;
-            solver.dijkstra(*solved);
-            solver.parse_path(*solved, *instr);
-            delete solved;
+            if(!ESPLogger::retrieve_solution(*instr)) {
+                /* push target to maze */
+                maze.set_targets(END_POINTS);
+
+                solver.solve(); /* run from start to target */
+
+                /* push start to maze */
+                maze.set_targets(START_POINTS);
+                solver.solve(); /* run from target to start */
+
+                maze.set_targets(END_POINTS);
+                solver.finalize_discovery();
+                std::vector<GraphCoordinate>* solved = new std::vector<GraphCoordinate>;
+                solver.dijkstra(*solved);
+                solver.parse_path(*solved, *instr);
+                delete solved;
+                ESPLogger::write_solution(*instr);
+            }
             solver.run(*instr);
+            ESPLogger::force_log("SUCCESS");
             delete instr;
             break;
         }

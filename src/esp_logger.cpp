@@ -1,6 +1,9 @@
 #include "esp_logger.hpp"
 
 #include <Arduino.h>
+#include <string>
+#include "NVSDatabase.hpp"
+#include "util.hpp"
 
 bool logger_enabled = false;
 
@@ -13,10 +16,14 @@ int ESPLogger::get_count() {
 
 void ESPLogger::log(std::string msg) {
     if (logger_enabled) {
-        nvsDB.putPair(std::to_string(get_count()).c_str(), msg.c_str());
-        int next_count = get_count() + 1;
-        nvsDB.putPair("0", std::to_string(next_count).c_str());
+        force_log(msg);
     }
+}
+
+void ESPLogger::force_log(std::string msg) {
+    nvsDB.putPair(std::to_string(get_count()).c_str(), msg.c_str());
+    int next_count = get_count() + 1;
+    nvsDB.putPair("0", std::to_string(next_count).c_str());
 }
 
 void ESPLogger::clear_logs() {
@@ -41,4 +48,70 @@ void ESPLogger::export_logs(void) {
         Serial.print(value);
         Serial.print('\n');
     }
+}
+
+std::string ESPLogger::get_tail() {
+    char value[80];
+    size_t maxSize = sizeof(value);
+    DatabaseError_t err = nvsDB.getValueOf(std::to_string(get_count() - 1).c_str(), value, &maxSize);
+    return std::string(value);
+}
+
+void ESPLogger::write_solution(const std::vector<Instruction>& instr) {
+    std::string to_write = "SOL";
+    for (const Instruction& i : instr) {
+       switch (i) {
+            case(MOVE_FORWARD):
+                to_write += 'F';
+                break;
+            case(MOVE_FORWARD_HALF):
+                to_write += 'f';
+                break;
+            case(TURN_LEFT_45):
+                to_write += 'l';
+                break;
+            case(TURN_LEFT_90):
+                to_write += 'L';
+                break;
+            case(TURN_RIGHT_45):
+                to_write += 'r';
+                break;
+            case(TURN_RIGHT_90):
+                to_write += 'R';
+                break;
+       }
+    }
+    force_log(to_write);
+}
+
+bool ESPLogger::retrieve_solution(std::vector<Instruction>& instr) {
+    std::string tail = get_tail();
+    if (tail.substr(0, 3) == "SOL") {
+        for (const char& i : tail.substr(3)) {
+            switch (i) {
+                case('F'):
+                    instr.push_back(MOVE_FORWARD);
+                    break;
+                case('f'):
+                    instr.push_back(MOVE_FORWARD_HALF);
+                    break;
+                case('l'):
+                    instr.push_back(TURN_LEFT_45);
+                    break;
+                case('L'):
+                    instr.push_back(TURN_LEFT_90);
+                    break;
+                case('r'):
+                    instr.push_back(TURN_RIGHT_45);
+                    break;
+                case('R'):
+                    instr.push_back(TURN_RIGHT_90);
+                    break;
+                default:
+                    return false;
+            }
+        }
+        return true;
+    }
+    return false;
 }
