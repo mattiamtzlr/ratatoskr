@@ -13,10 +13,14 @@ int ESPLogger::get_count() {
 
 void ESPLogger::log(std::string msg) {
     if (logger_enabled) {
-        nvsDB.putPair(std::to_string(get_count()).c_str(), msg.c_str());
-        int next_count = get_count() + 1;
-        nvsDB.putPair("0", std::to_string(next_count).c_str());
+        force_log(msg);
     }
+}
+
+void ESPLogger::force_log(std::string msg) {
+    nvsDB.putPair(std::to_string(get_count()).c_str(), msg.c_str());
+    int next_count = get_count() + 1;
+    nvsDB.putPair("0", std::to_string(next_count).c_str());
 }
 
 void ESPLogger::clear_logs() {
@@ -41,4 +45,11 @@ void ESPLogger::export_logs(void) {
         Serial.print(value);
         Serial.print('\n');
     }
+}
+
+std::string ESPLogger::get_tail() {
+    char value[80];
+    size_t maxSize = sizeof(value);
+    DatabaseError_t err = nvsDB.getValueOf(std::to_string(get_count() - 1).c_str(), value, &maxSize);
+    return std::string(value);
 }
