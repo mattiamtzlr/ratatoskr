@@ -5,8 +5,9 @@
 
 static NVSDatabase nvsDB("logs");
 
+extern bool logger_enabled;
+
 namespace ESPLogger {
-static bool enabled = true;
 int get_count();
 void clear_logs();
 void log(std::string msg);

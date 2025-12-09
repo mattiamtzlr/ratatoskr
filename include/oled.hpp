@@ -37,6 +37,9 @@ class OLED {
     Adafruit_SSD1306 m_oled =
         Adafruit_SSD1306(m_width, m_height, &Wire, m_reset);
 
+    enum LinePos { LEFT, MID_LEFT, MID, MID_RIGHT, RIGHT };
+    void set_cursor(int line, LinePos pos);
+
    public:
     MODE mode = RUN;
 

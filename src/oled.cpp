@@ -18,8 +18,9 @@ void OLED::begin() {
     m_oled.setTextWrap(false);
 
     set_text_size(MEDIUM);
-    m_oled.setCursor(
-        12, ((m_height - FONT_HEIGHT * MEDIUM) / 2) + (FONT_HEIGHT * MEDIUM));
+    m_oled.setCursor( /* center text */
+        12, ((m_height - FONT_HEIGHT * MEDIUM) / 2) + (FONT_HEIGHT * MEDIUM)
+    );
     m_oled.println("ratatoskr");
     m_oled.display();
     delay(1000);
@@ -38,41 +39,54 @@ void OLED::unfreeze() { m_frozen = false; }
 
 void OLED::set_text_size(TextSize size) { m_oled.setTextSize((int)size); }
 
+void OLED::set_cursor(int line, LinePos pos) {
+    int x_pos = 0;
+    switch (pos) {
+        case LEFT:
+            x_pos = 0;
+            break;
+        case MID_LEFT:
+            x_pos = m_width / 2 - (FONT_WIDTH * MEDIUM * 5) + 2;
+            break;
+        case MID:
+            x_pos = m_width / 2 - (int)floor(FONT_WIDTH * MEDIUM * 1.5) - 2;
+            break;
+        case MID_RIGHT:
+            x_pos = m_width / 2 + 10;
+            break;
+        case RIGHT:
+            x_pos = m_width - (FONT_WIDTH * MEDIUM * 3 + 5);
+            break;
+    }
+
+    int y_pos = line * FONT_HEIGHT * MEDIUM + (5 * (line == 2));
+    m_oled.setCursor(x_pos, y_pos);
+}
+
 void OLED::update_status_bar(int16_t gyro_angle, uint16_t left_rpm,
                              uint16_t right_rpm) {
-    /* write on line 1 on the left */
-    m_oled.setCursor(0, FONT_HEIGHT * MEDIUM);
+    set_cursor(1, LEFT);
     m_oled.printf("%03d", right_rpm);
 
-    /* write on line 1 in the middle */
-    m_oled.setCursor(m_width / 2 - floor(FONT_WIDTH * MEDIUM * 1.5) - 2,
-                     FONT_HEIGHT * MEDIUM);
+    set_cursor(1, MID);
     m_oled.printf("%03d", gyro_angle);
 
-    /* write on line 1 on the right */
-    m_oled.setCursor(m_width - (FONT_WIDTH * MEDIUM * 3 + 5),
-                     FONT_HEIGHT * MEDIUM);
+    set_cursor(1, RIGHT);
     m_oled.printf("%03d", left_rpm);
 }
 
 void OLED::update_ToFs(uint16_t tof_left, uint16_t tof_front_left,
                        uint16_t tof_front_right, uint16_t tof_right) {
-    /* write on line 2 on the left */
-    m_oled.setCursor(0, FONT_HEIGHT * MEDIUM * 2 + 5);
+    set_cursor(2, LEFT);
     m_oled.printf("%03d", tof_right);
 
-    /* write on line 2 on the right*/
-    m_oled.setCursor(m_width - (FONT_WIDTH * MEDIUM * 3 + 5),
-                     FONT_HEIGHT * MEDIUM * 2 + 5);
+    set_cursor(2, RIGHT);
     m_oled.printf("%03d", tof_left);
 
-    /* write on line 4 in the middle to the left */
-    m_oled.setCursor(m_width / 2 - (FONT_WIDTH * MEDIUM * 5) + 2,
-                     FONT_HEIGHT * MEDIUM * 4);
+    set_cursor(4, MID_LEFT);
     m_oled.printf("%03d", tof_front_right);
 
-    /* write on line 4 in the middle to the right*/
-    m_oled.setCursor(m_width / 2 + 10, FONT_HEIGHT * MEDIUM * 4);
+    set_cursor(4, MID_RIGHT);
     m_oled.printf("%03d", tof_front_left);
 }
 

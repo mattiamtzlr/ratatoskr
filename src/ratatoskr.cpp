@@ -163,9 +163,8 @@ void Ratatoskr::turn(int angle) {
 }
 
 bool Ratatoskr::too_close_front(uint16_t fl, uint16_t fr) {
-    bool res =
-        (fl != 0) && (fr != 0) && (fl < STOP_DISTANCE && fr < STOP_DISTANCE);
-    /*  log("Too close?" + res ? " YES" : " NO"); */
+    bool res = (fl != 0) && (fr != 0)
+        && (fl < STOP_DISTANCE && fr < STOP_DISTANCE);
     return res;
 }
 

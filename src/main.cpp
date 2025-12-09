@@ -79,11 +79,11 @@ void setup() {
     switch (mode) {
         case DEBUG: {
             oled.mode = DEBUG;
+            logger_enabled = true;
             /* WARN: no break on purpose cause we want to fall through to RUN */
         }
 
         case RUN: {
-            ESPLogger::enabled = false;
 
             /* push target to maze */
             maze.set_targets(END_POINTS);
