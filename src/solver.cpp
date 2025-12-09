@@ -4,6 +4,7 @@
 #include <cmath>
 #include <deque>
 #include <map>
+
 #include "config.hpp"
 
 using namespace Config;
@@ -112,7 +113,7 @@ std::vector<GraphCoordinate>& Solver::dijkstra(
 
     // initialize distances for all vertices (keys) and for all edge targets
     for (std::pair<GraphCoordinate, std::set<Edge>> kv : *adj_list)
-        (*dist)[kv.first] = UBOUND_DIST;
+        (*dist)[kv.first] = UBOUND_DIST * 10;
 
     (*dist)[start] = 0;
     pq.push(std::make_pair(0, start));
@@ -136,8 +137,6 @@ std::vector<GraphCoordinate>& Solver::dijkstra(
             int alt = (*dist)[u] + e.weight;
             if (alt < (*dist)[e.target]) {
                 (*dist)[e.target] = alt;
-                // update predecessor without requiring default-constructible
-                // GraphCoordinate
                 prev->erase(e.target);
                 prev->insert(std::make_pair(e.target, u));
                 pq.push(std::make_pair(alt, e.target));
