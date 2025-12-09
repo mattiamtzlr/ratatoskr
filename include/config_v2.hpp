@@ -15,7 +15,6 @@ const std::vector<Position> END_POINTS = {Position(6, 4)};
 constexpr int CELL_SIZE_MM = 180;
 constexpr int WALL_TO_WALL_MM = 160;
 
-
 /* ================================ movement ================================ */
 constexpr int MIN_TURN_PWM = 180;
 constexpr int MAX_TURN_PWM = 190;
@@ -25,10 +24,9 @@ constexpr float TURN_TRESHOLD = 0.2f;
 constexpr uint8_t FORWARD_PWM = 175;
 constexpr int STOP_DISTANCE = 45;
 
-
 /* =============================== dimensions =============================== */
 constexpr uint8_t WIDTH_MM = 70;
-
+constexpr float DIST_BETWEEN_SENSORS_MM = 53.75f;
 
 /* =============================== motor stuff ============================== */
 constexpr uint8_t GEARING = 30;
@@ -44,7 +42,6 @@ constexpr float ENCODER_COUNTS_PER_MM =
 
 constexpr float PWM_UPDATE_RATIO = .6f;
 constexpr float MAX_PWM_CORRECTION = 30.0f;
-
 
 /* =============================== ToF stuff ================================ */
 constexpr uint8_t TOF_LEFT_ADDRESS = 0x30;
@@ -65,4 +62,6 @@ constexpr int16_t TOF_LEFT_OFFSET_MM = -49;        /* | calibrated in | */
 constexpr int16_t TOF_FRONT_LEFT_OFFSET_MM = -17;  /* | calibration   | */
 constexpr int16_t TOF_FRONT_RIGHT_OFFSET_MM = -59; /* | cage (TM)     | */
 constexpr int16_t TOF_RIGHT_OFFSET_MM = -7;        /* ----------------- */
-}
+/* =============================== Diag stuff =============================== */
+const float MAX_DIST_MM = 100.0f;
+}  // namespace Config

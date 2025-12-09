@@ -34,8 +34,6 @@ void Ratatoskr::moveDiagonal(float distance) {
     long left_encoder_prev = 0;
     long right_encoder_prev = 0;
 
-    const float DIST_BETWEEN_SENSORS = 46.0f;
-    const float MAX_DIST = 100.0f;
     const float threshold = 10.0f;
 
     bool is_end = false;
@@ -69,11 +67,11 @@ void Ratatoskr::moveDiagonal(float distance) {
         uint16_t left_raw = m_tof_front_left.get_reading();
         uint16_t right_raw = m_tof_front_right.get_reading();
 
-        float left_dist = constrain(left_raw, 0, MAX_DIST);
-        float right_dist = constrain(right_raw, 0, MAX_DIST);
+        float left_dist = constrain(left_raw, 0, MAX_DIST_MM);
+        float right_dist = constrain(right_raw, 0, MAX_DIST_MM);
 
         is_end =
-            fabs(left_dist - right_dist) < DIST_BETWEEN_SENSORS - threshold;
+            fabs(left_dist - right_dist) < DIST_BETWEEN_SENSORS_MM - threshold;
 
         /*  ------------------ ERRORS ------------------ */
         float encoder_error = 0.0f - (left_encoder_diff - right_encoder_diff);
