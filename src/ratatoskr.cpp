@@ -181,7 +181,9 @@ void Ratatoskr::moveForward(int distance_cells) {
         moveDiagonal((float)distance_cells);
 }
 
-void Ratatoskr::moveForwardHalf() { moveForward(0.5f); }
+void Ratatoskr::moveForwardHalf(int num_half_steps) {
+    moveForward((float)num_half_steps * 0.5f);
+}
 
 void Ratatoskr::moveForward(float distance_cells) {
     /*  Convert cells to mm and then to encoder counts */
