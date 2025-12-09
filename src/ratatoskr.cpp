@@ -184,7 +184,7 @@ void Ratatoskr::moveForward(int distance_cells) {
 void Ratatoskr::moveForwardHalf() { moveForward(0.5f); }
 
 void Ratatoskr::moveForward(float distance_cells) {
-    /* Convert cells to mm and then to encoder counts */
+    /*  Convert cells to mm and then to encoder counts */
     int distance_mm = distance_cells * CELL_SIZE_MM;
     long target_counts = (long)(distance_mm * ENCODER_COUNTS_PER_MM);
 
@@ -207,21 +207,21 @@ void Ratatoskr::moveForward(float distance_cells) {
     int t_prev = t_now;
     m_gyro.update();
 
-    /* Track whether we had any usable side wall on previous loop */
+    /*  Track whether we had any usable side wall on previous loop */
     bool had_side_wall_prev = false;
 
     long avg_counts = (left_encoder + right_encoder) / 2;
     while (avg_counts < target_counts) {
-        /* ------------------ FRONT STOP ------------------ */
+        /*  ------------------ FRONT STOP ------------------ */
         uint16_t fl = m_tof_front_left.get_reading();
         uint16_t fr = m_tof_front_right.get_reading();
         if (too_close_front(fl, fr)) break;
 
-        /* ------------------ ENCODER PROGRESS ------------------ */
+        /*  ------------------ ENCODER PROGRESS ------------------ */
         int left_encoder_diff = left_encoder - left_encoder_prev;
         int right_encoder_diff = right_encoder - right_encoder_prev;
 
-        /* ------------------ SIDE ToF READING ------------------ */
+        /*  ------------------ SIDE ToF READING ------------------ */
         uint16_t left_raw = m_tof_left.get_reading();
         uint16_t right_raw = m_tof_right.get_reading();
 
@@ -230,38 +230,36 @@ void Ratatoskr::moveForward(float distance_cells) {
 
         bool has_side_wall = left_ok || right_ok;
 
-        /* If we just lost all side walls, reset the side PID */
+        /*  If we just lost all side walls, reset the side PID */
         if (!has_side_wall && had_side_wall_prev) {
             m_pid_tof_sides.reset();
         }
 
-        /* ------------------ ERRORS ------------------ */
+        /*  ------------------ ERRORS ------------------ */
         float encoder_error = 0.0f - (left_encoder_diff - right_encoder_diff);
-
-        right_raw = (right_ok) ? right_raw : TOF_SIDE_EXPECTED_MM;
-        left_raw = (left_ok) ? left_raw : TOF_SIDE_EXPECTED_MM;
-
-        float tof_error = 0.0f - (left_raw - right_raw);
+        float tof_error = 0.0f;
 
         if (has_side_wall) {
             if (left_ok && right_ok) {
-                /* Corridor: center between walls */
+                /*  Corridor: center between walls */
                 tof_error = (float)right_raw - (float)left_raw;
             } else if (right_ok && !left_ok) {
-                /* Only right wall: keep right distance at TOF_SIDE_EXPECTED_MM */
+                /*  Only right wall: keep right distance at TOF_SIDE_EXPECTED_MM
+                 */
                 tof_error = (float)right_raw - (float)TOF_SIDE_EXPECTED_MM;
             } else if (left_ok && !right_ok) {
-                /* Only left wall: keep left distance at TOF_SIDE_EXPECTED_MM */
+                /*  Only left wall: keep left distance at TOF_SIDE_EXPECTED_MM
+                 */
                 tof_error = (float)TOF_SIDE_EXPECTED_MM - (float)left_raw;
             }
         } else {
-            /* No usable side walls -> no side correction */
+            /*  No usable side walls -> no side correction */
             tof_error = 0.0f;
         }
 
-        /* ------------------ TIME STEP ------------------ */
+        /*  ------------------ TIME STEP ------------------ */
         t_now = millis();
-        /* same time scaling as before */
+        /*  same time scaling as before */
         float t_diff = (t_now - t_prev) / 100.0f;
 
         m_gyro.update();
@@ -269,26 +267,29 @@ void Ratatoskr::moveForward(float distance_cells) {
         update_screen(gyro_angle);
         t_prev = t_now;
 
-        /* ------------------ PID UPDATES ------------------ */
+        /*  ------------------ PID UPDATES ------------------ */
         float encoder_correction = m_pid_encoders.update(t_diff, encoder_error);
-        float tof_correction = m_pid_tof_sides.update(t_diff, tof_error);
-
-        float enc_tof_ratio = 0.0f;
-        tof_correction = 0.0f;
+        float tof_correction = 0.0f;
 
         if (has_side_wall) {
-            float enc_tof_ratio = PWM_UPDATE_RATIO;
+            tof_correction = m_pid_tof_sides.update(t_diff, tof_error);
+
+            /*  Clamp side correction so it can't yank PWM too hard */
             tof_correction = constrain(tof_correction, -MAX_PWM_CORRECTION,
                                        +MAX_PWM_CORRECTION);
+            pwm_left = BASE_PWM + PWM_UPDATE_RATIO * tof_correction +
+                       (1 - PWM_UPDATE_RATIO) * encoder_correction;
+            pwm_right = BASE_PWM - PWM_UPDATE_RATIO * tof_correction -
+                        (1 - PWM_UPDATE_RATIO) * encoder_correction;
+        } else {
+            /*  No wall: sides PID output forced to 0 */
+            tof_correction = 0.0f;
+            pwm_left = BASE_PWM + encoder_correction;
+            pwm_right = BASE_PWM - encoder_correction;
         }
 
-        pwm_left = BASE_PWM + enc_tof_ratio * tof_correction +
-                   (1 - enc_tof_ratio) * encoder_correction;
-        pwm_right = BASE_PWM - enc_tof_ratio * tof_correction -
-                    (1 - enc_tof_ratio) * encoder_correction;
-
-        /* ------------------ PWM COMPUTATION ------------------ */
-        /* Encoders are always active; ToF only when a wall exists */
+        /*  ------------------ PWM COMPUTATION ------------------ */
+        /*  Encoders are always active; ToF only when a wall exists */
 
         pwm_left = constrain(pwm_left, 70, 240);
         pwm_right = constrain(pwm_right, 70, 240);
@@ -300,7 +301,7 @@ void Ratatoskr::moveForward(float distance_cells) {
 
         delay(loop_delay_ms);
 
-        /* ------------------ ENCODER PROGRESS ------------------ */
+        /*  ------------------ ENCODER PROGRESS ------------------ */
         left_encoder_prev = left_encoder;
         right_encoder_prev = right_encoder;
 
