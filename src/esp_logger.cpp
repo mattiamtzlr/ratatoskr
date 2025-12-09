@@ -28,7 +28,8 @@ void ESPLogger::force_log(std::string msg) {
 
 void ESPLogger::clear_logs() {
     nvsDB.eraseAll();
-    nvsDB.putPair("0", "1");
+    nvsDB.putPair("0", "2"); // Stores total size of log
+    nvsDB.putPair("1", "0"); // Stores the index of the most recent solution
 }
 
 void ESPLogger::export_logs(void) {
@@ -50,11 +51,24 @@ void ESPLogger::export_logs(void) {
     }
 }
 
-std::string ESPLogger::get_tail() {
+std::string ESPLogger::get_at(int i) {
     char value[80];
     size_t maxSize = sizeof(value);
-    DatabaseError_t err = nvsDB.getValueOf(std::to_string(get_count() - 1).c_str(), value, &maxSize);
+    DatabaseError_t err = nvsDB.getValueOf(std::to_string(i).c_str(), value, &maxSize);
     return std::string(value);
+}
+
+
+std::string ESPLogger::get_tail() {
+    return get_at(get_count() - 1);
+}
+
+std::string ESPLogger::get_prev_sol() {
+    return get_at(atoi(get_at(1).c_str()));
+}
+
+void ESPLogger::clear_sol() {
+    nvsDB.putPair("1", "0");
 }
 
 void ESPLogger::write_solution(const std::vector<Instruction>& instr) {
@@ -81,11 +95,12 @@ void ESPLogger::write_solution(const std::vector<Instruction>& instr) {
                 break;
        }
     }
+    nvsDB.putPair("1", std::to_string(get_count()).c_str());
     force_log(to_write);
 }
 
 bool ESPLogger::retrieve_solution(std::vector<Instruction>& instr) {
-    std::string tail = get_tail();
+    std::string tail = get_prev_sol();
     if (tail.substr(0, 3) == "SOL") {
         for (const char& i : tail.substr(3)) {
             switch (i) {
