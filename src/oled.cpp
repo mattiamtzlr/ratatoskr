@@ -1,4 +1,5 @@
 #include "oled.hpp"
+
 #include "esp_logger.hpp"
 
 using namespace ESPLogger;
@@ -40,8 +41,7 @@ void OLED::set_text_size(TextSize size) { m_oled.setTextSize((int)size); }
 void OLED::update_status_bar(int16_t gyro_angle, uint16_t left_rpm,
                              uint16_t right_rpm) {
     /* write on line 1 on the left */
-    m_oled.setCursor(0,
-                     FONT_HEIGHT * MEDIUM);
+    m_oled.setCursor(0, FONT_HEIGHT * MEDIUM);
     m_oled.printf("%03d", right_rpm);
 
     /* write on line 1 in the middle */
@@ -58,8 +58,7 @@ void OLED::update_status_bar(int16_t gyro_angle, uint16_t left_rpm,
 void OLED::update_ToFs(uint16_t tof_left, uint16_t tof_front_left,
                        uint16_t tof_front_right, uint16_t tof_right) {
     /* write on line 2 on the left */
-    m_oled.setCursor(0,
-                     FONT_HEIGHT * MEDIUM * 2 + 5);
+    m_oled.setCursor(0, FONT_HEIGHT * MEDIUM * 2 + 5);
     m_oled.printf("%03d", tof_right);
 
     /* write on line 2 on the right*/
@@ -73,8 +72,7 @@ void OLED::update_ToFs(uint16_t tof_left, uint16_t tof_front_left,
     m_oled.printf("%03d", tof_front_right);
 
     /* write on line 4 in the middle to the right*/
-    m_oled.setCursor(m_width / 2 + 10,
-                     FONT_HEIGHT * MEDIUM * 4);
+    m_oled.setCursor(m_width / 2 + 10, FONT_HEIGHT * MEDIUM * 4);
     m_oled.printf("%03d", tof_front_left);
 }
 

@@ -1,8 +1,9 @@
 #include "gyro.hpp"
-#include "esp32-hal.h"
-#include "esp_logger.hpp"
 
 #include <math.h>
+
+#include "esp32-hal.h"
+#include "esp_logger.hpp"
 
 using namespace ESPLogger;
 
@@ -22,14 +23,12 @@ float X_OFFSET = 0;
 float Y_OFFSET = 0;
 float Z_OFFSET = 0;
 
-
 std::map<AccelSensitivity, float> rangeToScaleAccel = {
     {ACCEL_RANGE_2G, ACCEL_SCALE_2G},
     {ACCEL_RANGE_4G, ACCEL_SCALE_4G},
     {ACCEL_RANGE_8G, ACCEL_SCALE_8G},
     {ACCEL_RANGE_16G, ACCEL_SCALE_16G},
 };
-
 
 std::map<GyroSensitivity, float> rangeToScaleGyro = {
     {GYRO_RANGE_250_DEG, GYRO_SCALE_250_DEG},
@@ -38,7 +37,6 @@ std::map<GyroSensitivity, float> rangeToScaleGyro = {
     {GYRO_RANGE_2000_DEG, GYRO_SCALE_2000_DEG},
 };
 
-
 MPU6050::MPU6050(uint8_t addr)
     : m_addr(addr),
       m_accelScale(ACCEL_SCALE_16G),
@@ -46,7 +44,6 @@ MPU6050::MPU6050(uint8_t addr)
       m_angle(0),
       m_t_now(micros()),
       m_t_last(micros()) {}
-
 
 bool MPU6050::begin() {
     // Wake up the MPU-6050
@@ -65,7 +62,6 @@ bool MPU6050::begin() {
     return true;
 }
 
-
 void MPU6050::setAccelSensitivity(AccelSensitivity range) {
     m_accelScale = rangeToScaleAccel[range];
     // AFS_SEL are bits 3-4 in ACCEL_CONFIG
@@ -75,13 +71,11 @@ void MPU6050::setAccelSensitivity(AccelSensitivity range) {
     writeByte(MPU6050_REG_ACCEL_CONFIG, cfg);
 }
 
-
 void MPU6050::setGyroSensitivity(GyroSensitivity range) {
     m_gyroScale = rangeToScaleGyro[range];
 
     writeByte(MPU6050_REG_GYRO_CONFIG, range);
 }
-
 
 uint8_t MPU6050::readByte(uint8_t reg) {
     uint8_t data = 0;
@@ -99,7 +93,6 @@ uint8_t MPU6050::readByte(uint8_t reg) {
     return data;
 }
 
-
 void MPU6050::readBytes(uint8_t reg, uint8_t count, uint8_t* dest) {
     Wire.beginTransmission(m_addr);
     Wire.write(reg);
@@ -116,7 +109,6 @@ void MPU6050::readBytes(uint8_t reg, uint8_t count, uint8_t* dest) {
     }
 }
 
-
 void MPU6050::writeByte(uint8_t reg, uint8_t data) {
     Wire.beginTransmission(m_addr);
     Wire.write(reg);
@@ -124,12 +116,10 @@ void MPU6050::writeByte(uint8_t reg, uint8_t data) {
     Wire.endTransmission(true);
 }
 
-
 Vector3D MPU6050::rawToScaled(int16_t x, int16_t y, int16_t z, float scale) {
     Vector3D vec = {(float)x / scale, (float)y / scale, (float)z / scale};
     return vec;
 }
-
 
 Vector3D MPU6050::readRawAccel() {
     // 3 Mesurements of 2 bytes each
@@ -145,7 +135,6 @@ Vector3D MPU6050::readRawAccel() {
     return res;
 }
 
-
 Vector3D MPU6050::readRawGyro() {
     // 3 Mesurements of 2 bytes each
     const int BYTES_TO_READ = 6;
@@ -160,12 +149,10 @@ Vector3D MPU6050::readRawGyro() {
     return res;
 }
 
-
 Vector3D MPU6050::readScaledAccel() {
     Vector3D raw = readRawAccel();
     return rawToScaled(raw.x, raw.y, raw.z, m_accelScale);
 }
-
 
 Vector3D MPU6050::readScaledGyro() {
     Vector3D raw = readRawGyro();
@@ -174,7 +161,6 @@ Vector3D MPU6050::readScaledGyro() {
                                     scaled.z - Z_OFFSET};
     return scaled_and_unbiased;
 }
-
 
 void MPU6050::calibrateGyro() {
     float x_values = 0;
@@ -213,8 +199,10 @@ void MPU6050::calibrateGyro() {
     Y_OFFSET = (float)y_values / (float)count;
     Z_OFFSET = (float)z_values / (float)count;
 
-    log("[MPU6050] Calibration done with " + std::to_string(count) + " samples.");
-    log("Offsets (deg/s) X: " + std::to_string(X_OFFSET) + " Y: " + std::to_string(Y_OFFSET) + " Z: " + std::to_string(Z_OFFSET));
+    log("[MPU6050] Calibration done with " + std::to_string(count) +
+        " samples.");
+    log("Offsets (deg/s) X: " + std::to_string(X_OFFSET) +
+        " Y: " + std::to_string(Y_OFFSET) + " Z: " + std::to_string(Z_OFFSET));
 }
 
 void MPU6050::update() {
@@ -222,13 +210,12 @@ void MPU6050::update() {
     m_t_now = micros();
 }
 
-float MPU6050::get_current_angle() {
-    return m_angle;
-}
+float MPU6050::get_current_angle() { return m_angle; }
 
 float MPU6050::get_next_angle() {
     Vector3D velocities = readScaledGyro();
-    float dt = (float)(m_t_now - m_t_last) * 1e-6f;  // t_now/t_last must be micros()
+    float dt =
+        (float)(m_t_now - m_t_last) * 1e-6f;  // t_now/t_last must be micros()
 
     if (dt <= 0.0f) {
         return m_angle;
@@ -238,4 +225,3 @@ float MPU6050::get_next_angle() {
     m_angle += change;
     return m_angle;
 }
-

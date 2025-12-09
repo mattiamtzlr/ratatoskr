@@ -1,4 +1,5 @@
 #include "gear_motor.hpp"
+
 #include "config.hpp"
 
 using namespace Config;
@@ -10,10 +11,8 @@ void IRAM_ATTR GearMotor::isr_trampoline(void *obj) {
 /*
  * GearMotor class constructor
  */
-GearMotor::GearMotor(int in1, int in2, int ch1, int ch2,
-                     int encoder_pin_1, int encoder_pin_2,
-                     int max_pwm,
-                     int encoder_sign)
+GearMotor::GearMotor(int in1, int in2, int ch1, int ch2, int encoder_pin_1,
+                     int encoder_pin_2, int max_pwm, int encoder_sign)
     : IN1(in1),
       IN2(in2),
       CH1(ch1),
@@ -25,7 +24,6 @@ GearMotor::GearMotor(int in1, int in2, int ch1, int ch2,
       m_t_last_i(0),
       m_max_pwm(max_pwm),
       m_encoder_sign(encoder_sign) {
-
     // Motor pins and PWM setup
     pinMode(IN1, OUTPUT);
     pinMode(IN2, OUTPUT);
@@ -107,26 +105,20 @@ void GearMotor::setSpeed(int speed) {
 /**
  * Spin motor "clockwise" at given (PWM) speed.
  */
-void GearMotor::spin_cw(int speed) {
-    setSpeed(abs(speed));
-}
+void GearMotor::spin_cw(int speed) { setSpeed(abs(speed)); }
 
 /**
  * Spin motor "counter-clockwise" at given (PWM) speed.
  */
-void GearMotor::spin_ccw(int speed) {
-    setSpeed(-abs(speed));
-}
+void GearMotor::spin_ccw(int speed) { setSpeed(-abs(speed)); }
 
 /**
  * Stop motor by coasting (both channels low).
  */
-void GearMotor::coast() {
-    setSpeed(0);
-}
+void GearMotor::coast() { setSpeed(0); }
 
 /**
- * Active brake, (both channels driven HIGH). 
+ * Active brake, (both channels driven HIGH).
  * ! DON'T RUN THIS FOR TOO LONG !
  */
 void GearMotor::brake() {
@@ -137,13 +129,9 @@ void GearMotor::brake() {
 /**
  * Get encoder tick count
  */
-long GearMotor::get_encoder_count() {
-    return m_encoder_count;
-}
+long GearMotor::get_encoder_count() { return m_encoder_count; }
 
 /**
  * Reset encoder tick count
  */
-void GearMotor::reset_encoder_count() {
-    m_encoder_count = 0;
-}
+void GearMotor::reset_encoder_count() { m_encoder_count = 0; }
