@@ -6,7 +6,9 @@
 #include "util.hpp"
 
 namespace Config {
-/* ================================== maze ================================== */
+/* ========================================================================== */
+/* |                                  maze                                  | */
+/* ========================================================================== */
 constexpr int MAZE_WIDTH = 7;
 constexpr int MAZE_HEIGHT = 5;
 
@@ -16,28 +18,31 @@ const std::vector<Position> END_POINTS = {Position(6, 4)};
 constexpr int CELL_SIZE_MM = 180;
 constexpr int WALL_TO_WALL_MM = 160;
 
-
-/* ================================ movement ================================ */
-constexpr int MIN_TURN_PWM = 180;
-constexpr int MAX_TURN_PWM = 190;
+/* ========================================================================== */
+/* |                                movement                                | */
+/* ========================================================================== */
+constexpr int MIN_TURN_PWM = 177;
+constexpr int MAX_TURN_PWM = 187;
 constexpr int TURN_TIME_LIMIT = 1500;
 constexpr float TURN_TRESHOLD = 0.2f;
 
 constexpr uint8_t FORWARD_PWM = 175;
-constexpr int STOP_DISTANCE = 45;
+constexpr int STOP_DISTANCE = 48;
 
-
-/* =============================== dimensions =============================== */
+/* ========================================================================== */
+/* |                               dimensions                               | */
+/* ========================================================================== */
 constexpr uint8_t WIDTH_MM = 70;
 constexpr float DIST_BETWEEN_SENSORS_MM = 53.75f;
 
-
-/* =============================== motor stuff ============================== */
+/* ========================================================================== */
+/* |                               motor stuff                              | */
+/* ========================================================================== */
 constexpr uint8_t GEARING = 30;
 constexpr uint8_t ENCODER_MULTIPLIER = 6;
 
 /* measured by pushing the mouse exactly one cell length */
-constexpr uint16_t ENCODER_COUNTS_PER_CELL = 250;
+constexpr uint16_t ENCODER_COUNTS_PER_CELL = 248;
 
 /*  encoder counts per mm = counts per cell / cell size */
 constexpr float ENCODER_COUNTS_PER_MM =
@@ -47,8 +52,9 @@ constexpr float ENCODER_COUNTS_PER_MM =
 constexpr float PWM_UPDATE_RATIO = .6f;
 constexpr float MAX_PWM_CORRECTION = 30.0f;
 
-
-/* =============================== ToF stuff ================================ */
+/* ========================================================================== */
+/* |                                ToF stuff                               | */
+/* ========================================================================== */
 constexpr uint8_t TOF_LEFT_ADDRESS = 0x30;
 constexpr uint8_t TOF_FRONT_LEFT_ADDRESS = 0x31;
 constexpr uint8_t TOF_FRONT_RIGHT_ADDRESS = 0x32;
@@ -68,7 +74,8 @@ constexpr int16_t TOF_FRONT_LEFT_OFFSET_MM = -17;  /* | calibration   | */
 constexpr int16_t TOF_FRONT_RIGHT_OFFSET_MM = -59; /* | cage (TM)     | */
 constexpr int16_t TOF_RIGHT_OFFSET_MM = -7;        /* ----------------- */
 
-
-/* =============================== Diag stuff =============================== */
+/* ========================================================================== */
+/* |                                diagonals                               | */
+/* ========================================================================== */
 const float MAX_DIST_MM = 100.0f;
-}
+}  // namespace Config

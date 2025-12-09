@@ -2,6 +2,8 @@
 
 #include <Arduino.h>
 
+bool logger_enabled = false;
+
 int ESPLogger::get_count() {
     char value[10];
     size_t maxSize = sizeof(value);
@@ -10,7 +12,7 @@ int ESPLogger::get_count() {
 }
 
 void ESPLogger::log(std::string msg) {
-    if (enabled) {
+    if (logger_enabled) {
         nvsDB.putPair(std::to_string(get_count()).c_str(), msg.c_str());
         int next_count = get_count() + 1;
         nvsDB.putPair("0", std::to_string(next_count).c_str());

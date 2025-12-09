@@ -108,9 +108,7 @@ void API::clearColor(int x, int y) {
     std::cout << "clearColor " << x << " " << y << std::endl;
 }
 
-void API::clearAllColor() {
-    std::cout << "clearAllColor" << std::endl;
-}
+void API::clearAllColor() { std::cout << "clearAllColor" << std::endl; }
 
 void API::setText(int x, int y, const std::string& text) {
     std::cout << "setText " << x << " " << y << " " << text << std::endl;
@@ -120,9 +118,7 @@ void API::clearText(int x, int y) {
     std::cout << "clearText " << x << " " << y << std::endl;
 }
 
-void API::clearAllText() {
-    std::cout << "clearAllText" << std::endl;
-}
+void API::clearAllText() { std::cout << "clearAllText" << std::endl; }
 
 bool API::wasReset() {
     std::cout << "wasReset" << std::endl;

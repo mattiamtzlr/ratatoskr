@@ -1,12 +1,13 @@
 #pragma once
-#include "util.hpp"
 #include <Arduino.h>
 #include <Wire.h>
+
+#include "util.hpp"
 
 // Defalut address for MPU6050
 static constexpr uint8_t MPU6050_ADDRESS = 0x68;
 
-// MPU6050 Registers Addresses 
+// MPU6050 Registers Addresses
 static constexpr uint8_t MPU6050_REG_PWR_MGMT_1 = 0x6B;
 static constexpr uint8_t MPU6050_REG_ACCEL_XOUT_H = 0x3B;
 static constexpr uint8_t MPU6050_REG_GYRO_XOUT_H = 0x43;
@@ -14,9 +15,8 @@ static constexpr uint8_t MPU6050_REG_WHO_AM_I = 0x68;
 static constexpr uint8_t MPU6050_REG_ACCEL_CONFIG = 0x1C;
 static constexpr uint8_t MPU6050_REG_GYRO_CONFIG = 0x1B;
 
-
 // Sensitivity for gyroscope
-enum GyroSensitivity{
+enum GyroSensitivity {
     GYRO_RANGE_250_DEG = 0b00,
     GYRO_RANGE_500_DEG = 0b01,
     GYRO_RANGE_1000_DEG = 0b10,
@@ -31,7 +31,7 @@ enum AccelSensitivity {
     ACCEL_RANGE_16G = 0b11
 };
 
-// Holds 3-axis reading 
+// Holds 3-axis reading
 struct Vector3D {
     float x;
     float y;
@@ -39,9 +39,9 @@ struct Vector3D {
 };
 
 class MPU6050 {
-public:
+   public:
     MPU6050(uint8_t addr = MPU6050_ADDRESS);
-    
+
     // Setup gyroscope and accelerometer
     bool begin();
 
@@ -50,9 +50,9 @@ public:
 
     Vector3D readRawGyro();
     Vector3D readRawAccel();
-    
-    Vector3D readScaledGyro(); // Rerturns deg/s
-    Vector3D readScaledAccel(); // Returns G's
+
+    Vector3D readScaledGyro();   // Rerturns deg/s
+    Vector3D readScaledAccel();  // Returns G's
 
     // Get previous read of gyro angle
     float get_next_angle();
@@ -62,14 +62,14 @@ public:
     // Calc offsets
     void calibrateGyro();
 
-private:
+   private:
     uint8_t m_addr;
     float m_angle;
-    float m_accelScale; // Sensitivity scale factor
-    float m_gyroScale;  // Sensitivity scale factor
+    float m_accelScale;  // Sensitivity scale factor
+    float m_gyroScale;   // Sensitivity scale factor
     unsigned long m_t_now;
     unsigned long m_t_last;
-    
+
     // Low-level helper functions for I2C communication
     void writeByte(uint8_t reg, uint8_t data);
     uint8_t readByte(uint8_t reg);

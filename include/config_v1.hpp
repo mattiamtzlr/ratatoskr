@@ -7,7 +7,9 @@
 #include "util.hpp"
 
 namespace Config {
-/* ================================== maze ================================== */
+/* ========================================================================== */
+/* |                                  maze                                  | */
+/* ========================================================================== */
 constexpr int MAZE_WIDTH = 7;
 constexpr int MAZE_HEIGHT = 5;
 
@@ -17,8 +19,9 @@ const std::vector<Position> END_POINTS = {Position(6, 4)};
 constexpr int CELL_SIZE_MM = 180;
 constexpr int WALL_TO_WALL_MM = 160;
 
-
-/* ================================ movement ================================ */
+/* ========================================================================== */
+/* |                                movement                                | */
+/* ========================================================================== */
 constexpr int MIN_TURN_PWM = 185;
 constexpr int MAX_TURN_PWM = 195;
 constexpr int TURN_TIME_LIMIT = 1500;
@@ -27,14 +30,16 @@ constexpr float TURN_TRESHOLD = 0.2f;
 constexpr u_int8_t FORWARD_PWM = 180;
 constexpr int STOP_DISTANCE = 40;
 
-
-/* =============================== dimensions =============================== */
+/* ========================================================================== */
+/* |                               dimensions                               | */
+/* ========================================================================== */
 constexpr u_int8_t WIDTH_MM = 70;
 constexpr float MM_PER_CELL = 180.0;
 constexpr float DIST_BETWEEN_SENSORS_MM = 46.0f;
 
-
-/* =============================== motor stuff ============================== */
+/* ========================================================================== */
+/* |                               motor stuff                              | */
+/* ========================================================================== */
 /*  one revolution is 31*pi mm = 97.4 mm */
 constexpr u_int8_t WHEEL_DIAMETER_MM = 31;
 
@@ -47,8 +52,9 @@ constexpr float ENCODER_COUNTS_PER_MM = 190.0f / (WHEEL_DIAMETER_MM * M_PI);
 constexpr float PWM_UPDATE_RATIO = .6f;
 constexpr float MAX_PWM_CORRECTION = 30.0f;
 
-
-/* =============================== ToF stuff ================================ */
+/* ========================================================================== */
+/* |                                ToF stuff                               | */
+/* ========================================================================== */
 constexpr uint8_t TOF_LEFT_ADDRESS = 0x30;
 constexpr uint8_t TOF_FRONT_LEFT_ADDRESS = 0x31;
 constexpr uint8_t TOF_FRONT_RIGHT_ADDRESS = 0x32;
@@ -68,7 +74,8 @@ constexpr int16_t TOF_FRONT_LEFT_OFFSET_MM = -18; /*   calibration     */
 constexpr int16_t TOF_FRONT_RIGHT_OFFSET_MM = 2;  /*   cage (TM)       */
 constexpr int16_t TOF_RIGHT_OFFSET_MM = -7;       /* ----------------- */
 
-
-/* =============================== Diag stuff =============================== */
+/* ========================================================================== */
+/* |                                diagonals                               | */
+/* ========================================================================== */
 constexpr float MAX_DIST_MM = 100.0f;
-}
+}  // namespace Config

@@ -23,7 +23,6 @@ Maze maze;
 GearMotor motor_left(MOTOR_L_IN1, MOTOR_L_IN2, ENC_L_OUT1, ENC_L_OUT2, 50);
 GearMotor motor_right(MOTOR_R_IN1, MOTOR_R_IN2, ENC_R_OUT1, ENC_R_OUT2, 50);
 
-
 Ratatoskr rat(motor_left, motor_right, tof_left, tof_left_front,
               tof_right_front, tof_right, gyro);
 // Solver solver(rat, maze);
@@ -121,5 +120,4 @@ void setup() {
     }
 }
 
-void loop() {
-}
+void loop() {}

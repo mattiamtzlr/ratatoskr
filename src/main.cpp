@@ -19,23 +19,19 @@ ToF tof_front_right =
     ToF(FRONT_RIGHT, TOF_FRONT_RIGHT_ADDRESS, TOF_FRONT_RIGHT_XSHUT);
 ToF tof_right = ToF(RIGHT, TOF_RIGHT_ADDRESS, TOF_RIGHT_XSHUT);
 
-
 MPU6050 gyro = MPU6050();
 
 OLED oled = OLED();
 
-
-/* encoder_sign is the last argument (default = 1), determines the direction */
-GearMotor motor_left(MOTOR_L_IN1, MOTOR_L_IN2, 0, 1,  /* PWM channels */
-                     ENC_L_OUT1, ENC_L_OUT2,
-                     255,  /* max PWM */
-                     +1    /* encoder_sign (I tested) */
+/* encoder_sign (default = 1) determines the direction */
+GearMotor motor_left(MOTOR_L_IN1, MOTOR_L_IN2, 0, 1, /* PWM channels */
+                     ENC_L_OUT1, ENC_L_OUT2, 255,    /* max PWM */
+                     +1 /* encoder_sign (I tested) */
 );
 
-GearMotor motor_right(MOTOR_R_IN1, MOTOR_R_IN2, 2, 3,  /* PWM channels */
-                      ENC_R_OUT1, ENC_R_OUT2,
-                      255,  /* max PWM */
-                      -1    /* encoder_sign (I tested) */
+GearMotor motor_right(MOTOR_R_IN1, MOTOR_R_IN2, 2, 3, /* PWM channels */
+                      ENC_R_OUT1, ENC_R_OUT2, 255,    /* max PWM */
+                      -1 /* encoder_sign (I tested) */
 );
 
 Maze maze;
@@ -83,11 +79,11 @@ void setup() {
     switch (mode) {
         case DEBUG: {
             oled.mode = DEBUG;
+            logger_enabled = true;
             /* WARN: no break on purpose cause we want to fall through to RUN */
         }
 
         case RUN: {
-            ESPLogger::enabled = false;
 
             /* push target to maze */
             maze.set_targets(END_POINTS);
@@ -101,7 +97,8 @@ void setup() {
             maze.set_targets(END_POINTS);
             solver.finalize_discovery();
             std::vector<Instruction>* instr = new std::vector<Instruction>;
-            std::vector<GraphCoordinate>* solved = new std::vector<GraphCoordinate>;
+            std::vector<GraphCoordinate>* solved =
+                new std::vector<GraphCoordinate>;
             solver.dijkstra(*solved);
             solver.parse_path(*solved, *instr);
             delete solved;

@@ -13,19 +13,18 @@
 #define SSD1306_NO_SPLASH /* this disables the splash screen */
 
 #define FONT &Font5x7FixedMono
-#define FONT_WIDTH 5 /* set manually */
+#define FONT_WIDTH 5  /* set manually */
 #define FONT_HEIGHT 7 /* set manually */
 
 enum TextSize { SMALL = 1, MEDIUM = 2, LARGE = 3, HUGE = 4 };
-enum Face { HAPPY, NEUTRAL, DIAGONAL, LOOK_LEFT, LOOK_RIGHT};
+enum Face { HAPPY, NEUTRAL, DIAGONAL, LOOK_LEFT, LOOK_RIGHT };
 
 static std::map<Face, const uint8_t*> face_map = {
     {HAPPY, happy_bits},
     {NEUTRAL, neutral_bits},
     {DIAGONAL, diagonal_bits},
     {LOOK_LEFT, look_left_bits},
-    {LOOK_RIGHT, look_right_bits}
-};
+    {LOOK_RIGHT, look_right_bits}};
 
 class OLED {
    private:
@@ -37,6 +36,9 @@ class OLED {
     bool m_frozen = false;
     Adafruit_SSD1306 m_oled =
         Adafruit_SSD1306(m_width, m_height, &Wire, m_reset);
+
+    enum LinePos { LEFT, MID_LEFT, MID, MID_RIGHT, RIGHT };
+    void set_cursor(int line, LinePos pos);
 
    public:
     MODE mode = RUN;

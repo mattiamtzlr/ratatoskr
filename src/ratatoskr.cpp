@@ -68,7 +68,6 @@ void Ratatoskr::moveDiagonal(float distance) {
 
         /*  ------------------ TIME STEP ------------------ */
         t_now = millis();
-        /* same time scaling as before */
         float t_diff = (t_now - t_prev) / 100.0f;
         t_prev = t_now;
 
@@ -83,7 +82,7 @@ void Ratatoskr::moveDiagonal(float distance) {
             pwm_right = BASE_PWM - PWM_UPDATE_RATIO * tof_correction -
                         (1 - PWM_UPDATE_RATIO) * encoder_correction;
         } else {
-            /*  No wall: ToF PID output forced to 0 */
+            /*  No wall -> ToF PID output forced to 0 */
             tof_correction = 0.0f;
             pwm_left = BASE_PWM + encoder_correction;
             pwm_right = BASE_PWM - encoder_correction;
@@ -139,8 +138,7 @@ void Ratatoskr::turn(int angle) {
         float abs_err = fabs(err);
 
         if (abs_err <= TURN_TRESHOLD) {
-            /*  Inside band: stop and shrink speed so next corrections are
-             * softer */
+            /* Inside band: stop and shrink speed so next corrections are softer */
             coast();
             delay(1);
             if (turn_speed > MIN_TURN_PWM) {
@@ -165,9 +163,8 @@ void Ratatoskr::turn(int angle) {
 }
 
 bool Ratatoskr::too_close_front(uint16_t fl, uint16_t fr) {
-    bool res =
-        (fl != 0) && (fr != 0) && (fl < STOP_DISTANCE && fr < STOP_DISTANCE);
-    /*  log("Too close?" + res ? " YES" : " NO"); */
+    bool res = (fl != 0) && (fr != 0)
+        && (fl < STOP_DISTANCE && fr < STOP_DISTANCE);
     return res;
 }
 
@@ -261,7 +258,6 @@ void Ratatoskr::moveForward(float distance_cells) {
 
         /*  ------------------ TIME STEP ------------------ */
         t_now = millis();
-        /*  same time scaling as before */
         float t_diff = (t_now - t_prev) / 100.0f;
 
         m_gyro.update();
@@ -349,7 +345,7 @@ void Ratatoskr::moveStraightMM(float mm) {
         float t_diff = (t_now - t_prev) / 100.0f;
         t_prev = t_now;
 
-        /* Encoder PID (same sign convention as moveForward) */
+        /* Same sign convention as moveForward */
         float encoder_error = 0.0f - (left_encoder_diff - right_encoder_diff);
         float encoder_correction = pid_encoders.update(t_diff, encoder_error);
 
@@ -362,7 +358,6 @@ void Ratatoskr::moveStraightMM(float mm) {
         pwm_left = constrain(pwm_left, 70, 240);
         pwm_right = constrain(pwm_right, 70, 240);
 
-        /* Apply direction (forward/backward) but keep same differential */
         if (dir > 0) {
             /* forward */
             m_motor_left.spin_cw(pwm_left);

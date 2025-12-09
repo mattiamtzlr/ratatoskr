@@ -53,7 +53,6 @@ struct Position {
     int y;
     Position(size_t x, size_t y) : x(x), y(y) {};
     Position() : x(0), y(0) {};
-
 };
 
 bool operator<(const Position& lhs, const Position& rhs);

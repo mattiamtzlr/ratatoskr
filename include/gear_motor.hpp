@@ -3,10 +3,10 @@
 #include <Arduino.h>
 
 constexpr int MOTOR_FREQ = 20000;  // 20 kHz
-constexpr int MOTOR_RES  = 8;      // 8-bit resolution
+constexpr int MOTOR_RES = 8;       // 8-bit resolution
 
 class GearMotor {
-public:
+   public:
     // Trampoline used to attach the encoder ISR with a void* argument
     static void IRAM_ATTR isr_trampoline(void *obj);
 
@@ -20,10 +20,8 @@ public:
      * max_pwm        : maximum PWM value (e.g. 255 for 8-bit), brake uses this
      * encoder_sign   : +1 or -1 to match physical encoder direction
      */
-    GearMotor(int in1, int in2, int ch1, int ch2,
-              int encoder_pin_1, int encoder_pin_2,
-              int max_pwm = 255,
-              int encoder_sign = 1);
+    GearMotor(int in1, int in2, int ch1, int ch2, int encoder_pin_1,
+              int encoder_pin_2, int max_pwm = 255, int encoder_sign = 1);
 
     // --- Motion control (Motors-style API for a single motor) ---
 
@@ -61,7 +59,7 @@ public:
     /// Accessor for configured max PWM
     int16_t maxPwm() const { return m_max_pwm; }
 
-private:
+   private:
     // H-bridge pins and PWM channels
     const int IN1;
     const int IN2;
@@ -73,7 +71,7 @@ private:
     const int ENCODER_PIN_2;  // channel B
 
     // Encoder state
-    volatile long     m_encoder_count;
+    volatile long m_encoder_count;
     volatile uint32_t m_delta_time;  // time between encoder pulses (µs)
     volatile uint32_t m_t_last_i;    // last interrupt timestamp (µs)
 

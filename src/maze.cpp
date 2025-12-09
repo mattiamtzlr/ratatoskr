@@ -56,12 +56,11 @@ void Maze::set_targets(const std::vector<Position>& targets) {
     m_targets = targets;
 }
 
-const std::vector<Position>& Maze::get_targets() const {
-    return m_targets;
-}
+const std::vector<Position>& Maze::get_targets() const { return m_targets; }
 
 bool Maze::at_target(Position pos) {
-    return std::find(m_targets.begin(), m_targets.end(), pos) != m_targets.end();
+    return std::find(m_targets.begin(), m_targets.end(), pos) !=
+           m_targets.end();
 }
 
 void Maze::set_distance(Position pos, int value) {
