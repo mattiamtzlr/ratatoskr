@@ -2,6 +2,7 @@
 #include <string>
 
 #include "NVSDatabase.hpp"
+#include "util.hpp"
 
 static NVSDatabase nvsDB("logs");
 
@@ -13,5 +14,7 @@ void clear_logs();
 void log(std::string msg);
 void force_log(std::string msg);
 void export_logs(void);
-};  // namespace ESPLogger
 std::string get_tail();
+void write_solution(const std::vector<Instruction>& instr);
+bool retrieve_solution(std::vector<Instruction>& instr);
+};
