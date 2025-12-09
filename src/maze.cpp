@@ -1,14 +1,11 @@
 #include "maze.hpp"
-#include "config.hpp"
 
 #include <algorithm>
 #include <cmath>
 #include <iostream>
 #include <map>
 
-const int MOVE_COST = 2;
-const int HALF_MOVE_COST = 1;
-const int TURN_COST = 10;
+#include "config.hpp"
 
 using namespace Config;
 
@@ -128,8 +125,8 @@ std::map<GraphCoordinate, std::set<Edge>>& Maze::get_adj_list(
             GraphCoordinate diag_neighbor = get_diag_neighbor(node, d);
             if (std::find((*halfway_nodes).begin(), (*halfway_nodes).end(),
                           diag_neighbor) != (*halfway_nodes).end()) {
-                Edge e = {diag_neighbor, HALF_MOVE_COST};
-                Edge e_back = {node, HALF_MOVE_COST};
+                Edge e = {diag_neighbor, DIAG_HALF_MOVE_COST};
+                Edge e_back = {node, DIAG_HALF_MOVE_COST};
 
                 adj_list[node].insert(e);
                 adj_list[diag_neighbor].insert(e_back);

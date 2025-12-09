@@ -9,6 +9,10 @@
 #include "config.hpp"
 #include "util.hpp"
 
+constexpr int MOVE_COST = 10;
+constexpr int HALF_MOVE_COST = 5;
+constexpr int DIAG_HALF_MOVE_COST = 7;
+
 struct Edge {
     GraphCoordinate target;
     unsigned int weight;
