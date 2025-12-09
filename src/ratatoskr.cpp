@@ -19,7 +19,7 @@ Ratatoskr::Ratatoskr(GearMotor &motor_left, GearMotor &motor_right,
 
 /* ============================[ MOVEMENT ]================================== */
 
-void Ratatoskr::moveDiagonal(int distance) {
+void Ratatoskr::moveDiagonal(float distance) {
     /*  Convert cells to mm and then to encoder counts */
     int distance_mm = distance * CELL_SIZE_MM * sqrt(2);
     long target_counts = (long)(distance_mm * ENCODER_COUNTS_PER_MM);
@@ -190,7 +190,11 @@ bool Ratatoskr::too_close_front(uint16_t fl, uint16_t fr) {
 /*  => ideal sensor–wall distance when centered = 80 - 30 = 50 mm */
 void Ratatoskr::moveForward(int distance_cells) {
     Mouse::moveForward(distance_cells);
-    moveForward((float)distance_cells);
+    Direction d = Mouse::getDirection();
+    if (d == NORTH || d == EAST || d == SOUTH || d == WEST)
+        moveForward((float)distance_cells);
+    else
+        moveDiagonal((float)distance_cells);
 }
 
 void Ratatoskr::moveForwardHalf() { moveForward(0.5f); }

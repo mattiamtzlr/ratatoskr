@@ -43,13 +43,13 @@ class Ratatoskr : public Mouse {
     /**
      * move @distance cells forward diagonally with PID control
      */
-    void moveDiagonal(int distance = 1);
+    void moveDiagonal(float distance);
 
     /**
      * move @distance cells forward with PID control
      */
     virtual void moveForward(int distance = 1);
-    void moveForward(float distance = 0.5f);
+    void moveForward(float distance);
     void moveForwardHalf();
 
     /**
