@@ -201,6 +201,7 @@ void Ratatoskr::moveForward(float distance_cells) {
     long target_counts = (long)(distance_mm * ENCODER_COUNTS_PER_MM);
 
     int BASE_PWM = FORWARD_PWM + FORWARD_FAST_PWM_CHUNK * (distance_cells - 1);
+    if (BASE_PWM > FORWARD_FAST_PWM_MAX) BASE_PWM = FORWARD_FAST_PWM_MAX;
 
     m_motor_left.reset_encoder_count();
     m_motor_right.reset_encoder_count();
