@@ -21,13 +21,13 @@ constexpr int WALL_TO_WALL_MM = 160;
 /* ========================================================================== */
 /* |                                movement                                | */
 /* ========================================================================== */
-constexpr int MIN_TURN_PWM = 175;
+constexpr int MIN_TURN_PWM = 177;
 constexpr int MAX_TURN_PWM = 187;
 constexpr int TURN_TIME_LIMIT = 1500;
 constexpr float TURN_TRESHOLD = 0.2f;
 
 constexpr uint8_t FORWARD_PWM = 175;
-constexpr int STOP_DISTANCE = 45;
+constexpr int STOP_DISTANCE = 48;
 
 /* ========================================================================== */
 /* |                               dimensions                               | */
@@ -42,7 +42,7 @@ constexpr uint8_t GEARING = 30;
 constexpr uint8_t ENCODER_MULTIPLIER = 6;
 
 /* measured by pushing the mouse exactly one cell length */
-constexpr uint16_t ENCODER_COUNTS_PER_CELL = 250;
+constexpr uint16_t ENCODER_COUNTS_PER_CELL = 248;
 
 /*  encoder counts per mm = counts per cell / cell size */
 constexpr float ENCODER_COUNTS_PER_MM =
