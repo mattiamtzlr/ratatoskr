@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstdint>
 #include <vector>
 
 #include "util.hpp"
@@ -28,6 +29,7 @@ constexpr int STOP_DISTANCE = 45;
 
 /* =============================== dimensions =============================== */
 constexpr uint8_t WIDTH_MM = 70;
+constexpr float DIST_BETWEEN_SENSORS_MM = 53.75f;
 
 
 /* =============================== motor stuff ============================== */
@@ -65,4 +67,8 @@ constexpr int16_t TOF_LEFT_OFFSET_MM = -49;        /* | calibrated in | */
 constexpr int16_t TOF_FRONT_LEFT_OFFSET_MM = -17;  /* | calibration   | */
 constexpr int16_t TOF_FRONT_RIGHT_OFFSET_MM = -59; /* | cage (TM)     | */
 constexpr int16_t TOF_RIGHT_OFFSET_MM = -7;        /* ----------------- */
+
+
+/* =============================== Diag stuff =============================== */
+const float MAX_DIST_MM = 100.0f;
 }

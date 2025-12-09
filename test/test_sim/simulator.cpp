@@ -2,22 +2,24 @@
 #include <vector>
 
 #include "API.hpp"
+#include "config.hpp"
 #include "solver.hpp"
 #include "virtual_mouse.hpp"
+
+using namespace Config;
 
 int main(int argc, char* argv[]) {
     VirtualMouse mouse;
     Maze maze;
     Solver solver(mouse, maze);
-    std::vector sim_center = std::vector{Position(7,7), Position(7,8), Position(8,7), Position(8,8)};
-    maze.set_targets(sim_center);
+    maze.set_targets(END_POINTS);
 
     solver.solve();  // Run from start to target
 
-    maze.set_targets(std::vector{Position(0,0)});
+    maze.set_targets(START_POINTS);
     solver.solve();  // Run from target to start
 
-    maze.set_targets(sim_center);
+    maze.set_targets(END_POINTS);
     solver.finalize_discovery();
     /*
     std::map<GraphCoordinate, std::set<Edge>> adj = maze.get_adj_list();

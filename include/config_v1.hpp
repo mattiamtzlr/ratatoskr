@@ -1,7 +1,8 @@
 #pragma once
 
-#include <vector>
 #include <cmath>
+#include <cstdint>
+#include <vector>
 
 #include "util.hpp"
 
@@ -30,6 +31,7 @@ constexpr int STOP_DISTANCE = 40;
 /* =============================== dimensions =============================== */
 constexpr u_int8_t WIDTH_MM = 70;
 constexpr float MM_PER_CELL = 180.0;
+constexpr float DIST_BETWEEN_SENSORS_MM = 46.0f;
 
 
 /* =============================== motor stuff ============================== */
@@ -40,8 +42,7 @@ constexpr uint8_t GEARING = 30;
 constexpr uint8_t ENCODER_MULTIPLIER = 6;
 
 /*  So encooder counts per mm = counts per rev / (WHEEL_DIAMETER_MM * pi) */
-constexpr float ENCODER_COUNTS_PER_MM =
-    190.0f / (WHEEL_DIAMETER_MM * M_PI);
+constexpr float ENCODER_COUNTS_PER_MM = 190.0f / (WHEEL_DIAMETER_MM * M_PI);
 
 constexpr float PWM_UPDATE_RATIO = .6f;
 constexpr float MAX_PWM_CORRECTION = 30.0f;
@@ -66,4 +67,8 @@ constexpr int16_t TOF_LEFT_OFFSET_MM = -33;       /*   calibrated in   */
 constexpr int16_t TOF_FRONT_LEFT_OFFSET_MM = -18; /*   calibration     */
 constexpr int16_t TOF_FRONT_RIGHT_OFFSET_MM = 2;  /*   cage (TM)       */
 constexpr int16_t TOF_RIGHT_OFFSET_MM = -7;       /* ----------------- */
+
+
+/* =============================== Diag stuff =============================== */
+constexpr float MAX_DIST_MM = 100.0f;
 }
