@@ -135,7 +135,7 @@ void Ratatoskr::turn(int angle) {
     float target = start_angle + angle;
 
     /*  Initial turn speed */
-    int turn_speed = ((MIN_TURN_PWM + MAX_TURN_PWM) / 2) * 90 / abs(angle);
+    int turn_speed = MIN_TURN_PWM;
     turn_speed = constrain(turn_speed, MIN_TURN_PWM, MAX_TURN_PWM);
 
     while (millis() - t_start < TURN_TIME_LIMIT * (abs(angle) / 180.0f)) {
@@ -147,7 +147,8 @@ void Ratatoskr::turn(int angle) {
         float abs_err = fabs(err);
 
         if (abs_err <= TURN_TRESHOLD) {
-            /* Inside band: stop and shrink speed so next corrections are softer */
+            /* Inside band: stop and shrink speed so next corrections are softer
+             */
             coast();
             delay(1);
             if (turn_speed > MIN_TURN_PWM) {
@@ -172,8 +173,8 @@ void Ratatoskr::turn(int angle) {
 }
 
 bool Ratatoskr::too_close_front(uint16_t fl, uint16_t fr) {
-    bool res = (fl != 0) && (fr != 0)
-        && (fl < STOP_DISTANCE && fr < STOP_DISTANCE);
+    bool res =
+        (fl != 0) && (fr != 0) && (fl < STOP_DISTANCE && fr < STOP_DISTANCE);
     return res;
 }
 
@@ -196,7 +197,7 @@ void Ratatoskr::moveForward(float distance_cells) {
     int distance_mm = distance_cells * CELL_SIZE_MM;
     long target_counts = (long)(distance_mm * ENCODER_COUNTS_PER_MM);
 
-    const int BASE_PWM = FORWARD_PWM;
+    int BASE_PWM = FORWARD_PWM + FORWARD_FAST_PWM_CHUNK * (distance_cells - 1);
 
     m_motor_left.reset_encoder_count();
     m_motor_right.reset_encoder_count();
@@ -220,6 +221,8 @@ void Ratatoskr::moveForward(float distance_cells) {
 
     long avg_counts = (left_encoder + right_encoder) / 2;
     while (avg_counts < target_counts) {
+        if (avg_counts > target_counts * (distance_cells - 1) / distance_cells)
+            BASE_PWM = FORWARD_PWM;
         /*  ------------------ FRONT STOP ------------------ */
         uint16_t fl = m_tof_front_left.get_reading();
         uint16_t fr = m_tof_front_right.get_reading();

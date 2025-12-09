@@ -22,12 +22,14 @@ constexpr int WALL_TO_WALL_MM = 160;
 /* ========================================================================== */
 /* |                                movement                                | */
 /* ========================================================================== */
-constexpr int MIN_TURN_PWM = 185;
-constexpr int MAX_TURN_PWM = 195;
+constexpr int MIN_TURN_PWM = 180;
+constexpr int MAX_TURN_PWM = 180;
 constexpr int TURN_TIME_LIMIT = 1500;
 constexpr float TURN_TRESHOLD = 0.2f;
 
-constexpr u_int8_t FORWARD_PWM = 180;
+constexpr uint8_t FORWARD_PWM = 180;
+constexpr uint8_t FORWARD_FAST_PWM_CHUNK = 10;
+constexpr uint8_t FORWARD_FAST_PWM_MAX = 240;
 constexpr int STOP_DISTANCE = 40;
 
 /* ========================================================================== */
