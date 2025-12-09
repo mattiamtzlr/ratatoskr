@@ -102,6 +102,7 @@ void setup() {
                 solver.dijkstra(*solved);
                 solver.parse_path(*solved, *instr);
                 delete solved;
+                ESPLogger::write_solution(*instr);
             }
             solver.run(*instr);
             ESPLogger::force_log("SUCCESS");
