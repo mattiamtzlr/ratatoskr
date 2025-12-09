@@ -46,8 +46,11 @@ void Ratatoskr::moveDiagonal(float distance) {
     int t_prev = t_now;
 
     long avg_counts = (left_encoder + right_encoder) / 2;
+    m_gyro.update();
 
     while (avg_counts < target_counts) {
+        m_gyro.update();
+        m_gyro.get_next_angle();
         /*  ------------------ FRONT STOP ------------------ */
         uint16_t fl = m_tof_front_left.get_reading();
         uint16_t fr = m_tof_front_right.get_reading();
@@ -348,7 +351,10 @@ void Ratatoskr::moveStraightMM(float mm) {
     PID pid_encoders(0.75, 0.8, 0.1);
     long avg_counts = (labs(left_encoder) + labs(right_encoder)) / 2;
 
+    m_gyro.update();
     while (avg_counts < target_counts) {
+        m_gyro.update();
+        m_gyro.get_next_angle();
         int left_encoder_diff = left_encoder - left_encoder_prev;
         int right_encoder_diff = right_encoder - right_encoder_prev;
 
