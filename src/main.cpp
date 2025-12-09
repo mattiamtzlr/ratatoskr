@@ -104,6 +104,7 @@ void setup() {
                 delete solved;
             }
             solver.run(*instr);
+            ESPLogger::force_log("SUCCESS");
             delete instr;
             break;
         }

@@ -87,7 +87,7 @@ void ESPLogger::write_solution(const std::vector<Instruction>& instr) {
 bool ESPLogger::retrieve_solution(std::vector<Instruction>& instr) {
     std::string tail = get_tail();
     if (tail.substr(0, 3) == "SOL") {
-        for (const char& i : tail) {
+        for (const char& i : tail.substr(3)) {
             switch (i) {
                 case('F'):
                     instr.push_back(MOVE_FORWARD);
