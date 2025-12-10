@@ -9,11 +9,11 @@ namespace Config {
 /* ========================================================================== */
 /* |                                  maze                                  | */
 /* ========================================================================== */
-constexpr int MAZE_WIDTH = 7;
+constexpr int MAZE_WIDTH = 5;
 constexpr int MAZE_HEIGHT = 5;
 
 const std::vector<Position> START_POINTS = {Position(0, 0)};
-const std::vector<Position> END_POINTS = {Position(6, 4)};
+const std::vector<Position> END_POINTS = {Position(2, 2)};
 
 constexpr int CELL_SIZE_MM = 180;
 constexpr int WALL_TO_WALL_MM = 160;
@@ -21,10 +21,10 @@ constexpr int WALL_TO_WALL_MM = 160;
 /* ========================================================================== */
 /* |                                movement                                | */
 /* ========================================================================== */
-constexpr int MIN_TURN_PWM = 180;
-constexpr int MAX_TURN_PWM = 180;
+constexpr int MIN_TURN_PWM = 184;
+constexpr int MAX_TURN_PWM = 184;
 constexpr int TURN_TIME_LIMIT = 1500;
-constexpr float TURN_TRESHOLD = 0.2f;
+constexpr float TURN_TRESHOLD = 5.f;
 
 constexpr uint8_t FORWARD_PWM = 175;
 constexpr uint8_t FORWARD_FAST_PWM_CHUNK = 10;

@@ -136,11 +136,15 @@ void Ratatoskr::turn(int angle) {
     /*  Read current heading and define absolute target */
     float start_angle = m_gyro.get_current_angle();
     float target = start_angle + angle;
-
+    
     /*  Initial turn speed */
     int turn_speed = MIN_TURN_PWM;
-    turn_speed = constrain(turn_speed, MIN_TURN_PWM, MAX_TURN_PWM);
-
+    if (angle < 60) {
+        turn_speed -= 5;
+    }
+    
+    // turn_speed = constrain(turn_speed, MIN_TURN_PWM, MAX_TURN_PWM);
+    
     while (millis() - t_start < TURN_TIME_LIMIT * (abs(angle) / 180.0f)) {
         m_gyro.update();
         float yaw = m_gyro.get_next_angle();
@@ -160,14 +164,14 @@ void Ratatoskr::turn(int angle) {
             }
         } else {
             /*  Outside band: correct direction based on sign of error */
-            int pwm = constrain(turn_speed, MIN_TURN_PWM, MAX_TURN_PWM);
+            // int pwm = constrain(turn_speed, MIN_TURN_PWM, MAX_TURN_PWM);
 
             if (err > 0) { /*  need to increase angle (CCW) */
-                m_motor_left.spin_ccw(pwm);
-                m_motor_right.spin_ccw(pwm);
+                m_motor_left.spin_ccw(turn_speed);
+                m_motor_right.spin_ccw(turn_speed);
             } else { /*  err < 0, need to decrease angle (CW) */
-                m_motor_left.spin_cw(pwm);
-                m_motor_right.spin_cw(pwm);
+                m_motor_left.spin_cw(turn_speed);
+                m_motor_right.spin_cw(turn_speed);
             }
         }
     }
@@ -225,7 +229,7 @@ void Ratatoskr::moveForward(float distance_cells) {
 
     long avg_counts = (left_encoder + right_encoder) / 2;
     while (avg_counts < target_counts) {
-        if (avg_counts > target_counts * (distance_cells - 1) / distance_cells)
+        if (avg_counts > target_counts * (distance_cells - 2) / distance_cells)
             BASE_PWM = FORWARD_PWM;
         /*  ------------------ FRONT STOP ------------------ */
         uint16_t fl = m_tof_front_left.get_reading();
