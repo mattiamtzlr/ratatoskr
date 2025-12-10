@@ -19,7 +19,7 @@ components and the general layout of the software.
 We also used parts of their maze for convenience and to save on resources and waste, as remaking these would
 include a lot of material and time. More about this in the maze section.  
 
-<img style="float:right" src="./img/ratatoskr.png" height="150">
+<img align="right" src="./img/ratatoskr.png" height="150">
 Finally, the name 'Ratatoskr' comes from Norse mythology and refers to a squirrel which runs through the world-tree
 Yggdrasil, carrying messages. We found this name to be quite fitting for our project, as Ratatoskr is one of the only
 creatures capable of traversing the complicated insides of Yggdrasil.  
