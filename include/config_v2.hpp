@@ -24,13 +24,13 @@ constexpr int WALL_TO_WALL_MM = 160;
 constexpr int MIN_TURN_PWM = 184;
 constexpr int MAX_TURN_PWM = 184;
 constexpr int TURN_TIME_LIMIT = 1500;
-constexpr float TURN_TRESHOLD = 5.f;
+constexpr float TURN_TRESHOLD = 3.f;
 
-constexpr uint8_t FORWARD_PWM = 175;
+constexpr uint8_t FORWARD_PWM = 180;
 constexpr uint8_t FORWARD_FAST_PWM_CHUNK = 10;
 constexpr uint8_t FORWARD_FAST_PWM_MAX = 240;
+constexpr float FORWARD_OVERSHOOT_SLOPE = 0.02f;
 constexpr int STOP_DISTANCE = 48;
-
 /* ========================================================================== */
 /* |                               dimensions                               | */
 /* ========================================================================== */

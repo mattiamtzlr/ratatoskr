@@ -112,6 +112,7 @@ void Ratatoskr::moveDiagonal(float distance) {
         avg_counts = (left_encoder + right_encoder) / 2;
     }
     safe_stop();
+    delay(1000);
 }
 
 void Ratatoskr::turn(int angle) {
@@ -139,7 +140,7 @@ void Ratatoskr::turn(int angle) {
     
     /*  Initial turn speed */
     int turn_speed = MIN_TURN_PWM;
-    if (angle < 60) {
+    if (angle < 60 && angle > -60) {
         turn_speed -= 5;
     }
     
@@ -176,7 +177,8 @@ void Ratatoskr::turn(int angle) {
         }
     }
     safe_stop();
-    moveStraightMM(-5);
+    // if (!(angle < 90 && angle > -90)) // if small turn, no need to move backward
+    // moveStraightMM(-5);
 }
 
 bool Ratatoskr::too_close_front(uint16_t fl, uint16_t fr) {
@@ -196,13 +198,26 @@ void Ratatoskr::moveForward(int distance_cells) {
 }
 
 void Ratatoskr::moveForwardHalf(int num_half_steps) {
+    delay(1000);
     moveForward((float)num_half_steps * 0.5f);
 }
 
 void Ratatoskr::moveForward(float distance_cells) {
-    /*  Convert cells to mm and then to encoder counts */
+    /*  Convert cells to mm */
     int distance_mm = distance_cells * CELL_SIZE_MM;
-    long target_counts = (long)(distance_mm * ENCODER_COUNTS_PER_MM);
+
+    /*  Overshoot factor grows with requested distance.
+     *  For 1 cell: factor = 1.0
+     *  For N cells: factor = 1 + FORWARD_OVERSHOOT_SLOPE * (N - 1)
+     */
+    float overshoot_factor = 1.0f;
+    if (distance_cells > 1.0f) {
+        overshoot_factor += FORWARD_OVERSHOOT_SLOPE * (distance_cells - 1.0f);
+    }
+
+    /*  Convert to encoder counts, including overshoot */
+    long target_counts = (long)(distance_mm * ENCODER_COUNTS_PER_MM *
+                                overshoot_factor);
 
     int BASE_PWM = FORWARD_PWM + FORWARD_FAST_PWM_CHUNK * (distance_cells - 1);
     if (BASE_PWM > FORWARD_FAST_PWM_MAX) BASE_PWM = FORWARD_FAST_PWM_MAX;
@@ -229,8 +244,18 @@ void Ratatoskr::moveForward(float distance_cells) {
 
     long avg_counts = (left_encoder + right_encoder) / 2;
     while (avg_counts < target_counts) {
-        if (avg_counts > target_counts * (distance_cells - 2) / distance_cells)
+        // Go slow for first cell to correct bad turns
+        // Only reduce speed when we're close to the target
+        if ((avg_counts > target_counts * (distance_cells - 2) / distance_cells) ||
+            avg_counts < target_counts * 1 / distance_cells)
             BASE_PWM = FORWARD_PWM;
+        else {
+            BASE_PWM =
+                FORWARD_PWM + FORWARD_FAST_PWM_CHUNK * (distance_cells - 1);
+            if (BASE_PWM > FORWARD_FAST_PWM_MAX)
+                BASE_PWM = FORWARD_FAST_PWM_MAX;
+        }
+
         /*  ------------------ FRONT STOP ------------------ */
         uint16_t fl = m_tof_front_left.get_reading();
         uint16_t fr = m_tof_front_right.get_reading();
@@ -263,12 +288,10 @@ void Ratatoskr::moveForward(float distance_cells) {
                 /*  Corridor: center between walls */
                 tof_error = (float)right_raw - (float)left_raw;
             } else if (right_ok && !left_ok) {
-                /*  Only right wall: keep right distance at TOF_SIDE_EXPECTED_MM
-                 */
+                /*  Only right wall: keep right distance at TOF_SIDE_EXPECTED_MM */
                 tof_error = (float)right_raw - (float)TOF_SIDE_EXPECTED_MM;
             } else if (left_ok && !right_ok) {
-                /*  Only left wall: keep left distance at TOF_SIDE_EXPECTED_MM
-                 */
+                /*  Only left wall: keep left distance at TOF_SIDE_EXPECTED_MM */
                 tof_error = (float)TOF_SIDE_EXPECTED_MM - (float)left_raw;
             }
         } else {
@@ -307,8 +330,6 @@ void Ratatoskr::moveForward(float distance_cells) {
         }
 
         /*  ------------------ PWM COMPUTATION ------------------ */
-        /*  Encoders are always active; ToF only when a wall exists */
-
         pwm_left = constrain(pwm_left, 70, 240);
         pwm_right = constrain(pwm_right, 70, 240);
 
@@ -329,6 +350,7 @@ void Ratatoskr::moveForward(float distance_cells) {
         avg_counts = (left_encoder + right_encoder) / 2;
     }
     safe_stop();
+    delay(1000);
 }
 
 void Ratatoskr::moveStraightMM(float mm) {
@@ -402,6 +424,7 @@ void Ratatoskr::moveStraightMM(float mm) {
         avg_counts = (labs(left_encoder) + labs(right_encoder)) / 2;
     }
     safe_stop();
+    delay(500);
 }
 
 /**
@@ -422,7 +445,7 @@ void Ratatoskr::safe_stop() {
     coast();
     delay(1);
     stop();
-    delay(1);
+    delay(2);
     coast();
 }
 
