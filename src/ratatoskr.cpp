@@ -112,7 +112,6 @@ void Ratatoskr::moveDiagonal(float distance) {
         avg_counts = (left_encoder + right_encoder) / 2;
     }
     safe_stop();
-    delay(1000);
 }
 
 void Ratatoskr::turn(int angle) {
@@ -350,7 +349,6 @@ void Ratatoskr::moveForward(float distance_cells) {
         avg_counts = (left_encoder + right_encoder) / 2;
     }
     safe_stop();
-    delay(1000);
 }
 
 void Ratatoskr::moveStraightMM(float mm) {
@@ -424,7 +422,6 @@ void Ratatoskr::moveStraightMM(float mm) {
         avg_counts = (labs(left_encoder) + labs(right_encoder)) / 2;
     }
     safe_stop();
-    delay(500);
 }
 
 /**
