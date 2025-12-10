@@ -1,4 +1,32 @@
-# CS-358a Project: Ratatoskr Micromouse
+# CS-358a Project: Ratatoskr (Micromouse)
+Leoluca Bernardi, Leonardo Bolognese, Ali Gorgani, Mattia Metzler, Anthony Tamberg
+
+_sick animation here_  
+_image of finished v1 and v2 mice next to each other here_  
+
+## Introduction
+Ratatoskr is a small autonomous robot, called a 'micromouse' which can find the fastest path through a maze.
+In two separate `search` and `run` phases, the mouse first finds the most optimal path and then traverses it,
+trying to accomplish both in the shortest possible time. In this project we designed a compact micromouse capable
+of traversing a maze smoothly and precisely. Additionally we optimised the final `run` phase such that the mouse
+can take diagonal paths if it is more efficient.
+
+### Inspiration and References
+This project is inspired by the micromice of a previous iteration of the course, namely
+[MinosMouse](https://github.com/epfl-cs358/2024fa-minosmouse) and
+[PicoMouse](https://github.com/epfl-cs358/2024fa-picomouse). We used their projects to get an idea of the needed
+components and the general layout of the software.  
+We also used parts of their maze for convenience and to save on resources and waste, as remaking these would
+include a lot of material and time. More about this in the maze section.  
+
+<img style="float:right" src="./img/ratatoskr.png" height="150">
+Finally, the name 'Ratatoskr' comes from Norse mythology and refers to a squirrel which runs through the world-tree
+Yggdrasil, carrying messages. We found this name to be quite fitting for our project, as Ratatoskr is one of the only
+creatures capable of traversing the complicated insides of Yggdrasil.  
+For your enjoyment, here's an image from a 17<sup>th</sup> icelandic manuscript depicting Ratatoskr, taken from Wikipedia (public domain).
+
+
+# ↓ OLD VERSION ↓
 
 ## Logistics
 - Use `./src/` for source code (`.cpp`, `.c`) and for unit tests (`.test.cpp`).
