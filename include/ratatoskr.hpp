@@ -26,7 +26,6 @@ class Ratatoskr : public Mouse {
     OLED &m_oled;
 
     bool too_close_front(uint16_t front_left_dist, uint16_t front_right_dist);
-    void moveStraightMM(float mm);
     inline void stop();
     inline void coast();
     inline void safe_stop();

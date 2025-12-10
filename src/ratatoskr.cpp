@@ -112,6 +112,7 @@ void Ratatoskr::moveDiagonal(float distance) {
         avg_counts = (left_encoder + right_encoder) / 2;
     }
     safe_stop();
+    delay(500);
 }
 
 void Ratatoskr::turn(int angle) {
@@ -140,7 +141,7 @@ void Ratatoskr::turn(int angle) {
     /*  Initial turn speed */
     int turn_speed = MIN_TURN_PWM;
     if (angle < 60 && angle > -60) {
-        turn_speed -= 5;
+        turn_speed -= 4;
     }
     
     // turn_speed = constrain(turn_speed, MIN_TURN_PWM, MAX_TURN_PWM);
@@ -176,8 +177,6 @@ void Ratatoskr::turn(int angle) {
         }
     }
     safe_stop();
-    // if (!(angle < 90 && angle > -90)) // if small turn, no need to move backward
-    // moveStraightMM(-5);
 }
 
 bool Ratatoskr::too_close_front(uint16_t fl, uint16_t fr) {
@@ -199,6 +198,7 @@ void Ratatoskr::moveForward(int distance_cells) {
 void Ratatoskr::moveForwardHalf(int num_half_steps) {
     delay(1000);
     moveForward((float)num_half_steps * 0.5f);
+    delay(1000);
 }
 
 void Ratatoskr::moveForward(float distance_cells) {
@@ -210,8 +210,11 @@ void Ratatoskr::moveForward(float distance_cells) {
      *  For N cells: factor = 1 + FORWARD_OVERSHOOT_SLOPE * (N - 1)
      */
     float overshoot_factor = 1.0f;
-    if (distance_cells > 1.0f) {
+    if (distance_cells >= 1.0f) {
         overshoot_factor += FORWARD_OVERSHOOT_SLOPE * (distance_cells - 1.0f);
+    } else {
+        // undershoot for half-cells
+        overshoot_factor = 0.9f;
     }
 
     /*  Convert to encoder counts, including overshoot */
@@ -347,79 +350,6 @@ void Ratatoskr::moveForward(float distance_cells) {
         right_encoder = m_motor_right.get_encoder_count();
 
         avg_counts = (left_encoder + right_encoder) / 2;
-    }
-    safe_stop();
-}
-
-void Ratatoskr::moveStraightMM(float mm) {
-    /* Distance in encoder counts (always positive) */
-    long target_counts = (long)(fabs(mm) * ENCODER_COUNTS_PER_MM);
-
-    /* Reset encoders so we measure this move cleanly */
-    m_motor_left.reset_encoder_count();
-    m_motor_right.reset_encoder_count();
-
-    long left_encoder = 0;
-    long right_encoder = 0;
-    long left_encoder_prev = 0;
-    long right_encoder_prev = 0;
-
-    /* Direction: +1 = forward, -1 = backward */
-    int dir = (mm >= 0.0f) ? 1 : -1;
-
-    const int loop_delay = 10; /*  shorter loop, it's a tiny move */
-
-    int t_now = millis();
-    int t_prev = t_now;
-
-    /* Same encoder PID as moveForward */
-    PID pid_encoders(0.75, 0.8, 0.1);
-    long avg_counts = (labs(left_encoder) + labs(right_encoder)) / 2;
-
-    m_gyro.update();
-    while (avg_counts < target_counts) {
-        m_gyro.update();
-        m_gyro.get_next_angle();
-        int left_encoder_diff = left_encoder - left_encoder_prev;
-        int right_encoder_diff = right_encoder - right_encoder_prev;
-
-        /* Time step */
-        t_now = millis();
-        float t_diff = (t_now - t_prev) / 100.0f;
-        t_prev = t_now;
-
-        /* Same sign convention as moveForward */
-        float encoder_error = 0.0f - (left_encoder_diff - right_encoder_diff);
-        float encoder_correction = pid_encoders.update(t_diff, encoder_error);
-
-        /* Basic PWM with encoder correction */
-        float pwm_left =
-            FORWARD_PWM + 20 + (1 - PWM_UPDATE_RATIO) * encoder_correction;
-        float pwm_right =
-            FORWARD_PWM + 20 - (1 - PWM_UPDATE_RATIO) * encoder_correction;
-
-        pwm_left = constrain(pwm_left, 70, 240);
-        pwm_right = constrain(pwm_right, 70, 240);
-
-        if (dir > 0) {
-            /* forward */
-            m_motor_left.spin_cw(pwm_left);
-            m_motor_right.spin_ccw(pwm_right);
-        } else {
-            /* backward */
-            m_motor_left.spin_ccw(pwm_left);
-            m_motor_right.spin_cw(pwm_right);
-        }
-
-        delay(loop_delay);
-        /*  Read encoders */
-        left_encoder_prev = left_encoder;
-        right_encoder_prev = right_encoder;
-
-        left_encoder = m_motor_left.get_encoder_count();
-        right_encoder = m_motor_right.get_encoder_count();
-
-        avg_counts = (labs(left_encoder) + labs(right_encoder)) / 2;
     }
     safe_stop();
 }
