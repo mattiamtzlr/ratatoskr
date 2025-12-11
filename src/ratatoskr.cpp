@@ -196,12 +196,13 @@ void Ratatoskr::moveForward(int distance_cells) {
 
 void Ratatoskr::moveForwardHalf(int num_half_steps) {
     delay(1000);
+    float JITTER_DISTANCE = 1.f;
     bool has_passed_pole = false;
     int changes = wallLeft() && wallRight() ? 1 : 2;
     int count = 0;
     if(!wallLeft()){
         while(!has_passed_pole){
-            moveForward(0.1f);
+            moveStraightMM(JITTER_DISTANCE);
             if(wallLeft() && count == 0){
                 count++;
             }
@@ -212,7 +213,7 @@ void Ratatoskr::moveForwardHalf(int num_half_steps) {
     }
     else if(!wallRight()){
         while(!has_passed_pole){
-            moveForward(0.1f);
+            moveStraightMM(JITTER_DISTANCE);
             if(wallRight() && count == 0){
                 count++;
             }
@@ -223,13 +224,13 @@ void Ratatoskr::moveForwardHalf(int num_half_steps) {
     }
     else if(changes == 1){
         while(!has_passed_pole){
-            moveForward(0.1f);
+            moveStraightMM(JITTER_DISTANCE);
             if((!wallRight() || !wallLeft())){
                 has_passed_pole = true;
             }
         }
     }
-    moveForward(0.05f);
+    moveStraightMM(JITTER_DISTANCE);
     
     delay(1000);
 }
@@ -385,6 +386,77 @@ void Ratatoskr::moveForward(float distance_cells) {
         avg_counts = (left_encoder + right_encoder) / 2;
     }
     safe_stop();
+}
+void Ratatoskr::moveStraightMM(float mm) {
+    /* Distance in encoder counts (always positive) */
+    long target_counts = (long)(fabs(mm) * ENCODER_COUNTS_PER_MM);
+
+    /* Reset encoders so we measure this move cleanly */
+    m_motor_left.reset_encoder_count();
+    m_motor_right.reset_encoder_count();
+
+    long left_encoder = 0;
+    long right_encoder = 0;
+    long left_encoder_prev = 0;
+    long right_encoder_prev = 0;
+
+    /* Direction: +1 = forward, -1 = backward */
+    int dir = (mm >= 0.0f) ? 1 : -1;
+
+    const int loop_delay = 10; /*  shorter loop, it's a tiny move */
+
+    int t_now = millis();
+    int t_prev = t_now;
+    int BASE_PWM = FORWARD_PWM - 20;
+
+    /* Same encoder PID as moveForward */
+    PID pid_encoders(0.75, 0.8, 0.1);
+    long avg_counts = (labs(left_encoder) + labs(right_encoder)) / 2;
+
+    while (avg_counts < target_counts) {
+        int left_encoder_diff = left_encoder - left_encoder_prev;
+        int right_encoder_diff = right_encoder - right_encoder_prev;
+
+        /* Time step */
+        t_now = millis();
+        float t_diff = (t_now - t_prev) / 100.0f;
+        t_prev = t_now;
+
+        /* Same sign convention as moveForward */
+        float encoder_error = 0.0f - (left_encoder_diff - right_encoder_diff);
+        float encoder_correction = pid_encoders.update(t_diff, encoder_error);
+
+        /* Basic PWM with encoder correction */
+        float pwm_left =
+            BASE_PWM + (1 - PWM_UPDATE_RATIO) * encoder_correction;
+        float pwm_right =
+            BASE_PWM - (1 - PWM_UPDATE_RATIO) * encoder_correction;
+
+        pwm_left = constrain(pwm_left, 70, 240);
+        pwm_right = constrain(pwm_right, 70, 240);
+
+        if (dir > 0) {
+            /* forward */
+            m_motor_left.spin_cw(pwm_left);
+            m_motor_right.spin_ccw(pwm_right);
+        } else {
+            /* backward */
+            m_motor_left.spin_ccw(pwm_left);
+            m_motor_right.spin_cw(pwm_right);
+        }
+
+        delay(loop_delay);
+        /*  Read encoders */
+        left_encoder_prev = left_encoder;
+        right_encoder_prev = right_encoder;
+
+        left_encoder = m_motor_left.get_encoder_count();
+        right_encoder = m_motor_right.get_encoder_count();
+
+        avg_counts = (labs(left_encoder) + labs(right_encoder)) / 2;
+    }
+    safe_stop();
+    delay(10);
 }
 
 /**

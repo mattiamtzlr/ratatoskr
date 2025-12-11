@@ -50,6 +50,7 @@ class Ratatoskr : public Mouse {
     virtual void moveForward(int distance = 1);
     void moveForward(float distance);
     void moveForwardHalf(int num_half_steps = 1);
+    void moveStraightMM(float mm);
 
     /**
      * turn @angle degrees in counterclockwise direction
