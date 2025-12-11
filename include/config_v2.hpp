@@ -9,13 +9,13 @@ namespace Config {
 /* ========================================================================== */
 /* |                                  maze                                  | */
 /* ========================================================================== */
-constexpr int MAZE_WIDTH = 5;
-constexpr int MAZE_HEIGHT = 5;
+constexpr int MAZE_WIDTH = 3;
+constexpr int MAZE_HEIGHT = 3;
 
 const std::vector<Position> START_POINTS = {Position(0, 0)};
 const std::vector<Position> END_POINTS = {Position(2, 2)};
 
-constexpr int CELL_SIZE_MM = 180;
+constexpr int CELL_SIZE_MM = 180;   
 constexpr int WALL_TO_WALL_MM = 160;
 
 /* ========================================================================== */
