@@ -196,7 +196,26 @@ void Ratatoskr::moveForward(int distance_cells) {
 
 void Ratatoskr::moveForwardHalf(int num_half_steps) {
     delay(1000);
-    moveForward((float)num_half_steps * 0.5f);
+    bool has_passed_pole = false;
+    uint16_t initial_left = m_tof_left.get_reading();
+    uint16_t initial_right = m_tof_right.get_reading();
+    int changes = 2;
+    int count = 0;
+    if(initial_left > 100){
+        while(!has_passed_pole){
+            moveForward(0.05f);
+            uint16_t reading = m_tof_left.get_reading();
+            if(reading < 70 && count == 0){
+                count++;
+            }
+            else if(reading > 100 && count == 1){
+                has_passed_pole = true;
+            }
+            delay(10);
+        }
+    }
+    moveForward(0.1f);
+    
     delay(1000);
 }
 
