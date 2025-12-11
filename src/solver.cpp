@@ -78,11 +78,17 @@ void Solver::solve() {
         float best_dist = 0;
         for (Position neighbor :
              m_maze.valid_neighbors(m_mouse.getPosition())) {
+            Direction neighbor_dir =
+                dir_for_neighbor(neighbor, m_mouse.getPosition());
+
             if (m_maze.get_distance(neighbor) < best_val ||
                 (m_maze.get_distance(neighbor) == best_val &&
-                 m_maze.distance_to_target_L2(neighbor) < best_dist)) {
+                 m_maze.distance_to_target_L2(neighbor) < best_dist) ||
+                (m_maze.get_distance(neighbor) == best_val &&
+                 m_maze.distance_to_target_L2(neighbor) == best_dist &&
+                 neighbor_dir == m_mouse.getDirection())) {
                 best_val = m_maze.get_distance(neighbor);
-                best_dir = dir_for_neighbor(neighbor, m_mouse.getPosition());
+                best_dir = neighbor_dir;
                 best_dist = m_maze.distance_to_target_L2(neighbor);
             }
         }
