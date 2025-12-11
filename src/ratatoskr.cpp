@@ -195,7 +195,11 @@ void Ratatoskr::moveForward(int distance_cells) {
 }
 
 void Ratatoskr::moveForwardHalf(int num_half_steps) {
-    delay(1000);
+     Direction d = Mouse::getDirection();
+    if (!(d == NORTH || d == EAST || d == SOUTH || d == WEST)){
+        moveForward((float)num_half_steps * 0.5f);
+        return;
+    }
     float JITTER_DISTANCE = 1.f;
     bool has_passed_pole = false;
     int changes = wallLeft() && wallRight() ? 1 : 2;
@@ -231,8 +235,6 @@ void Ratatoskr::moveForwardHalf(int num_half_steps) {
         }
     }
     moveStraightMM(JITTER_DISTANCE);
-    
-    delay(1000);
 }
 
 void Ratatoskr::moveForward(float distance_cells) {
