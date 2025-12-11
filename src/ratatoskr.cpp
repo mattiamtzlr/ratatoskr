@@ -113,12 +113,12 @@ void Ratatoskr::moveDiagonal(float distance) {
 
 void Ratatoskr::turn(int angle) {
     /* Verifies in which way is better to do the turn */
-    if(angle == 180){
+    if(abs(angle) == 180){
         uint16_t distance_left = m_tof_left.get_reading();
         uint16_t distance_right = m_tof_right.get_reading();
 
         if(distance_left < distance_right){
-            angle = -180;
+            angle = -angle;
         }
     }
     moveStraightMM(5);
