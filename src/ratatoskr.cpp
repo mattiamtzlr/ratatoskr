@@ -125,7 +125,6 @@ void Ratatoskr::turn(int angle) {
             angle = -angle;
         }
     }
-    moveStraightMM(5);
     int requested_turn = angle;
     /*  Reset PIDs when turning */
     m_pid_encoders.reset();
