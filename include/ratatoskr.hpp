@@ -25,6 +25,8 @@ class Ratatoskr : public Mouse {
     MPU6050 &m_gyro;
     OLED &m_oled;
 
+    bool in_diagonal;
+
     bool too_close_front(uint16_t front_left_dist, uint16_t front_right_dist);
     inline void stop();
     inline void coast();

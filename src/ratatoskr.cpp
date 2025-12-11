@@ -15,7 +15,8 @@ Ratatoskr::Ratatoskr(GearMotor &motor_left, GearMotor &motor_right,
       m_tof_front_right(tof_front_right),
       m_tof_right(tof_right),
       m_gyro(gyro),
-      m_oled(oled) {}
+      m_oled(oled),
+      in_diagonal(true) {}
 
 /* ============================[ MOVEMENT ]================================== */
 
@@ -195,9 +196,15 @@ void Ratatoskr::moveForward(int distance_cells) {
 }
 
 void Ratatoskr::moveForwardHalf(int num_half_steps) {
-     Direction d = Mouse::getDirection();
+    if(!in_diagonal){
+        moveForward((float)num_half_steps * 0.5f);
+        in_diagonal = true;
+        return;
+    }
+    Direction d = Mouse::getDirection();
     if (!(d == NORTH || d == EAST || d == SOUTH || d == WEST)){
         moveForward((float)num_half_steps * 0.5f);
+        in_diagonal = false;
         return;
     }
     float JITTER_DISTANCE = 1.f;
