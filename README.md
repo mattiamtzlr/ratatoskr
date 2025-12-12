@@ -1,8 +1,8 @@
 # CS-358a Project: Ratatoskr (Micromouse)
-Leoluca Bernardi, Leonardo Bolognese, Ali Gorgani, Mattia Metzler, Anthony Tamberg
+Team members: Leoluca Bernardi, Leonardo Bolognese, Ali Gorgani, Mattia Metzler, Anthony Tamberg
 
 _sick animation here_  
-_image of finished v1 and v2 mice next to each other here_  
+<p align="center"><img src="./img/ratatoskr_finished.jpg" height="400"><p>
 
 ## Introduction
 Ratatoskr is a small autonomous robot, called a 'micromouse' which can find the fastest path through a maze.
@@ -19,12 +19,23 @@ components and the general layout of the software.
 We also used parts of their maze for convenience and to save on resources and waste, as remaking these would
 include a lot of material and time. More about this in the maze section.  
 
-<img align="right" src="./img/ratatoskr.png" height="150">
+<img align="right" src="./img/ratatoskr_myth.png" height="150">
 Finally, the name 'Ratatoskr' comes from Norse mythology and refers to a squirrel which runs through the world-tree
 Yggdrasil, carrying messages. We found this name to be quite fitting for our project, as Ratatoskr is one of the only
 creatures capable of traversing the complicated insides of Yggdrasil.  
-For your enjoyment, here's an image from a 17<sup>th</sup> icelandic manuscript depicting Ratatoskr, taken from Wikipedia (public domain).
+For your enjoyment, here's an image from a 17<sup>th</sup> icelandic manuscript depicting Ratatoskr, taken from Wikipedia
+(public domain).
 
+<br>
+
+## Design
+The design of Ratatoskr is made to be fully 3D-printable for most parts, with the remaining parts being common Lego
+pieces.  
+The final Micromouse weighs approximately 190g, it's 7cm wide and about 10cm long. Most of the weight comes from the
+9V battery used to power it.
+
+### Hardware
+Ratatoskr requires the following electronic and mechanical components:
 
 # ↓ OLD VERSION ↓
 
