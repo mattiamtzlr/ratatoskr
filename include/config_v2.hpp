@@ -10,12 +10,12 @@ namespace Config {
 /* |                                  maze                                  | */
 /* ========================================================================== */
 constexpr int MAZE_WIDTH = 3;
-constexpr int MAZE_HEIGHT = 3;
+constexpr int MAZE_HEIGHT = 5;
 
 const std::vector<Position> START_POINTS = {Position(0, 0)};
-const std::vector<Position> END_POINTS = {Position(2, 2)};
+const std::vector<Position> END_POINTS = {Position(2, 4)};
 
-constexpr int CELL_SIZE_MM = 180;   
+constexpr int CELL_SIZE_MM = 180;
 constexpr int WALL_TO_WALL_MM = 160;
 
 /* ========================================================================== */
@@ -79,5 +79,5 @@ constexpr int16_t TOF_RIGHT_OFFSET_MM = -7;        /* ----------------- */
 /* ========================================================================== */
 /* |                                diagonals                               | */
 /* ========================================================================== */
-const float MAX_DIST_MM = 200.0f;
+const float MAX_DIST_MM = 100.0f;
 }  // namespace Config
