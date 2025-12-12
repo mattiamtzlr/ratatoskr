@@ -16,7 +16,7 @@ Ratatoskr::Ratatoskr(GearMotor &motor_left, GearMotor &motor_right,
       m_tof_right(tof_right),
       m_gyro(gyro),
       m_oled(oled),
-      in_diagonal(true) {}
+      in_diagonal(false) {}
 
 /* ============================[ MOVEMENT ]================================== */
 
@@ -37,6 +37,7 @@ void Ratatoskr::moveDiagonal(float distance) {
     long right_encoder_prev = 0;
 
     bool is_end = false;
+    bool nearing_end = false;
 
     float pwm_left = BASE_PWM;
     float pwm_right = BASE_PWM;
@@ -60,12 +61,22 @@ void Ratatoskr::moveDiagonal(float distance) {
         /*  ------------------ ENCODER PROGRESS ------------------ */
         int left_encoder_diff = left_encoder - left_encoder_prev;
         int right_encoder_diff = right_encoder - right_encoder_prev;
-
-        float left_dist = constrain(fl, 0, MAX_DIST_MM);
-        float right_dist = constrain(fr, 0, MAX_DIST_MM);
+        
+        float left_dist;
+        float right_dist;
 
         is_end = fabs(left_dist - right_dist) < DIST_BETWEEN_SENSORS_MM - TRESH;
-
+        nearing_end =
+            fabs(target_counts - avg_counts) < ENCODER_COUNTS_PER_MM * CELL_SIZE_MM;
+        
+        if (nearing_end) { 
+            left_dist = constrain(fl, 0, MAX_DIST_MM - 50); 
+            right_dist = constrain(fr, 0, MAX_DIST_MM - 50);
+        } else {
+            left_dist = constrain(fl, 0, MAX_DIST_MM); 
+            right_dist = constrain(fr, 0, MAX_DIST_MM);
+        }
+        
         /*  ------------------ ERRORS ------------------ */
         float encoder_error = 0.0f - (left_encoder_diff - right_encoder_diff);
         float tof_error = 0.0f - (left_dist - right_dist);
@@ -113,7 +124,7 @@ void Ratatoskr::moveDiagonal(float distance) {
         avg_counts = (left_encoder + right_encoder) / 2;
     }
     safe_stop();
-    delay(500);
+    moveStraightMM(30.0f);
 }
 
 void Ratatoskr::turn(int angle) {
@@ -196,23 +207,28 @@ void Ratatoskr::moveForward(int distance_cells) {
 }
 
 void Ratatoskr::moveForwardHalf(int num_half_steps) {
-    if(!in_diagonal){
+    safe_stop();
+    delay(1067);
+    Direction d = Mouse::getDirection();
+    bool is_cardinal = (d == NORTH || d == EAST || d == SOUTH || d == WEST);
+    if (!is_cardinal){
+        // in_diagonal = true;
         moveForward((float)num_half_steps * 0.5f);
-        in_diagonal = true;
         return;
     }
-    Direction d = Mouse::getDirection();
-    if (!(d == NORTH || d == EAST || d == SOUTH || d == WEST)){
+    if(in_diagonal){
         moveForward((float)num_half_steps * 0.5f);
         in_diagonal = false;
         return;
     }
+    delay(100);
     float JITTER_DISTANCE = 1.f;
     bool has_passed_pole = false;
     int changes = wallLeft() && wallRight() ? 1 : 2;
     int count = 0;
     if(!wallLeft()){
         while(!has_passed_pole){
+            delay(100);
             moveStraightMM(JITTER_DISTANCE);
             if(wallLeft() && count == 0){
                 count++;
@@ -224,6 +240,7 @@ void Ratatoskr::moveForwardHalf(int num_half_steps) {
     }
     else if(!wallRight()){
         while(!has_passed_pole){
+            delay(100);
             moveStraightMM(JITTER_DISTANCE);
             if(wallRight() && count == 0){
                 count++;
@@ -235,13 +252,16 @@ void Ratatoskr::moveForwardHalf(int num_half_steps) {
     }
     else if(changes == 1){
         while(!has_passed_pole){
+            delay(100);
             moveStraightMM(JITTER_DISTANCE);
             if((!wallRight() || !wallLeft())){
                 has_passed_pole = true;
             }
         }
     }
-    moveStraightMM(JITTER_DISTANCE);
+    moveStraightMM(40.0f);
+    in_diagonal = true;
+    has_passed_pole = false; // i know we do this on init but fuck you
 }
 
 void Ratatoskr::moveForward(float distance_cells) {
@@ -416,7 +436,7 @@ void Ratatoskr::moveStraightMM(float mm) {
 
     int t_now = millis();
     int t_prev = t_now;
-    int BASE_PWM = FORWARD_PWM - 20;
+    int BASE_PWM = FORWARD_PWM;
 
     /* Same encoder PID as moveForward */
     PID pid_encoders(0.75, 0.8, 0.1);
@@ -430,7 +450,11 @@ void Ratatoskr::moveStraightMM(float mm) {
         t_now = millis();
         float t_diff = (t_now - t_prev) / 100.0f;
         t_prev = t_now;
-
+        /*  ------------------ FRONT STOP ------------------ */
+        uint16_t fl = m_tof_front_left.get_reading();
+        uint16_t fr = m_tof_front_right.get_reading();
+        if (too_close_front(fl, fr)) break;
+        
         /* Same sign convention as moveForward */
         float encoder_error = 0.0f - (left_encoder_diff - right_encoder_diff);
         float encoder_correction = pid_encoders.update(t_diff, encoder_error);

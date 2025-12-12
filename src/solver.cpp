@@ -275,7 +275,13 @@ void Solver::run(const std::vector<Instruction>& instructions) {
                 move_forward_for += 1;
                 break;
             case MOVE_FORWARD_HALF:
-                move_forward_for += 0.5;
+                // Execute any accumulated full moves first
+                if (move_forward_for > 0.0) {
+                    accumulative_forward(move_forward_for);
+                    move_forward_for = 0;
+                }
+                // Execute half move immediately without accumulation
+                m_mouse.moveForwardHalf();
                 break;
             case TURN_LEFT_45:
                 accumulative_forward(move_forward_for);
