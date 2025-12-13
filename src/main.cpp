@@ -105,7 +105,6 @@ void setup() {
                 delete solved;
                 ESPLogger::write_solution(*instr);
             }
-            delay(1000);
             solver.run(*instr);
             ESPLogger::clear_sol();
             delete instr;

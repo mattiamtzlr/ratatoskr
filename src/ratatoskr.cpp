@@ -557,6 +557,7 @@ void Ratatoskr::update_screen(float gyro_angle, Face face) {
 }
 
 void Ratatoskr::update_visuals(Maze &maze) {}
+void Ratatoskr::pause(int ms) { delay(ms); }
 bool Ratatoskr::wasReset() { return false; }
 void Ratatoskr::ackReset() {}
 

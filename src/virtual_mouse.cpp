@@ -115,5 +115,6 @@ void VirtualMouse::update_visuals(Maze& maze) {
     for (auto& p : route) API::setColor(p.x, p.y, 'B');
 }
 
+void VirtualMouse::pause(int ms) { sleep(ms); }
 bool VirtualMouse::wasReset() { return API::wasReset(); }
 void VirtualMouse::VirtualMouse::ackReset() { return API::ackReset(); }

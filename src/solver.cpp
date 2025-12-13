@@ -273,6 +273,8 @@ void Solver::accumulative_forward(double steps) {
 
 void Solver::run(const std::vector<Instruction>& instructions) {
     face(NORTH);
+    detect_and_set_walls();
+    m_mouse.pause(1000);
     double move_forward_for = 0.0;
     for (const Instruction& next_instruction : instructions) {
         switch (next_instruction) {

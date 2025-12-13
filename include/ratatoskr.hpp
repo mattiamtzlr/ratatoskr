@@ -79,6 +79,7 @@ class Ratatoskr : public Mouse {
     virtual void update_visuals(Maze &maze);
     virtual void log(std::string msg);
 
+    virtual void pause(int ms);
     virtual bool wasReset();
     virtual void ackReset();
 };
