@@ -126,12 +126,12 @@ void Ratatoskr::moveDiagonal(float distance) {
     safe_stop();
     // delay(1000);
     // moveStraightMM(35.0f);
-    delay(1000);
+    delay(10);
 }
 
 void Ratatoskr::turn(int angle) {
     safe_stop();
-    delay(100);
+    delay(10);
     /* Verifies in which way is better to do the turn */
     if (abs(angle) == 180) {
         uint16_t distance_left = m_tof_left.get_reading();
@@ -257,7 +257,7 @@ void Ratatoskr::moveForwardHalf(int num_half_steps) {
         }
     }
     moveStraightMM(10.0f);
-    delay(100);
+    delay(10);
     in_diagonal = true;
     has_passed_pole = false;  // i know we do this on init but fuck you
 }
