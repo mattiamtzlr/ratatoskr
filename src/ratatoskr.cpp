@@ -67,7 +67,7 @@ void Ratatoskr::moveDiagonal(float distance) {
 
         is_end = fabs(left_dist - right_dist) < DIST_BETWEEN_SENSORS_MM - TRESH;
         nearing_end = fabs(target_counts - avg_counts) <
-                      ENCODER_COUNTS_PER_MM * CELL_SIZE_MM;
+                      ENCODER_COUNTS_PER_MM * CELL_SIZE_MM * std::sqrt(2) / 2;
 
         if (nearing_end) {
             left_dist = constrain(fl, 0, MAX_DIST_MM - 50);
@@ -124,8 +124,8 @@ void Ratatoskr::moveDiagonal(float distance) {
         avg_counts = (left_encoder + right_encoder) / 2;
     }
     safe_stop();
-    delay(1000);
-    moveStraightMM(35.0f);
+    // delay(1000);
+    // moveStraightMM(35.0f);
     delay(1000);
 }
 
@@ -190,6 +190,9 @@ void Ratatoskr::turn(int angle) {
     }
     safe_stop();
     /*  Reset PIDs when turning */
+    if (abs(requested_turn) == 180) {
+        moveStraightMM(-35.0f);
+    }
     m_pid_encoders.reset();
     m_pid_tof_sides.reset();
 }
@@ -307,8 +310,7 @@ void Ratatoskr::moveForward(float distance_cells) {
     while (avg_counts < target_counts) {
         // Go slow for first cell to correct bad turns
         // Only reduce speed when we're close to the target
-        if ((avg_counts >
-             target_counts * (distance_cells - 2) / distance_cells) ||
+        if ((avg_counts > target_counts * (distance_cells - 2) / distance_cells) ||
             avg_counts < target_counts * 1 / distance_cells)
             BASE_PWM = FORWARD_PWM;
         else {
@@ -436,7 +438,7 @@ void Ratatoskr::moveStraightMM(float mm) {
 
     int t_now = millis();
     int t_prev = t_now;
-    int BASE_PWM = FORWARD_PWM - 20;
+    int BASE_PWM = FORWARD_PWM - 15;
 
     /* Same encoder PID as moveForward */
     long avg_counts = (labs(left_encoder) + labs(right_encoder)) / 2;

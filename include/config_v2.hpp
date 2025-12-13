@@ -30,7 +30,7 @@ constexpr uint8_t FORWARD_PWM = 181;
 constexpr uint8_t FORWARD_FAST_PWM_CHUNK = 10;
 constexpr uint8_t FORWARD_FAST_PWM_MAX = 240;
 constexpr float FORWARD_OVERSHOOT_SLOPE = 0.02f;
-constexpr int STOP_DISTANCE = 48;
+constexpr int STOP_DISTANCE = 55;
 /* ========================================================================== */
 /* |                               dimensions                               | */
 /* ========================================================================== */
@@ -44,7 +44,7 @@ constexpr uint8_t GEARING = 30;
 constexpr uint8_t ENCODER_MULTIPLIER = 6;
 
 /* measured by pushing the mouse exactly one cell length */
-constexpr uint16_t ENCODER_COUNTS_PER_CELL = 248;
+constexpr uint16_t ENCODER_COUNTS_PER_CELL = 265;
 
 /*  encoder counts per mm = counts per cell / cell size */
 constexpr float ENCODER_COUNTS_PER_MM =
