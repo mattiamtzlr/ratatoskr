@@ -50,7 +50,7 @@ class Ratatoskr : public Mouse {
      * move @distance cells forward with PID control
      */
     virtual void moveForward(int distance = 1);
-    void moveForward(float distance);
+    virtual void moveForward(float distance);
     void moveForwardHalf(int num_half_steps = 1);
     void moveStraightMM(float mm);
 

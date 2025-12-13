@@ -43,7 +43,6 @@ void ToF::begin() {
     m_sensor.setAddress(i2c_address);
     delay(100);
 
-    log("VL53L1X at pin" + std::to_string(xshut_pin) + "initialized");
 
     m_sensor.startContinuous(TIMING_BUDGET);
 

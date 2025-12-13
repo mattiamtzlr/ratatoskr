@@ -58,7 +58,6 @@ bool MPU6050::begin() {
     delay(1000);
     calibrateGyro();
     // delay(1000);
-    log("Gyro is ready");
     return true;
 }
 
@@ -168,7 +167,6 @@ void MPU6050::calibrateGyro() {
     float z_values = 0;
     unsigned long count = 0;
     delay(10);
-    log("[MPU6050] Starting gyro calibration. Press Enter to stop...");
     while (count < 2500) {
         Serial.println("Collecting sample " + String(count + 1) + "/2500");
         if (Serial.available()) {
@@ -191,7 +189,6 @@ void MPU6050::calibrateGyro() {
         X_OFFSET = 0.0f;
         Y_OFFSET = 0.0f;
         Z_OFFSET = 0.0f;
-        log("[MPU6050] Calibration aborted: no samples collected.");
         return;
     }
 
@@ -199,10 +196,6 @@ void MPU6050::calibrateGyro() {
     Y_OFFSET = (float)y_values / (float)count;
     Z_OFFSET = (float)z_values / (float)count;
 
-    log("[MPU6050] Calibration done with " + std::to_string(count) +
-        " samples.");
-    log("Offsets (deg/s) X: " + std::to_string(X_OFFSET) +
-        " Y: " + std::to_string(Y_OFFSET) + " Z: " + std::to_string(Z_OFFSET));
 }
 
 void MPU6050::update() {

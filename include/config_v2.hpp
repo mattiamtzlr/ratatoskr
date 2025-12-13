@@ -21,12 +21,12 @@ constexpr int WALL_TO_WALL_MM = 160;
 /* ========================================================================== */
 /* |                                movement                                | */
 /* ========================================================================== */
-constexpr int MIN_TURN_PWM = 184;
-constexpr int MAX_TURN_PWM = 184;
+constexpr int MIN_TURN_PWM = 185;
+constexpr int MAX_TURN_PWM = 185;
 constexpr int TURN_TIME_LIMIT = 1500;
 constexpr float TURN_TRESHOLD = 3.f;
 
-constexpr uint8_t FORWARD_PWM = 180;
+constexpr uint8_t FORWARD_PWM = 181;
 constexpr uint8_t FORWARD_FAST_PWM_CHUNK = 10;
 constexpr uint8_t FORWARD_FAST_PWM_MAX = 240;
 constexpr float FORWARD_OVERSHOOT_SLOPE = 0.02f;
@@ -79,5 +79,5 @@ constexpr int16_t TOF_RIGHT_OFFSET_MM = -7;        /* ----------------- */
 /* ========================================================================== */
 /* |                                diagonals                               | */
 /* ========================================================================== */
-const float MAX_DIST_MM = 100.0f;
+const float MAX_DIST_MM = 150.0f;
 }  // namespace Config

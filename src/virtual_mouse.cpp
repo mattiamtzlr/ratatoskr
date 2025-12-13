@@ -2,11 +2,22 @@
 
 #include <iostream>
 #include <vector>
+#include <cmath>
 
 #include "API.hpp"
 #include "util.hpp"
 
 using namespace Config;
+
+void VirtualMouse::moveForward(float distance) {
+    int full_steps = std::floor(distance);
+    if (full_steps > 0) {
+        API::moveForward(full_steps);
+    }
+    if (distance - (double)full_steps > 0.0) {
+        API::moveForwardHalf();
+    }
+}
 
 void VirtualMouse::moveForward(int distance) {
     Mouse::moveForward(distance);

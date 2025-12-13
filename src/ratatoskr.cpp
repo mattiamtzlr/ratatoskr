@@ -61,22 +61,22 @@ void Ratatoskr::moveDiagonal(float distance) {
         /*  ------------------ ENCODER PROGRESS ------------------ */
         int left_encoder_diff = left_encoder - left_encoder_prev;
         int right_encoder_diff = right_encoder - right_encoder_prev;
-        
+
         float left_dist;
         float right_dist;
 
         is_end = fabs(left_dist - right_dist) < DIST_BETWEEN_SENSORS_MM - TRESH;
-        nearing_end =
-            fabs(target_counts - avg_counts) < ENCODER_COUNTS_PER_MM * CELL_SIZE_MM;
-        
-        if (nearing_end) { 
-            left_dist = constrain(fl, 0, MAX_DIST_MM - 50); 
+        nearing_end = fabs(target_counts - avg_counts) <
+                      ENCODER_COUNTS_PER_MM * CELL_SIZE_MM;
+
+        if (nearing_end) {
+            left_dist = constrain(fl, 0, MAX_DIST_MM - 50);
             right_dist = constrain(fr, 0, MAX_DIST_MM - 50);
         } else {
-            left_dist = constrain(fl, 0, MAX_DIST_MM); 
+            left_dist = constrain(fl, 0, MAX_DIST_MM);
             right_dist = constrain(fr, 0, MAX_DIST_MM);
         }
-        
+
         /*  ------------------ ERRORS ------------------ */
         float encoder_error = 0.0f - (left_encoder_diff - right_encoder_diff);
         float tof_error = 0.0f - (left_dist - right_dist);
@@ -91,7 +91,7 @@ void Ratatoskr::moveDiagonal(float distance) {
         float tof_correction =
             m_pid_tof_front_diagonals.update(t_diff, tof_error);
 
-        if (!is_end) {
+        if (!is_end && !nearing_end) {
             pwm_left = BASE_PWM + PWM_UPDATE_RATIO * tof_correction +
                        (1 - PWM_UPDATE_RATIO) * encoder_correction;
             pwm_right = BASE_PWM - PWM_UPDATE_RATIO * tof_correction -
@@ -124,23 +124,24 @@ void Ratatoskr::moveDiagonal(float distance) {
         avg_counts = (left_encoder + right_encoder) / 2;
     }
     safe_stop();
-    moveStraightMM(30.0f);
+    delay(1000);
+    moveStraightMM(35.0f);
+    delay(1000);
 }
 
 void Ratatoskr::turn(int angle) {
+    safe_stop();
+    delay(100);
     /* Verifies in which way is better to do the turn */
-    if(abs(angle) == 180){
+    if (abs(angle) == 180) {
         uint16_t distance_left = m_tof_left.get_reading();
         uint16_t distance_right = m_tof_right.get_reading();
 
-        if(distance_left < distance_right){
+        if (distance_left < distance_right) {
             angle = -angle;
         }
     }
     int requested_turn = angle;
-    /*  Reset PIDs when turning */
-    m_pid_encoders.reset();
-    m_pid_tof_sides.reset();
 
     unsigned long t_start = millis();
     m_gyro.update();
@@ -148,15 +149,15 @@ void Ratatoskr::turn(int angle) {
     /*  Read current heading and define absolute target */
     float start_angle = m_gyro.get_current_angle();
     float target = start_angle + angle;
-    
+
     /*  Initial turn speed */
     int turn_speed = MIN_TURN_PWM;
     if (angle < 60 && angle > -60) {
         turn_speed -= 4;
     }
-    
+
     // turn_speed = constrain(turn_speed, MIN_TURN_PWM, MAX_TURN_PWM);
-    
+
     while (millis() - t_start < TURN_TIME_LIMIT * (abs(angle) / 180.0f)) {
         m_gyro.update();
         float yaw = m_gyro.get_next_angle();
@@ -188,11 +189,13 @@ void Ratatoskr::turn(int angle) {
         }
     }
     safe_stop();
+    /*  Reset PIDs when turning */
+    m_pid_encoders.reset();
+    m_pid_tof_sides.reset();
 }
 
 bool Ratatoskr::too_close_front(uint16_t fl, uint16_t fr) {
-    bool res =
-        (fl != 0) && (fr != 0) && (fl < STOP_DISTANCE && fr < STOP_DISTANCE);
+    bool res = (fl < STOP_DISTANCE && fr < STOP_DISTANCE);
     return res;
 }
 
@@ -208,64 +211,57 @@ void Ratatoskr::moveForward(int distance_cells) {
 
 void Ratatoskr::moveForwardHalf(int num_half_steps) {
     safe_stop();
-    delay(1067);
     Direction d = Mouse::getDirection();
     bool is_cardinal = (d == NORTH || d == EAST || d == SOUTH || d == WEST);
-    if (!is_cardinal){
+    if (!is_cardinal) {
         // in_diagonal = true;
-        moveForward((float)num_half_steps * 0.5f);
+        moveDiagonal((float)num_half_steps * 0.5f);
         return;
     }
-    if(in_diagonal){
+    if (in_diagonal) {
         moveForward((float)num_half_steps * 0.5f);
         in_diagonal = false;
         return;
     }
-    delay(100);
-    float JITTER_DISTANCE = 1.f;
+    float JITTER_DISTANCE = 15.f;
     bool has_passed_pole = false;
     int changes = wallLeft() && wallRight() ? 1 : 2;
     int count = 0;
-    if(!wallLeft()){
-        while(!has_passed_pole){
-            delay(100);
+    if (!wallLeft()) {
+        while (!has_passed_pole) {
             moveStraightMM(JITTER_DISTANCE);
-            if(wallLeft() && count == 0){
+            if (wallLeft() && count == 0) {
                 count++;
-            }
-            else if((!wallRight() || !wallLeft()) && count == 1){
+            } else if ((!wallRight() || !wallLeft()) && count == 1) {
                 has_passed_pole = true;
             }
         }
-    }
-    else if(!wallRight()){
-        while(!has_passed_pole){
-            delay(100);
+    } else if (!wallRight()) {
+        while (!has_passed_pole) {
             moveStraightMM(JITTER_DISTANCE);
-            if(wallRight() && count == 0){
+            if (wallRight() && count == 0) {
                 count++;
-            }
-            else if((!wallRight() || !wallLeft()) && count == 1){
+            } else if ((!wallRight() || !wallLeft()) && count == 1) {
                 has_passed_pole = true;
             }
         }
-    }
-    else if(changes == 1){
-        while(!has_passed_pole){
-            delay(100);
+    } else if (changes == 1) {
+        while (!has_passed_pole) {
             moveStraightMM(JITTER_DISTANCE);
-            if((!wallRight() || !wallLeft())){
+            if ((!wallRight() || !wallLeft())) {
                 has_passed_pole = true;
             }
         }
     }
-    moveStraightMM(40.0f);
+    moveStraightMM(10.0f);
+    delay(100);
     in_diagonal = true;
-    has_passed_pole = false; // i know we do this on init but fuck you
+    has_passed_pole = false;  // i know we do this on init but fuck you
 }
 
 void Ratatoskr::moveForward(float distance_cells) {
     /*  Convert cells to mm */
+    log("forward " + std::to_string(distance_cells));
     int distance_mm = distance_cells * CELL_SIZE_MM;
 
     /*  Overshoot factor grows with requested distance.
@@ -281,8 +277,8 @@ void Ratatoskr::moveForward(float distance_cells) {
     }
 
     /*  Convert to encoder counts, including overshoot */
-    long target_counts = (long)(distance_mm * ENCODER_COUNTS_PER_MM *
-                                overshoot_factor);
+    long target_counts =
+        (long)(distance_mm * ENCODER_COUNTS_PER_MM * overshoot_factor);
 
     int BASE_PWM = FORWARD_PWM + FORWARD_FAST_PWM_CHUNK * (distance_cells - 1);
     if (BASE_PWM > FORWARD_FAST_PWM_MAX) BASE_PWM = FORWARD_FAST_PWM_MAX;
@@ -311,7 +307,8 @@ void Ratatoskr::moveForward(float distance_cells) {
     while (avg_counts < target_counts) {
         // Go slow for first cell to correct bad turns
         // Only reduce speed when we're close to the target
-        if ((avg_counts > target_counts * (distance_cells - 2) / distance_cells) ||
+        if ((avg_counts >
+             target_counts * (distance_cells - 2) / distance_cells) ||
             avg_counts < target_counts * 1 / distance_cells)
             BASE_PWM = FORWARD_PWM;
         else {
@@ -353,10 +350,12 @@ void Ratatoskr::moveForward(float distance_cells) {
                 /*  Corridor: center between walls */
                 tof_error = (float)right_raw - (float)left_raw;
             } else if (right_ok && !left_ok) {
-                /*  Only right wall: keep right distance at TOF_SIDE_EXPECTED_MM */
+                /*  Only right wall: keep right distance at TOF_SIDE_EXPECTED_MM
+                 */
                 tof_error = (float)right_raw - (float)TOF_SIDE_EXPECTED_MM;
             } else if (left_ok && !right_ok) {
-                /*  Only left wall: keep left distance at TOF_SIDE_EXPECTED_MM */
+                /*  Only left wall: keep left distance at TOF_SIDE_EXPECTED_MM
+                 */
                 tof_error = (float)TOF_SIDE_EXPECTED_MM - (float)left_raw;
             }
         } else {
@@ -423,6 +422,7 @@ void Ratatoskr::moveStraightMM(float mm) {
     /* Reset encoders so we measure this move cleanly */
     m_motor_left.reset_encoder_count();
     m_motor_right.reset_encoder_count();
+    m_pid_encoders.reset();
 
     long left_encoder = 0;
     long right_encoder = 0;
@@ -436,10 +436,9 @@ void Ratatoskr::moveStraightMM(float mm) {
 
     int t_now = millis();
     int t_prev = t_now;
-    int BASE_PWM = FORWARD_PWM;
+    int BASE_PWM = FORWARD_PWM - 20;
 
     /* Same encoder PID as moveForward */
-    PID pid_encoders(0.75, 0.8, 0.1);
     long avg_counts = (labs(left_encoder) + labs(right_encoder)) / 2;
 
     while (avg_counts < target_counts) {
@@ -454,14 +453,13 @@ void Ratatoskr::moveStraightMM(float mm) {
         uint16_t fl = m_tof_front_left.get_reading();
         uint16_t fr = m_tof_front_right.get_reading();
         if (too_close_front(fl, fr)) break;
-        
+
         /* Same sign convention as moveForward */
         float encoder_error = 0.0f - (left_encoder_diff - right_encoder_diff);
-        float encoder_correction = pid_encoders.update(t_diff, encoder_error);
+        float encoder_correction = m_pid_encoders.update(t_diff, encoder_error);
 
         /* Basic PWM with encoder correction */
-        float pwm_left =
-            BASE_PWM + (1 - PWM_UPDATE_RATIO) * encoder_correction;
+        float pwm_left = BASE_PWM + (1 - PWM_UPDATE_RATIO) * encoder_correction;
         float pwm_right =
             BASE_PWM - (1 - PWM_UPDATE_RATIO) * encoder_correction;
 
@@ -489,14 +487,12 @@ void Ratatoskr::moveStraightMM(float mm) {
         avg_counts = (labs(left_encoder) + labs(right_encoder)) / 2;
     }
     safe_stop();
-    delay(10);
 }
 
 /**
  * STOOOOOOP
  */
 void Ratatoskr::stop() {
-    log("stop");
     m_motor_left.brake();
     m_motor_right.brake();
 }

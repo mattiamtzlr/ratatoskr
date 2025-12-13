@@ -86,7 +86,7 @@ void setup() {
 
         case RUN: {
             std::vector<Instruction>* instr = new std::vector<Instruction>;
-            if(!ESPLogger::retrieve_solution(*instr)) {
+            if (!ESPLogger::retrieve_solution(*instr)) {
                 /* push target to maze */
                 maze.set_targets(END_POINTS);
 
@@ -98,7 +98,8 @@ void setup() {
 
                 maze.set_targets(END_POINTS);
                 solver.finalize_discovery();
-                std::vector<GraphCoordinate>* solved = new std::vector<GraphCoordinate>;
+                std::vector<GraphCoordinate>* solved =
+                    new std::vector<GraphCoordinate>;
                 solver.dijkstra(*solved);
                 solver.parse_path(*solved, *instr);
                 delete solved;
@@ -107,10 +108,12 @@ void setup() {
             solver.run(*instr);
             ESPLogger::clear_sol();
             delete instr;
+            ESPLogger::clear_logs();
             break;
         }
 
         case DUMP_LOG: {
+            logger_enabled = true;
             ESPLogger::export_logs();
             ESPLogger::clear_logs();
             break;
@@ -118,20 +121,10 @@ void setup() {
 
         case TESTING: {
             oled.mode = DEBUG;
-            while (true) {
-                /*Serial.printf("left: %ld\nright: %ld\n\n",
-                              motor_left.get_encoder_count(),
-                              motor_right.get_encoder_count());
-                delay(1000);*/
-
-                rat.turnRight();
-                delay(1000);
-                rat.turn180();
-                delay(1000);
-                rat.turnLeft();
-                delay(1000);
-                rat.turnLeft45();
-            }
+            rat.moveDiagonal(2.0);
+            rat.turnLeft();
+            rat.moveDiagonal(0.5);
+            rat.turnLeft45();
         }
     }
 }

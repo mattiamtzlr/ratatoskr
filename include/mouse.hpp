@@ -21,12 +21,16 @@ class Mouse {
     Position getPosition();
     Direction getDirection();
 
+    bool is_in_diagonal();
+
     int mazeWidth();
     int mazeHeight();
 
     // Call this method inside the overriding method in the derived class!
-    virtual void moveForward(int distance = 1);
-    virtual void moveForwardHalf(int num_half_steps = 1);
+
+    virtual void moveForward(float distance) = 0;
+    virtual void moveForward(int distance = 1) = 0;
+    virtual void moveForwardHalf(int num_half_steps = 1) = 0;
 
     virtual void turn(int angle) = 0;
 

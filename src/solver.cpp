@@ -257,6 +257,11 @@ std::vector<Instruction>& Solver::parse_path(
 }
 
 void Solver::accumulative_forward(double steps) {
+    if (!m_mouse.is_in_diagonal() && fabs(steps) > 0.00001) {
+        m_mouse.moveForward((float)steps);
+        return;
+    }
+
     int full_steps = std::floor(steps);
     if (full_steps > 0) {
         m_mouse.moveForward(full_steps);
@@ -276,12 +281,14 @@ void Solver::run(const std::vector<Instruction>& instructions) {
                 break;
             case MOVE_FORWARD_HALF:
                 // Execute any accumulated full moves first
-                if (move_forward_for > 0.0) {
+                if (m_mouse.is_in_diagonal()) {
+                    move_forward_for += 0.5;
+                } else {
                     accumulative_forward(move_forward_for);
                     move_forward_for = 0;
+                    // Execute half move immediately without accumulation
+                    m_mouse.moveForwardHalf();
                 }
-                // Execute half move immediately without accumulation
-                m_mouse.moveForwardHalf();
                 break;
             case TURN_LEFT_45:
                 accumulative_forward(move_forward_for);
