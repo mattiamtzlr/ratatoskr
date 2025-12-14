@@ -20,16 +20,38 @@ enum SensorPosition {
 
 class ToF {
    public:
-    // Constructor performs initialization
+    /**
+     * Constructor performs initialization for backend library object
+     * @params `SensorPosition` for the location of the sensor in relation to
+     * the mouse, the i2c address and the xshut address.
+     */
     ToF(SensorPosition position, uint8_t i2c_address, uint8_t xshut_pin);
 
-    // Start continuous ranging
+    /**
+     * Start continuous ranging and apply offsets. Assign I2C address passed to
+     * constructor.
+     * - Also discards the initial few readings of the sensor (inaccurate)
+     */
     void begin();
 
-    // Read current corrected distance in millimeters
+    /**
+     * @returns current measured distance in millimeters.
+     * May return nonsense if the sensor is not ready.
+     */
     uint16_t read();
+
+    /**
+     * Read current distance in millimeters (non-blocking)
+     * Safely @returns the last valid reading if the sensor
+     * is not ready.
+     */
     uint16_t get_reading();
 
+    /**
+     * Calibration will sample the sensor and compare the
+     * reading to an expected value. Requires a Serial connection
+     * to output the difference and recommended offsets.
+     */
     void calibrate_sensor(uint16_t expected_distance);
 
     // Physical position on the mouse
