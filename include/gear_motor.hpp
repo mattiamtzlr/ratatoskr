@@ -2,12 +2,11 @@
 
 #include <Arduino.h>
 
-constexpr int MOTOR_FREQ = 20000;  // 20 kHz
-constexpr int MOTOR_RES = 8;       // 8-bit resolution
-
 class GearMotor {
    public:
-    // Trampoline used to attach the encoder ISR with a void* argument
+    /**
+     * ISR-Trampoline used to attach the encoder ISR with a void* argument.
+     */
     static void IRAM_ATTR isr_trampoline(void *obj);
 
     /*
@@ -25,35 +24,58 @@ class GearMotor {
 
     // --- Motion control (Motors-style API for a single motor) ---
 
-    /// Set signed speed: positive = one direction, negative = opposite.
-    /// Range is constrained to [-max_pwm, +max_pwm].
+    /**
+     * Set signed speed for the motor.
+     * Positive speed: CH1 active, CH2 low.
+     * Negative speed: CH2 active, CH1 low.
+     * Range is constrained to [-max_pwm, +max_pwm].
+     */
     void setSpeed(int speed);
 
-    /// Convenience: spin "clockwise" = positive speed
+    /**
+     * Spin motor "clockwise" at given (PWM) speed.
+     * Convenience: spin "clockwise" = negative speed
+     */
     void spin_cw(int speed);
 
-    /// Convenience: spin "counter-clockwise" = negative speed
+    /**
+     * Spin motor "counter-clockwise" at given (PWM) speed.
+     * Convenience: spin "counter-clockwise" = negative speed
+     */
     void spin_ccw(int speed);
 
-    /// Coast motor: both PWM channels = 0
+    /**
+     * Stop motor by coasting (both channels low).
+     */
     void coast();
 
-    /// Active brake: both channels driven HIGH (max_pwm)
-    /// ! DON'T RUN THIS FOR TOO LONG !
+    /**
+     * Active brake, (both channels driven HIGH).
+     * ! DON'T RUN THIS FOR TOO LONG !
+     */
     void brake();
 
     // --- Encoder / RPM measurement ---
 
-    /// Executed on encoder_pin_1 (channel A) rising edge.
+    /**
+     * Internal encoder ISR: executed on ENCODER_PIN_1 (channel A) rising edge.
+     */
     void IRAM_ATTR encoder_interrupt();
 
-    /// Get the RPM of the motor (based on last encoder period)
+    /**
+     * Get the estimated rpm of the motor
+     * > This is a good guess at best!
+     */
     int get_rpm();
 
-    /// Get total encoder tick count (signed, includes direction)
+    /**
+     * Get total encoder tick count (signed, includes direction)
+     */
     long get_encoder_count();
 
-    /// Reset encoder tick count to zero
+    /**
+     * Reset encoder tick count to zero.
+     */
     void reset_encoder_count();
 
     /// Accessor for configured max PWM
@@ -65,6 +87,11 @@ class GearMotor {
     const int IN2;
     const int CH1;
     const int CH2;
+
+    // 20 kHz
+    const int MOTOR_FREQ = 20000;
+    // 8-bit resolution
+    const int MOTOR_RES = 8;
 
     // Encoder pins (quadrature A/B)
     const int ENCODER_PIN_1;  // channel A

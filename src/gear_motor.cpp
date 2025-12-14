@@ -8,9 +8,6 @@ void IRAM_ATTR GearMotor::isr_trampoline(void *obj) {
     ((GearMotor *)obj)->encoder_interrupt();
 }
 
-/*
- * GearMotor class constructor
- */
 GearMotor::GearMotor(int in1, int in2, int ch1, int ch2, int encoder_pin_1,
                      int encoder_pin_2, int max_pwm, int encoder_sign)
     : IN1(in1),
@@ -42,9 +39,6 @@ GearMotor::GearMotor(int in1, int in2, int ch1, int ch2, int encoder_pin_1,
     pinMode(ENCODER_PIN_2, INPUT);
 }
 
-/**
- * Internal encoder ISR: executed on ENCODER_PIN_1 (channel A) rising edge.
- */
 void IRAM_ATTR GearMotor::encoder_interrupt() {
     uint32_t t_curr_i = micros();
     if (m_t_last_i < t_curr_i) {
@@ -66,9 +60,6 @@ void IRAM_ATTR GearMotor::encoder_interrupt() {
     }
 }
 
-/**
- * Get the rpm of the motor
- */
 int GearMotor::get_rpm() {
     /* avoid division by zero */
     if (m_delta_time == 0) {
@@ -85,11 +76,6 @@ int GearMotor::get_rpm() {
     return static_cast<int>(revolutions);
 }
 
-/**
- * Set signed speed for the motor.
- * Positive speed: CH1 active, CH2 low.
- * Negative speed: CH2 active, CH1 low.
- */
 void GearMotor::setSpeed(int speed) {
     speed = constrain(speed, -m_max_pwm, m_max_pwm);
 
@@ -102,36 +88,17 @@ void GearMotor::setSpeed(int speed) {
     }
 }
 
-/**
- * Spin motor "clockwise" at given (PWM) speed.
- */
 void GearMotor::spin_cw(int speed) { setSpeed(abs(speed)); }
 
-/**
- * Spin motor "counter-clockwise" at given (PWM) speed.
- */
 void GearMotor::spin_ccw(int speed) { setSpeed(-abs(speed)); }
 
-/**
- * Stop motor by coasting (both channels low).
- */
 void GearMotor::coast() { setSpeed(0); }
 
-/**
- * Active brake, (both channels driven HIGH).
- * ! DON'T RUN THIS FOR TOO LONG !
- */
 void GearMotor::brake() {
     ledcWrite(CH1, m_max_pwm);
     ledcWrite(CH2, m_max_pwm);
 }
 
-/**
- * Get encoder tick count
- */
 long GearMotor::get_encoder_count() { return m_encoder_count; }
 
-/**
- * Reset encoder tick count
- */
 void GearMotor::reset_encoder_count() { m_encoder_count = 0; }
