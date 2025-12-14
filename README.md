@@ -52,6 +52,7 @@ Ratatoskr requires the following electronic and mechanical components:
 | SSD1306 OLED screen                        | 1        | These come in multiple colors, we used hybrid yellow-blue                                    |
 | 9V (PP3) battery w/ connector              | 1        | We recommend using good quality batteries for this, as the current should be somewhat stable |
 | LEGO(r) 58090 Tire 30.4 x 14 Solid         | 2        | Other tires of approximately the same size should work                                       |
+| LEGO(r) 55982 Wheel 18mm x 14mm Axle Hole  | 2        | Alternatively, these can be 3D-printed: [STL file](./CAD/STL/rim_17.5x12.5mm_no_chamfer.stl) |
 | LEGO(r) 3705 Technic Axle 4L               | 2        | -                                                                                            |
 
 [^1]: Not tested, but should work given the torque and speed requirements
@@ -136,9 +137,43 @@ All of these commands need to be run from the root directory of this repository.
 > everything.
 
 ### The Maze
-amazeing lmao
+
+The maze we use for Ratatoskr uses the same walls and mounting posts as the previous iterations of micromice with a newly
+designed floor. The posts are 3D-printed with a pocket to put an M2.5 nut. The walls and baseplates are lasercut from MDF.
+As a sidenote, it would have probably been better to redesign the posts and walls as well, as they aren't that easy
+to assemble and use. However, for the sake of saving on resources and time, we decided to go with the existing ones.  
+To mount the posts to the baseplates M2.5 flathead screws are used whose heads can be countersunk in the underside of
+the baseplates. The walls can then simply be slid inbetween the posts.
+
+The baseplates have been designed to interlock similarly to puzzle tiles eliminating the need for complex mounting
+
+Below is both a technical drawing of the maze baseplates as well as a picture of 4 fully assembled maze baseplates with
+some walls.
+<p align="center"><img src="./img/maze_v2_drawing.png" width="50%"><!--img src="" width="50%"--></p>
+
 
 <br>
 
 ## Assembly
-fugging hell this takes long
+To assemble Ratatoskr, the following additional hardware is needed:
+
+| Item | Quantity | Note |
+| --- | --- | --- |
+| M2.5 threaded inserts | 6 | 4x for ESP32 mount, 2x for chassis |
+|  |  |  |
+|  |  |  |
+|  |  |  |
+|  |  |  |
+|  |  |  |
+
+### 3D-printing
+
+### Chassis
+
+### Drivetrain and Housing
+
+### Battery and ESP32 Mount
+
+### OLED Mount
+
+### Wiring
