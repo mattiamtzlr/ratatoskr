@@ -151,12 +151,11 @@ void Ratatoskr::turn(int angle) {
     float target = start_angle + angle;
 
     /*  Initial turn speed */
-    int turn_speed = MIN_TURN_PWM;
+    int turn_speed = TURN_PWM;
     if (angle < 60 && angle > -60) {
         turn_speed -= 4;
     }
 
-    // turn_speed = constrain(turn_speed, MIN_TURN_PWM, MAX_TURN_PWM);
 
     while (millis() - t_start < TURN_TIME_LIMIT * (abs(angle) / 180.0f)) {
         m_gyro.update();
@@ -171,13 +170,12 @@ void Ratatoskr::turn(int angle) {
              */
             coast();
             delay(1);
-            if (turn_speed > MIN_TURN_PWM) {
+            if (turn_speed > TURN_PWM) {
                 turn_speed -= 3;
-                if (turn_speed < MIN_TURN_PWM) turn_speed = MIN_TURN_PWM;
+                if (turn_speed < TURN_PWM) turn_speed = TURN_PWM;
             }
         } else {
             /*  Outside band: correct direction based on sign of error */
-            // int pwm = constrain(turn_speed, MIN_TURN_PWM, MAX_TURN_PWM);
 
             if (err > 0) { /*  need to increase angle (CCW) */
                 m_motor_left.spin_ccw(turn_speed);

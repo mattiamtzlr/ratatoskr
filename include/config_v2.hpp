@@ -21,8 +21,7 @@ constexpr int WALL_TO_WALL_MM = 160;
 /* ========================================================================== */
 /* |                                movement                                | */
 /* ========================================================================== */
-constexpr int MIN_TURN_PWM = 185;
-constexpr int MAX_TURN_PWM = 185;
+constexpr int TURN_PWM = 185;
 constexpr int TURN_TIME_LIMIT = 1500;
 constexpr float TURN_TRESHOLD = 3.f;
 
