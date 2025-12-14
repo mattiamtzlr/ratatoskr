@@ -22,6 +22,7 @@ enum Instruction {
     TURN_LEFT_90,
     TURN_RIGHT_45,
     TURN_RIGHT_90,
+    BLANK,
 };
 
 /*

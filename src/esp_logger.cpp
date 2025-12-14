@@ -91,6 +91,9 @@ void ESPLogger::write_solution(const std::vector<Instruction>& instr) {
             case (TURN_RIGHT_90):
                 to_write += 'R';
                 break;
+            case (BLANK):
+                to_write += '_';
+                break;
         }
     }
     nvsDB.putPair("1", std::to_string(get_count()).c_str());
@@ -119,6 +122,9 @@ bool ESPLogger::retrieve_solution(std::vector<Instruction>& instr) {
                     break;
                 case ('R'):
                     instr.push_back(TURN_RIGHT_90);
+                    break;
+                case ('_'):
+                    instr.push_back(BLANK);
                     break;
                 default:
                     return false;
