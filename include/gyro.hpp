@@ -41,25 +41,69 @@ struct Vector3D {
 class MPU6050 {
    public:
     MPU6050(uint8_t addr = MPU6050_ADDRESS);
-
-    // Setup gyroscope and accelerometer
+    /**
+     * Setup gyroscope and accelerometer.
+     * Also starts calibration.
+     */
     bool begin();
 
+    /**
+     * Set the sensitivity on the sensor.
+     */
     void setGyroSensitivity(GyroSensitivity range);
+
+    /**
+     * Set the sensitivity of the acceleration on the sensor.
+     */
     void setAccelSensitivity(AccelSensitivity range);
 
+    /**
+     * Read raw gyro measurement.
+     * Requires Wire to be set up.
+     */
     Vector3D readRawGyro();
+
+    /**
+     * Read raw acceleration measurement.
+     * Requires Wire to be set up.
+     */
     Vector3D readRawAccel();
 
-    Vector3D readScaledGyro();   // Rerturns deg/s
-    Vector3D readScaledAccel();  // Returns G's
+    /**
+     * Read gyro measurement.
+     * Requires Wire to be set up.
+     * @returns deg/s
+     */
+    Vector3D readScaledGyro();
 
-    // Get previous read of gyro angle
+    /**
+     * Read raw acceleration measurement.
+     * Requires Wire to be set up.
+     * @returns G's
+     */
+    Vector3D readScaledAccel();
+
+    /**
+     * Update the angle reading.
+     * - Call this after update
+     */
     float get_next_angle();
+
+    /**
+     * Getter for the current angle.
+     * Does not read the sensor.
+     */
     float get_current_angle();
+
+    /**
+     * Update the class internal timer for gyro readings.
+     */
     void update();
 
-    // Calc offsets
+    /**
+     * Calibrate the gyro.
+     * WARNING: Do not touch the sensor while it is calibrating
+     */
     void calibrateGyro();
 
    private:

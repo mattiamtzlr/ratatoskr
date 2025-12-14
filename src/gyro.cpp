@@ -168,14 +168,6 @@ void MPU6050::calibrateGyro() {
     unsigned long count = 0;
     delay(10);
     while (count < 2500) {
-        Serial.println("Collecting sample " + String(count + 1) + "/2500");
-        if (Serial.available()) {
-            char c = Serial.read();
-            if (c == '\n' || c == '\r') {
-                break;
-            }
-        }
-
         Vector3D vec = readScaledGyro();
         x_values += vec.x;
         y_values += vec.y;
@@ -195,7 +187,6 @@ void MPU6050::calibrateGyro() {
     X_OFFSET = (float)x_values / (float)count;
     Y_OFFSET = (float)y_values / (float)count;
     Z_OFFSET = (float)z_values / (float)count;
-
 }
 
 void MPU6050::update() {
