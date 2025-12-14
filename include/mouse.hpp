@@ -11,14 +11,39 @@ class Mouse {
     Direction dir = NORTH;
 
    public:
+    /*
+    * Turn left 90°, update the direction of the mouse
+    */
     void turnLeft();
+    /*
+    * Turn right 90°, update the direction of the mouse
+    */
     void turnRight();
+    /*
+    * Turn right 45°, update the direction of the mouse
+    */
     void turnRight45();
+    /*
+    * Turn left 45°, update the direction of the mouse
+    */
     void turnLeft45();
+    /*
+    * Turn left or right 180° (depending on where there is more space), 
+    * update the direction of the mouse
+    */
     void turn180();
 
+    /*
+    * Update the position of the mouse on `x,y`
+    */
     void setPosition(int x, int y);
+    /*
+    * Return the current position of the mouse 
+    */
     Position getPosition();
+    /*
+    * Get the current direction of the mouse
+    */
     Direction getDirection();
 
     bool is_in_diagonal();
