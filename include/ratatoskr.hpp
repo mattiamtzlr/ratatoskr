@@ -50,15 +50,27 @@ class Ratatoskr : public Mouse {
 
     /**
      * move @distance cells forward diagonally with PID control
+     * Uses Encoders and the front ToF sensors.
      */
     void moveDiagonal(float distance);
 
     /**
      * move @distance cells forward with PID control
+     * will select either moveForward(double) or moveDiagonal(double)
      */
     virtual void moveForward(int distance = 1);
+
+    /**
+     * move @distance cells forward with PID control
+     */
     virtual void moveForward(float distance);
+
     void moveForwardHalf(int num_half_steps = 1);
+
+    /**
+     * move @mm milimeters forward with minimal PID control
+     * If negative milimeters are passed this goes backward.
+     */
     void moveStraightMM(float mm);
 
     /**
@@ -82,11 +94,23 @@ class Ratatoskr : public Mouse {
      */
     virtual bool wallLeft();
 
+    /**
+     * Update the information on the oled screen.
+     */
     void update_screen(float gyro_angle, Face face = NEUTRAL);
-    virtual void update_visuals(Maze &maze);
+
+    /**
+     * Delay for @ms
+     */
+    virtual void pause(int ms);
+
+    /**
+     * Log @msg to flash memory
+     */
     virtual void log(std::string msg);
 
-    virtual void pause(int ms);
+    // These functions do nothing
+    virtual void update_visuals(Maze &maze);
     virtual bool wasReset();
     virtual void ackReset();
 };
