@@ -9,11 +9,11 @@ namespace Config {
 /* ========================================================================== */
 /* |                                  maze                                  | */
 /* ========================================================================== */
-constexpr int MAZE_WIDTH = 3;
-constexpr int MAZE_HEIGHT = 5;
+constexpr int MAZE_WIDTH = 9;
+constexpr int MAZE_HEIGHT = 9;
 
 const std::vector<Position> START_POINTS = {Position(0, 0)};
-const std::vector<Position> END_POINTS = {Position(2, 4)};
+const std::vector<Position> END_POINTS = {Position(4, 4)};
 
 constexpr int CELL_SIZE_MM = 180;
 constexpr int WALL_TO_WALL_MM = 160;
@@ -70,10 +70,10 @@ constexpr uint16_t SIDE_WALL_MM = 90;
 
 constexpr uint16_t TOF_SIDE_EXPECTED_MM = 50;      /* ----------------- */
 constexpr uint16_t TOF_FRONT_EXPECTED_MM = 40;     /* | measured and  | */
-constexpr int16_t TOF_LEFT_OFFSET_MM = -49;        /* | calibrated in | */
-constexpr int16_t TOF_FRONT_LEFT_OFFSET_MM = -17;  /* | calibration   | */
-constexpr int16_t TOF_FRONT_RIGHT_OFFSET_MM = -59; /* | cage (TM)     | */
-constexpr int16_t TOF_RIGHT_OFFSET_MM = -7;        /* ----------------- */
+constexpr int16_t TOF_LEFT_OFFSET_MM = -17;        /* | calibrated in | */
+constexpr int16_t TOF_FRONT_LEFT_OFFSET_MM = -6;   /* | calibration   | */
+constexpr int16_t TOF_FRONT_RIGHT_OFFSET_MM = -50; /* | cage (TM)     | */
+constexpr int16_t TOF_RIGHT_OFFSET_MM = -60;       /* ----------------- */
 
 /* ========================================================================== */
 /* |                                diagonals                               | */
