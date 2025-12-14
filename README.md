@@ -3,7 +3,7 @@
 Team members: Leoluca Bernardi, Leonardo Bolognese, Ali Gorgani, Mattia Metzler, Anthony Tamberg
 
 <p align="center">sick animation here</p>
-<p align="center">finished photo here</p>
+<p align="center"><img src="./img/ratatoskr_finished.jpg"</p>
 
 ## Introduction
 
@@ -154,7 +154,7 @@ The baseplates have been designed to interlock similarly to puzzle tiles elimina
 Below is both a technical drawing of the maze baseplates as well as a picture of 4 fully assembled maze baseplates with
 some walls.
 
-<p align="center"><img src="./img/maze_v2_drawing.png" width="50%"><img src="" width="50%"></p>
+<p align="center"><img src="./img/maze_v2_drawing.png" width="90%"></p>
 
 <br>
 
@@ -197,7 +197,7 @@ It is recommended to print all parts on the Prusa MK4 printers and to split the 
 parts.  
 After that's done, heat-set the threaded inserts into the battery holder and the chassis:
 
-<p align="center"><img src="" width="50%"><img src="" width="50%"></p>
+<p align="center"><img src="./img/01a_chassis.JPG" width="45%"><img src="./img/01b_battery_holder.JPG" width="45%"></p>
 
 ### Soldering
 
@@ -211,7 +211,7 @@ Insert the inverted (!) ball-caster into the cutout in the front. You'll probabl
 designed to be press-fit.  
 Mount the ToF sensors as shown below to the chassis using 2x M2 5mm screws each.
 
-<p align="center"><img src="" width="80%"></p>
+<p align="center"><img src="./img/02_chassis.JPG" width="90%"></p>
 
 ### Drivetrain and Housing
 
@@ -220,7 +220,7 @@ of the gyro and the shelf, and a nut at the underside of the shelf. Use 2x M2.5 
 picture -- the back edge of the gyro should be aligned with the edge of the shelf.  
 Then slide the shelf down the rails in drivetrain housing. Again, you will probably need to sand/file some things here.
 
-<p align="center"><img src="" width="80%"></p>
+<p align="center"><img src="./img/03a_middle_shelf.JPG" width="90%"></p>
 
 Put one adapter over each motor shaft and slide on a gear. Insert the LEGO axles into the assembled wheels, put the washer on top
 and slide them through the axle holes in the chassis, while simultaneously putting in the second set of gears. This
@@ -228,11 +228,11 @@ step is somewhat tricky but well doable with some pliers or tweezers.
 Before doing this, you need to file down the insides of the axle holes (including the holder in the middle) to make sure
 the wheels turn freely. This is again somewhat finnicky but well doable with a small round file.
 
-<p align="center"><img src="" width="50%"><img src="" width="50%"></p>
+<p align="center"><img src="./img/03b_drivetrain.JPG" width="45%"><img src="./img/03c_wheels.JPG" width="45%"></p>
 
 Finally, insert the motors as shown below. You might need to turn the wheels a bit so the gears mesh well.
 
-<p align="center"><img src="" width="80%"></p>
+<p align="center"><img src="./img/03d_motors.JPG" width="90%"></p>
 
 ### Battery and ESP32 Mount
 
@@ -243,13 +243,13 @@ Also make sure that the screws are inserted all the way, i.e. the heads should s
 
 At this point you can slide in the battery and secure it from behind using the little clip.
 
-<p align="center"><img src="" width="80%"></p>
+<p align="center"><img src="./img/04_battery_holder.JPG" width="90%"></p>
 
 ### OLED Mount
 
 Using 4x M2 5mm screws, screw the OLED mounts to the OLED board like in the below photo:
 
-<p align="center"><img src="" width="80%"></p>
+<p align="center"><img src="./img/05_oled_mount.JPG" width="90%"></p>
 
 ### Wiring, Motor driver and Power Supply
 
@@ -272,7 +272,7 @@ We recommend keeping the colors between the trees different so they're easier to
 > and there won't be enough space in the mouse to put all the cables. Measure the cables before you cut them by
 > dry-fitting them on the mouse.
 
-<p align="center"><img src="" width="50%"><img src="" width="50%"></p>
+<p align="center"><img src="./img/06a_comm_tree.JPG" width="45%"><img src="./img/06b_comm_trees.JPG" width="45%"></p>
 
 The four down-facing unused connectors in the above picture are used for the OLED screen, which can also be mounted now
 by sliding it into the cutouts on the battery holder.
@@ -291,10 +291,11 @@ Then wire the other three cables to the motor drivers and the motors directly. F
 on the [schematic](#schematic).  
 The encoder and motor input cables should also end in Dupont connectors to connect to the ESP32.
 
+<p align="center"><img src="./img/07_power_wires.JPG" width="90%"></p>
+
 Finally, mount all of this to the mouse, making sure that the motors are plugged in correctly. To do so, first mount
 the motor driver to the top shelf using 1x M2.5 5mm screw. The buck converter is attached using the 2x M2.5 5mm screws.
 
-<p align="center"><img src="" width="50%"><img src="" width="50%"></p>
 
 #### ESP32
 
@@ -308,4 +309,4 @@ connect, but not be too long as they might not have enough space otherwise.
 
 And you're done! Enjoy your finished micromouse! :smile:
 
-<p align="center"><img src="" width="100%"></p>
+<p align="center"><img src="./img/08_finished.JPG" width="90%"></p>
