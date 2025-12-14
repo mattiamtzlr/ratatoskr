@@ -92,8 +92,7 @@ void Solver::solve() {
                 best_dist = m_maze.distance_to_target_L2(neighbor);
             }
         }
-        // Identify turns to use them later for finding best path in the
-        // speedrun
+
         Direction curr_dir = m_mouse.getDirection();
         Position pos_before = m_mouse.getPosition();
         face(best_dir);
@@ -103,10 +102,10 @@ void Solver::solve() {
 }
 
 std::vector<GraphCoordinate>& Solver::dijkstra(
-    std::vector<GraphCoordinate>& path) {
+    std::vector<GraphCoordinate>& path, bool diagonals) {
     std::map<GraphCoordinate, std::set<Edge>>* adj_list =
         new std::map<GraphCoordinate, std::set<Edge>>;
-    m_maze.get_adj_list(*adj_list);
+    m_maze.get_adj_list(*adj_list, diagonals);
 
     // prio queue of (distance, position) with comparator on distance only
     p_queue pq;
