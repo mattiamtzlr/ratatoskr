@@ -10,11 +10,11 @@ namespace Config {
 /* ========================================================================== */
 /* |                                  maze                                  | */
 /* ========================================================================== */
-constexpr int MAZE_WIDTH = 7;
+constexpr int MAZE_WIDTH = 3;
 constexpr int MAZE_HEIGHT = 5;
 
 const std::vector<Position> START_POINTS = {Position(0, 0)};
-const std::vector<Position> END_POINTS = {Position(6, 4)};
+const std::vector<Position> END_POINTS = {Position(2, 4)};
 
 constexpr int CELL_SIZE_MM = 180;
 constexpr int WALL_TO_WALL_MM = 160;
@@ -22,33 +22,34 @@ constexpr int WALL_TO_WALL_MM = 160;
 /* ========================================================================== */
 /* |                                movement                                | */
 /* ========================================================================== */
-constexpr int TURN_PWM = 180;
+constexpr int TURN_PWM = 185;
 constexpr int TURN_TIME_LIMIT = 1500;
-constexpr float TURN_TRESHOLD = 0.2f;
+constexpr float TURN_TRESHOLD = 3.f;
 
-constexpr uint8_t FORWARD_PWM = 180;
+constexpr uint8_t FORWARD_PWM = 181;
 constexpr uint8_t FORWARD_FAST_PWM_CHUNK = 10;
 constexpr uint8_t FORWARD_FAST_PWM_MAX = 240;
-constexpr int STOP_DISTANCE = 40;
-
+constexpr float FORWARD_OVERSHOOT_SLOPE = 0.02f;
+constexpr int STOP_DISTANCE = 55;
 /* ========================================================================== */
 /* |                               dimensions                               | */
 /* ========================================================================== */
-constexpr u_int8_t WIDTH_MM = 70;
-constexpr float MM_PER_CELL = 180.0;
+constexpr uint8_t WIDTH_MM = 70;
 constexpr float DIST_BETWEEN_SENSORS_MM = 46.0f;
 
 /* ========================================================================== */
 /* |                               motor stuff                              | */
 /* ========================================================================== */
-/*  one revolution is 31*pi mm = 97.4 mm */
-constexpr u_int8_t WHEEL_DIAMETER_MM = 31;
-
 constexpr uint8_t GEARING = 30;
 constexpr uint8_t ENCODER_MULTIPLIER = 6;
 
-/*  So encooder counts per mm = counts per rev / (WHEEL_DIAMETER_MM * pi) */
-constexpr float ENCODER_COUNTS_PER_MM = 190.0f / (WHEEL_DIAMETER_MM * M_PI);
+/* measured by pushing the mouse exactly one cell length */
+constexpr uint16_t ENCODER_COUNTS_PER_CELL = 370;
+
+/*  encoder counts per mm = counts per cell / cell size */
+constexpr float ENCODER_COUNTS_PER_MM =
+    static_cast<float>(ENCODER_COUNTS_PER_CELL) /
+    static_cast<float>(CELL_SIZE_MM);
 
 constexpr float PWM_UPDATE_RATIO = .6f;
 constexpr float MAX_PWM_CORRECTION = 30.0f;
@@ -78,5 +79,5 @@ constexpr int16_t TOF_RIGHT_OFFSET_MM = -7;       /* ----------------- */
 /* ========================================================================== */
 /* |                                diagonals                               | */
 /* ========================================================================== */
-constexpr float MAX_DIST_MM = 100.0f;
+const float MAX_DIST_MM = 150.0f;
 }  // namespace Config
