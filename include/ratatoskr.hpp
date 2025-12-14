@@ -28,9 +28,16 @@ class Ratatoskr : public Mouse {
     bool in_diagonal;
 
     bool too_close_front(uint16_t front_left_dist, uint16_t front_right_dist);
+
     inline void stop();
     inline void coast();
     inline void safe_stop();
+
+    inline void forward(int pwm_left, int pwm_right);
+    inline void backward(int pwm_left, int pwm_right);
+
+    inline void in_place_turn_left(int pwm);
+    inline void in_place_turn_right(int pwm);
 
     PID m_pid_encoders{0.75, 0.8, 0.1};
     PID m_pid_tof_sides{0.5, 0.0, 0.0};

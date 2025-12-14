@@ -18,8 +18,152 @@ Ratatoskr::Ratatoskr(GearMotor &motor_left, GearMotor &motor_right,
       m_oled(oled),
       in_diagonal(false) {}
 
-/* ============================[ MOVEMENT ]================================== */
+void Ratatoskr::update_visuals(Maze &maze) {}
+void Ratatoskr::pause(int ms) { delay(ms); }
+bool Ratatoskr::wasReset() { return false; }
+void Ratatoskr::ackReset() {}
 
+void Ratatoskr::log(std::string msg) { ESPLogger::log(msg); }
+
+/* =============================[ SENSING ] ================================= */
+bool Ratatoskr::wallFront() {
+    uint16_t distance_front_left = m_tof_front_left.get_reading();
+    uint16_t distance_front_right = m_tof_front_right.get_reading();
+
+    return (distance_front_left > 0) && (distance_front_left < FRONT_WALL_MM) ||
+           (distance_front_right > 0) && (distance_front_right < FRONT_WALL_MM);
+}
+
+bool Ratatoskr::wallRight() {
+    uint16_t distance_right = m_tof_right.get_reading();
+    return (distance_right > 0) && (distance_right < SIDE_WALL_MM);
+}
+
+bool Ratatoskr::wallLeft() {
+    uint16_t distance_left = m_tof_left.get_reading();
+    return (distance_left > 0) && (distance_left < SIDE_WALL_MM);
+}
+
+/* ============================[ SCREEN ]================================== */
+void Ratatoskr::update_screen(float gyro_angle, Face face) {
+    m_oled.clear();
+    switch (m_oled.mode) {
+        case DEBUG: {
+            uint16_t left_rpm = m_motor_left.get_rpm();
+            uint16_t right_rpm = m_motor_right.get_rpm();
+            m_oled.update_status_bar(abs(floor(gyro_angle)), left_rpm,
+                                     right_rpm);
+
+            uint16_t tof_left = m_tof_left.get_reading();
+            uint16_t tof_front_left = m_tof_front_left.get_reading();
+            uint16_t tof_front_right = m_tof_front_right.get_reading();
+            uint16_t tof_right = m_tof_right.get_reading();
+            m_oled.update_ToFs(tof_left, tof_front_left, tof_front_right,
+                               tof_right);
+
+            break;
+        }
+
+        default:
+            m_oled.draw_face(face);
+    }
+    m_oled.display();
+}
+
+/* ============================[ MOVEMENT ]================================== */
+void Ratatoskr::forward(int pwm_left, int pwm_right) {
+    m_motor_left.spin_cw(pwm_left);
+    m_motor_right.spin_ccw(pwm_right);
+}
+void Ratatoskr::backward(int pwm_left, int pwm_right) {
+    m_motor_left.spin_ccw(pwm_left);
+    m_motor_right.spin_cw(pwm_right);
+}
+void Ratatoskr::in_place_turn_left(int pwm) {
+    m_motor_left.spin_ccw(pwm);
+    m_motor_right.spin_ccw(pwm);
+}
+void Ratatoskr::in_place_turn_right(int pwm) {
+    m_motor_left.spin_cw(pwm);
+    m_motor_right.spin_cw(pwm);
+}
+void Ratatoskr::stop() {
+    m_motor_left.brake();
+    m_motor_right.brake();
+}
+
+void Ratatoskr::coast() {
+    m_motor_left.coast();
+    m_motor_right.coast();
+}
+
+void Ratatoskr::safe_stop() {
+    coast();
+    delay(1);
+    stop();
+    delay(2);
+    coast();
+}
+
+void Ratatoskr::moveForward(int distance_cells) {
+    /*  Keep maze state in sync */
+    Mouse::moveForward(distance_cells);
+    Direction d = Mouse::getDirection();
+    if (d == NORTH || d == EAST || d == SOUTH || d == WEST)
+        moveForward((float)distance_cells);
+    else
+        moveDiagonal((float)distance_cells);
+}
+
+void Ratatoskr::moveForwardHalf(int num_half_steps) {
+    safe_stop();
+    Direction d = Mouse::getDirection();
+    bool is_cardinal = (d == NORTH || d == EAST || d == SOUTH || d == WEST);
+    if (!is_cardinal) {
+        // in_diagonal = true;
+        moveDiagonal((float)num_half_steps * 0.5f);
+        return;
+    }
+    if (in_diagonal) {
+        moveForward((float)num_half_steps * 0.5f);
+        in_diagonal = false;
+        return;
+    }
+    float JITTER_DISTANCE = 15.f;
+    bool has_passed_pole = false;
+    int changes = wallLeft() && wallRight() ? 1 : 2;
+    int count = 0;
+    if (!wallLeft()) {
+        while (!has_passed_pole) {
+            moveStraightMM(JITTER_DISTANCE);
+            if (wallLeft() && count == 0) {
+                count++;
+            } else if ((!wallRight() || !wallLeft()) && count == 1) {
+                has_passed_pole = true;
+            }
+        }
+    } else if (!wallRight()) {
+        while (!has_passed_pole) {
+            moveStraightMM(JITTER_DISTANCE);
+            if (wallRight() && count == 0) {
+                count++;
+            } else if ((!wallRight() || !wallLeft()) && count == 1) {
+                has_passed_pole = true;
+            }
+        }
+    } else if (changes == 1) {
+        while (!has_passed_pole) {
+            moveStraightMM(JITTER_DISTANCE);
+            if ((!wallRight() || !wallLeft())) {
+                has_passed_pole = true;
+            }
+        }
+    }
+    moveStraightMM(10.0f);
+    delay(10);
+    in_diagonal = true;
+    has_passed_pole = false;  // i know we do this on init but fuck you
+}
 constexpr float TRESH = 10.0f;
 void Ratatoskr::moveDiagonal(float distance) {
     /*  Convert cells to mm and then to encoder counts */
@@ -109,8 +253,7 @@ void Ratatoskr::moveDiagonal(float distance) {
         pwm_left = constrain(pwm_left, 70, 240);
         pwm_right = constrain(pwm_right, 70, 240);
 
-        m_motor_left.spin_cw(pwm_left);
-        m_motor_right.spin_ccw(pwm_right);
+        forward(pwm_left, pwm_right);
 
         delay(loop_delay_ms);
 
@@ -156,7 +299,6 @@ void Ratatoskr::turn(int angle) {
         turn_speed -= 4;
     }
 
-
     while (millis() - t_start < TURN_TIME_LIMIT * (abs(angle) / 180.0f)) {
         m_gyro.update();
         float yaw = m_gyro.get_next_angle();
@@ -178,11 +320,9 @@ void Ratatoskr::turn(int angle) {
             /*  Outside band: correct direction based on sign of error */
 
             if (err > 0) { /*  need to increase angle (CCW) */
-                m_motor_left.spin_ccw(turn_speed);
-                m_motor_right.spin_ccw(turn_speed);
+                in_place_turn_left(turn_speed);
             } else { /*  err < 0, need to decrease angle (CW) */
-                m_motor_left.spin_cw(turn_speed);
-                m_motor_right.spin_cw(turn_speed);
+                in_place_turn_right(turn_speed);
             }
         }
     }
@@ -198,66 +338,6 @@ void Ratatoskr::turn(int angle) {
 bool Ratatoskr::too_close_front(uint16_t fl, uint16_t fr) {
     bool res = (fl < STOP_DISTANCE && fr < STOP_DISTANCE);
     return res;
-}
-
-void Ratatoskr::moveForward(int distance_cells) {
-    /*  Keep maze state in sync */
-    Mouse::moveForward(distance_cells);
-    Direction d = Mouse::getDirection();
-    if (d == NORTH || d == EAST || d == SOUTH || d == WEST)
-        moveForward((float)distance_cells);
-    else
-        moveDiagonal((float)distance_cells);
-}
-
-void Ratatoskr::moveForwardHalf(int num_half_steps) {
-    safe_stop();
-    Direction d = Mouse::getDirection();
-    bool is_cardinal = (d == NORTH || d == EAST || d == SOUTH || d == WEST);
-    if (!is_cardinal) {
-        // in_diagonal = true;
-        moveDiagonal((float)num_half_steps * 0.5f);
-        return;
-    }
-    if (in_diagonal) {
-        moveForward((float)num_half_steps * 0.5f);
-        in_diagonal = false;
-        return;
-    }
-    float JITTER_DISTANCE = 15.f;
-    bool has_passed_pole = false;
-    int changes = wallLeft() && wallRight() ? 1 : 2;
-    int count = 0;
-    if (!wallLeft()) {
-        while (!has_passed_pole) {
-            moveStraightMM(JITTER_DISTANCE);
-            if (wallLeft() && count == 0) {
-                count++;
-            } else if ((!wallRight() || !wallLeft()) && count == 1) {
-                has_passed_pole = true;
-            }
-        }
-    } else if (!wallRight()) {
-        while (!has_passed_pole) {
-            moveStraightMM(JITTER_DISTANCE);
-            if (wallRight() && count == 0) {
-                count++;
-            } else if ((!wallRight() || !wallLeft()) && count == 1) {
-                has_passed_pole = true;
-            }
-        }
-    } else if (changes == 1) {
-        while (!has_passed_pole) {
-            moveStraightMM(JITTER_DISTANCE);
-            if ((!wallRight() || !wallLeft())) {
-                has_passed_pole = true;
-            }
-        }
-    }
-    moveStraightMM(10.0f);
-    delay(10);
-    in_diagonal = true;
-    has_passed_pole = false;  // i know we do this on init but fuck you
 }
 
 void Ratatoskr::moveForward(float distance_cells) {
@@ -308,7 +388,8 @@ void Ratatoskr::moveForward(float distance_cells) {
     while (avg_counts < target_counts) {
         // Go slow for first cell to correct bad turns
         // Only reduce speed when we're close to the target
-        if ((avg_counts > target_counts * (distance_cells - 2) / distance_cells) ||
+        if ((avg_counts >
+             target_counts * (distance_cells - 2) / distance_cells) ||
             avg_counts < target_counts * 1 / distance_cells)
             BASE_PWM = FORWARD_PWM;
         else {
@@ -397,8 +478,7 @@ void Ratatoskr::moveForward(float distance_cells) {
         pwm_left = constrain(pwm_left, 70, 240);
         pwm_right = constrain(pwm_right, 70, 240);
 
-        m_motor_left.spin_cw(pwm_left);
-        m_motor_right.spin_ccw(pwm_right);
+        forward(pwm_left, pwm_right);
 
         had_side_wall_prev = has_side_wall;
 
@@ -467,13 +547,9 @@ void Ratatoskr::moveStraightMM(float mm) {
         pwm_right = constrain(pwm_right, 70, 240);
 
         if (dir > 0) {
-            /* forward */
-            m_motor_left.spin_cw(pwm_left);
-            m_motor_right.spin_ccw(pwm_right);
+            forward(pwm_left, pwm_right);
         } else {
-            /* backward */
-            m_motor_left.spin_ccw(pwm_left);
-            m_motor_right.spin_cw(pwm_right);
+            backward(pwm_left, pwm_right);
         }
 
         delay(loop_delay);
@@ -488,75 +564,3 @@ void Ratatoskr::moveStraightMM(float mm) {
     }
     safe_stop();
 }
-
-/**
- * STOOOOOOP
- */
-void Ratatoskr::stop() {
-    m_motor_left.brake();
-    m_motor_right.brake();
-}
-
-void Ratatoskr::coast() {
-    m_motor_left.coast();
-    m_motor_right.coast();
-}
-
-void Ratatoskr::safe_stop() {
-    coast();
-    delay(1);
-    stop();
-    delay(2);
-    coast();
-}
-
-/* =============================[ SENSING ] ================================= */
-bool Ratatoskr::wallFront() {
-    uint16_t distance_front_left = m_tof_front_left.get_reading();
-    uint16_t distance_front_right = m_tof_front_right.get_reading();
-
-    return (distance_front_left > 0) && (distance_front_left < FRONT_WALL_MM) ||
-           (distance_front_right > 0) && (distance_front_right < FRONT_WALL_MM);
-}
-
-bool Ratatoskr::wallRight() {
-    uint16_t distance_right = m_tof_right.get_reading();
-    return (distance_right > 0) && (distance_right < SIDE_WALL_MM);
-}
-
-bool Ratatoskr::wallLeft() {
-    uint16_t distance_left = m_tof_left.get_reading();
-    return (distance_left > 0) && (distance_left < SIDE_WALL_MM);
-}
-
-void Ratatoskr::update_screen(float gyro_angle, Face face) {
-    m_oled.clear();
-    switch (m_oled.mode) {
-        case DEBUG: {
-            uint16_t left_rpm = m_motor_left.get_rpm();
-            uint16_t right_rpm = m_motor_right.get_rpm();
-            m_oled.update_status_bar(abs(floor(gyro_angle)), left_rpm,
-                                     right_rpm);
-
-            uint16_t tof_left = m_tof_left.get_reading();
-            uint16_t tof_front_left = m_tof_front_left.get_reading();
-            uint16_t tof_front_right = m_tof_front_right.get_reading();
-            uint16_t tof_right = m_tof_right.get_reading();
-            m_oled.update_ToFs(tof_left, tof_front_left, tof_front_right,
-                               tof_right);
-
-            break;
-        }
-
-        default:
-            m_oled.draw_face(face);
-    }
-    m_oled.display();
-}
-
-void Ratatoskr::update_visuals(Maze &maze) {}
-void Ratatoskr::pause(int ms) { delay(ms); }
-bool Ratatoskr::wasReset() { return false; }
-void Ratatoskr::ackReset() {}
-
-void Ratatoskr::log(std::string msg) { ESPLogger::log(msg); }
