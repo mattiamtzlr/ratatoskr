@@ -3,7 +3,38 @@
 Team members: Leoluca Bernardi, Leonardo Bolognese, Ali Gorgani, Mattia Metzler, Anthony Tamberg
 
 <p align="center">sick animation here</p>
-<p align="center"><img src="./img/ratatoskr_finished.jpg"</p>
+<p align="center"><img width="90%" src="./img/ratatoskr_finished.jpg"</p>
+
+## Table of Contents
+
+<!-- mtoc-start -->
+
+* [Introduction](#introduction)
+  * [Inspiration and References](#inspiration-and-references)
+* [Design](#design)
+  * [Hardware](#hardware)
+    * [Schematic](#schematic)
+  * [Firmware and Software](#firmware-and-software)
+    * [Firmware](#firmware)
+    * [Software and Logic](#software-and-logic)
+    * [PIO Setup](#pio-setup)
+  * [The Maze](#the-maze)
+* [Assembly](#assembly)
+  * [3D-printing](#3d-printing)
+  * [Soldering](#soldering)
+  * [Chassis](#chassis)
+  * [Drivetrain and Housing](#drivetrain-and-housing)
+  * [Battery and ESP32 Mount](#battery-and-esp32-mount)
+  * [OLED Mount](#oled-mount)
+  * [Wiring, Motor driver and Power Supply](#wiring-motor-driver-and-power-supply)
+    * [Communication Cable Trees](#communication-cable-trees)
+    * [Battery Connector, Buck Converter and Motor Driver](#battery-connector-buck-converter-and-motor-driver)
+    * [ESP32](#esp32)
+    * [XSHUT Cables](#xshut-cables)
+
+<!-- mtoc-end -->
+
+<br>
 
 ## Introduction
 
@@ -29,6 +60,7 @@ creatures capable of traversing the complicated insides of Yggdrasil.
 For your enjoyment, here's an image from a 17<sup>th</sup> icelandic manuscript depicting Ratatoskr, taken from Wikipedia
 (public domain).
 
+<p></p>
 <br>
 
 ## Design
@@ -61,7 +93,7 @@ Ratatoskr requires the following electronic and mechanical components:
 
 Below is the full electronics schematic of ratatoskr.
 
-<p align="center"><img src="./img/schematic.png"></p>
+<p align="center"><img width="90%" src="./img/schematic.png"></p>
 Note that the exact pinout of the components might differ to the actual parts, as there are generally many different
 versions available.
 
@@ -295,7 +327,6 @@ The encoder and motor input cables should also end in Dupont connectors to conne
 
 Finally, mount all of this to the mouse, making sure that the motors are plugged in correctly. To do so, first mount
 the motor driver to the top shelf using 1x M2.5 5mm screw. The buck converter is attached using the 2x M2.5 5mm screws.
-
 
 #### ESP32
 
