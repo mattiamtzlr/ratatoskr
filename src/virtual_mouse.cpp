@@ -3,6 +3,7 @@
 #include <iostream>
 #include <vector>
 #include <cmath>
+#include <unistd.h>
 
 #include "API.hpp"
 #include "util.hpp"
@@ -44,9 +45,6 @@ void VirtualMouse::turn(int angle) {
         API::turnLeft();
         API::turnLeft();
     }
-    // TODO: Some sort of logging indicating that turning non-90 is not possible
-    // in MMS
-    // NOTE: YES IT IS THERE IS API::TURN45DEGREES
 }
 
 bool VirtualMouse::wallFront() {
@@ -115,6 +113,6 @@ void VirtualMouse::update_visuals(Maze& maze) {
     for (auto& p : route) API::setColor(p.x, p.y, 'B');
 }
 
-void VirtualMouse::pause(int ms) { sleep(ms); }
+void VirtualMouse::pause(int s) { sleep(s * 1e-3); }
 bool VirtualMouse::wasReset() { return API::wasReset(); }
 void VirtualMouse::VirtualMouse::ackReset() { return API::ackReset(); }
