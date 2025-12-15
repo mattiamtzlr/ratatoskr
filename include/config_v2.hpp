@@ -23,7 +23,7 @@ constexpr int WALL_TO_WALL_MM = 160;
 /* ========================================================================== */
 constexpr int TURN_PWM = 185;
 constexpr int TURN_TIME_LIMIT = 1500;
-constexpr float TURN_TRESHOLD = 3.f;
+constexpr float TURN_TRESHOLD = 2.f;
 
 constexpr uint8_t FORWARD_PWM = 181;
 constexpr uint8_t FORWARD_FAST_PWM_CHUNK = 10;
