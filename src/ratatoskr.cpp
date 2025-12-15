@@ -116,6 +116,7 @@ void Ratatoskr::moveForward(int distance_cells) {
 }
 
 void Ratatoskr::moveForwardHalf(int num_half_steps) {
+    delay(100);
     safe_stop();
     Direction d = Mouse::getDirection();
     bool is_cardinal = (d == NORTH || d == EAST || d == SOUTH || d == WEST);
@@ -276,7 +277,7 @@ void Ratatoskr::moveDiagonal(float distance) {
     safe_stop();
     // delay(1000);
     // moveStraightMM(35.0f);
-    delay(1000);
+    delay(50);
 }
 
 void Ratatoskr::turn(int angle) {
@@ -294,7 +295,7 @@ void Ratatoskr::turn(int angle) {
     int requested_turn = angle;
 
     if (abs(requested_turn) == 90) {
-        moveStraightMM(-20.0f);
+        moveStraightMM(-15.0f);
     }
     unsigned long t_start = millis();
     m_gyro.update();
@@ -396,7 +397,7 @@ void Ratatoskr::moveForward(float distance_cells) {
         // Only reduce speed when we're close to the target
         if ((avg_counts >
              target_counts * (distance_cells - 2) / distance_cells) ||
-            avg_counts < target_counts * 1 / distance_cells)
+            avg_counts < target_counts / (0.5 *distance_cells))
             BASE_PWM = FORWARD_PWM;
         else {
             BASE_PWM =
