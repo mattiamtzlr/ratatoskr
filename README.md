@@ -183,8 +183,7 @@ the baseplates. The walls can then simply be slid inbetween the posts.
 
 The baseplates have been designed to interlock similarly to puzzle tiles eliminating the need for complex mounting
 
-Below is both a technical drawing of the maze baseplates as well as a picture of 4 fully assembled maze baseplates with
-some walls.
+Below is a technical drawing of the maze baseplates.
 
 <p align="center"><img src="./img/maze_v2_drawing.png" width="90%"></p>
 
@@ -250,7 +249,7 @@ Mount the ToF sensors as shown below to the chassis using 2x M2 5mm screws each.
 Screw the gyro to the middle shelf of the drivetrain housing making sure to put three (3) washers between the underside
 of the gyro and the shelf, and a nut at the underside of the shelf. Use 2x M2.5 10mm screws. Take note of the orientation of the gyro in the below
 picture -- the back edge of the gyro should be aligned with the edge of the shelf.  
-Then slide the shelf down the rails in drivetrain housing. Again, you will probably need to sand/file some things here.
+Then slide the shelf down the rails in the drivetrain housing. Again, you will probably need to sand/file some things here.
 
 <p align="center"><img src="./img/03a_middle_shelf.JPG" width="90%"></p>
 
