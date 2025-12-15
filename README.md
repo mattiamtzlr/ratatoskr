@@ -47,7 +47,7 @@ can take diagonal paths if it is more efficient.
 
 ### Inspiration and References
 
-This project is inspired by the micromice of a previous iteration of the course, namely
+This project is inspired by the micromice of a previous iteration of the course, specifically
 [MinosMouse](https://github.com/epfl-cs358/2024fa-minosmouse) and
 [PicoMouse](https://github.com/epfl-cs358/2024fa-picomouse). We used their projects to get an idea of the needed
 components and the general layout of the software.  
@@ -129,7 +129,7 @@ To make testing easier we use [MMS](https://github.com/mackorone/mms), a micromo
 behavior of Ratatoskr without physically needing to run it in a maze.
 
 Ratatoskr uses _principal-integral-derivative_ (PID) controllers to generate precise and stable movement. These
-controllers constantly adjust the motor power based on sensor feedback, allowing the micromouse to correct itself on the
+controllers continually adjust the motor power based on sensor feedback, allowing the micromouse to correct itself on the
 fly. There are three PID systems in total:
 
 1. Motor encoders: ensure that both wheels spin at the same, correct rate allowing for controlled acceleration.
@@ -137,7 +137,7 @@ fly. There are three PID systems in total:
    maze.
 3. Front ToF sensors: ensure that the mouse stays centered during diagonals and detect the end of diagonals.
 
-To find the best path in the maze, Ratatoskr uses a floodfill algorithm while constantly updating its image of the maze
+To find the best path in the maze, Ratatoskr uses a floodfill algorithm while regularly updating its image of the maze
 using the sensors. The best path is then extracted from a Dijkstra graph constructed from this information. The Dijkstra
 algorithm is tuned to favor diagonals over turns. This path is finally further optimised to combine multiple forward
 movements into one so that Ratatoskr doesn't stop at every cell.
@@ -320,8 +320,8 @@ And you're done! Enjoy your finished micromouse! :smile:
 
 #### PIO Setup
 
-The [`platformio.ini`](./platformio.ini) file specifies the environment of the project, namely the microcontroller and
-the libraries needed for the project. To easiest way of interacting with PlatformIO is their
+The [`platformio.ini`](./platformio.ini) file specifies the environment of the project, which for this project is the 
+microcontroller and the libraries needed for the project. To easiest way of interacting with PlatformIO is their
 [CLI](https://docs.platformio.org/en/latest/core/index.html) which is used as follows:
 
 - Compile the project
