@@ -2,8 +2,9 @@
 
 Team members: Leoluca Bernardi, Leonardo Bolognese, Ali Gorgani, Mattia Metzler, Anthony Tamberg
 
-<p align="center">sick animation here</p>
-<p align="center"><img width="90%" src="./img/ratatoskr_finished.jpg"</p>
+<p align="center"><img width="90%" src="https://github.com/user-attachments/assets/68c0e55a-2afa-4a86-9273-187ae78718f4"></p>
+
+<p align="center"><img width="90%" src="./img/ratatoskr_finished.jpg"></p>
 
 ## Table of Contents
 
