@@ -299,7 +299,7 @@ In total that's six (6) female connectors, first split into two, one for ToFs/OL
 further split into five.  
 We recommend keeping the colors between the trees different so they're easier to differentiate, as in the photos below.
 
-> [!WARNING] Important
+> [!WARNING]
 > It's crucial to make these cables the right length. Too short and you won't be able to connect the components, too long
 > and there won't be enough space in the mouse to put all the cables. Measure the cables before you cut them by
 > dry-fitting them on the mouse.
