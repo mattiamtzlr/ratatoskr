@@ -9,11 +9,11 @@ namespace Config {
 /* ========================================================================== */
 /* |                                  maze                                  | */
 /* ========================================================================== */
-constexpr int MAZE_WIDTH = 7;
-constexpr int MAZE_HEIGHT = 3;
+constexpr int MAZE_WIDTH = 9;
+constexpr int MAZE_HEIGHT = 9;
 
 const std::vector<Position> START_POINTS = {Position(0, 0)};
-const std::vector<Position> END_POINTS = {Position(6, 2)};
+const std::vector<Position> END_POINTS = {Position(8, 8)};
 
 constexpr int CELL_SIZE_MM = 180;
 constexpr int WALL_TO_WALL_MM = 160;
@@ -43,7 +43,7 @@ constexpr uint8_t GEARING = 30;
 constexpr uint8_t ENCODER_MULTIPLIER = 6;
 
 /* measured by pushing the mouse exactly one cell length */
-constexpr uint16_t ENCODER_COUNTS_PER_CELL = 255;
+constexpr uint16_t ENCODER_COUNTS_PER_CELL = 250;
 
 /*  encoder counts per mm = counts per cell / cell size */
 constexpr float ENCODER_COUNTS_PER_MM =
@@ -78,5 +78,5 @@ constexpr int16_t TOF_RIGHT_OFFSET_MM = -1;        /* ----------------- */
 /* ========================================================================== */
 /* |                                diagonals                               | */
 /* ========================================================================== */
-const float MAX_DIST_MM = 150.0f;
+const float MAX_DIST_MM = 200.0f;
 }  // namespace Config
