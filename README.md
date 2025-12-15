@@ -17,7 +17,6 @@ Team members: Leoluca Bernardi, Leonardo Bolognese, Ali Gorgani, Mattia Metzler,
   * [Firmware and Software](#firmware-and-software)
     * [Firmware](#firmware)
     * [Software and Logic](#software-and-logic)
-    * [PIO Setup](#pio-setup)
   * [The Maze](#the-maze)
 * [Assembly](#assembly)
   * [3D-printing](#3d-printing)
@@ -31,7 +30,9 @@ Team members: Leoluca Bernardi, Leonardo Bolognese, Ali Gorgani, Mattia Metzler,
     * [Battery Connector, Buck Converter and Motor Driver](#battery-connector-buck-converter-and-motor-driver)
     * [ESP32](#esp32)
     * [XSHUT Cables](#xshut-cables)
-
+* [Software Setup](#software-setup)
+    * [PIO Setup](#pio-setup)
+    * [MMS Setup](#mms-setup)
 <!-- mtoc-end -->
 
 <br>
@@ -141,36 +142,10 @@ using the sensors. The best path is then extracted from a Dijkstra graph constru
 algorithm is tuned to favor diagonals over turns. This path is finally further optimised to combine multiple forward
 movements into one so that Ratatoskr doesn't stop at every cell.
 
-#### PIO Setup
+Documentation can be accessed by running `make docs` at project root. By using [Doxygen](https://www.doxygen.nl/index.html)
+and a [CSS extension](https://github.com/jothepro/doxygen-awesome-css/tree/1f3620084ff75734ed192101acf40e9dff01d848) all 
+function headers get collected into a nice multipage format including call-graphs.
 
-The [`platformio.ini`](./platformio.ini) file specifies the environment of the project, namely the microcontroller and
-the libraries needed for the project. To easiest way of interacting with PlatformIO is their
-[CLI](https://docs.platformio.org/en/latest/core/index.html) which is used as follows:
-
-- Compile the project
-    ```sh
-    pio run
-    ```
-- Upload the project to the ESP32
-    ```sh
-    pio run --target upload
-    ```
-- Open the serial monitor
-    ```sh
-    pio device monitor
-    ```
-
-All of these commands need to be run from the root directory of this repository.
-
-> [!WARNING]
-> Before doing anything for the first time, run
->
-> ```sh
-> pio run --target compiledb
-> ```
->
-> from the command-line in the root directory to generate `compile_commands.json` which tells `clangd` how to compile
-> everything.
 
 ### The Maze
 
@@ -340,3 +315,64 @@ connect, but not be too long as they might not have enough space otherwise.
 And you're done! Enjoy your finished micromouse! :smile:
 
 <p align="center"><img src="./img/08_finished.JPG" width="90%"></p>
+
+## Software Setup
+
+#### PIO Setup
+
+The [`platformio.ini`](./platformio.ini) file specifies the environment of the project, namely the microcontroller and
+the libraries needed for the project. To easiest way of interacting with PlatformIO is their
+[CLI](https://docs.platformio.org/en/latest/core/index.html) which is used as follows:
+
+- Compile the project
+    ```sh
+    pio run
+    ```
+- Upload the project to the ESP32
+    ```sh
+    pio run --target upload
+    ```
+- Open the serial monitor
+    ```sh
+    pio device monitor
+    ```
+
+All of these commands need to be run from the root directory of this repository.
+
+> [!WARNING]
+> Before doing anything for the first time, run
+>
+> ```sh
+> pio run --target compiledb
+> ```
+>
+> from the command-line in the root directory to generate `compile_commands.json` which tells `clangd` how to compile
+> everything.
+
+#### MMS Setup
+
+To set up MMS, you first need to download the version of MMS corresponding to your operating system on the [MMS releases page](https://github.com/mackorone/mms/releases).
+
+<img src="./img/mms_config_field.jpg" align="right" height="25%">
+In the top right of your MMS program, you will find a box titled _Config_.
+
+- Press the `+` button to create a new configuration.
+    - Choose any *Name*
+    - Choose the project root directory for the *Directory* field
+    - Enter `make sim` as *Build Command*
+    - Enter `./out/sim.out` as *Run Command*
+    - Click ok
+- The button with the colorwheel is a simple way to adjust the colors of the simulation.
+
+
+<img src="./img/mms_controls_field.jpg" align="right" height="25%">
+Now you are ready to run the simulation.
+
+- Press the `Build` button to compile the mouse code.
+- Press the `Run` button to make it start.
+    - Moving the scale from :turtle: to :rabbit: will increase the speed.
+
+> [!WARNING]
+> If you are using windows, a unix dependency may cause an error.
+>
+> To fix this, change line 6 of `virtual_mouse.cpp` from `#include <unistd.h>` to `#include <windows.h>`
