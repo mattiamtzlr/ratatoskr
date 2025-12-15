@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <cmath>
 #include <deque>
+#include <iostream>
 #include <map>
 
 #include "config.hpp"
@@ -201,9 +202,11 @@ void Solver::filter_turns(std::vector<Instruction>& instr) {
     for (int i = 1; i < instr.size() - 3; i++) {
         if (instr[i] == TURN_LEFT_45 && instr[i + 1] == MOVE_FORWARD_HALF &&
             instr[i + 2] == TURN_LEFT_45) {
-            instr[i] = MOVE_FORWARD_HALF;
+            instr[i - 1] = MOVE_FORWARD;
+            instr[i] = BLANK;
             instr[i + 1] = TURN_LEFT_90;
-            instr[i + 2] = MOVE_FORWARD_HALF;
+            instr[i + 2] = MOVE_FORWARD;
+            instr[i + 3] = BLANK;
 
         } else if (instr[i] == TURN_RIGHT_45 &&
                    instr[i + 1] == MOVE_FORWARD_HALF &&

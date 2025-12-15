@@ -131,11 +131,12 @@ void Ratatoskr::moveForwardHalf(int num_half_steps) {
         return;
     }
     float JITTER_DISTANCE = 15.f;
+    const size_t MAX_JITTER = 8;
     bool has_passed_pole = false;
     int changes = wallLeft() && wallRight() ? 1 : 2;
     int count = 0;
     if (!wallLeft()) {
-        while (!has_passed_pole) {
+        while (!has_passed_pole && count < MAX_JITTER) {
             moveStraightMM(JITTER_DISTANCE);
             if (wallLeft() && count == 0) {
                 count++;
@@ -145,7 +146,7 @@ void Ratatoskr::moveForwardHalf(int num_half_steps) {
         }
     } else if (!wallRight()) {
         while (!has_passed_pole) {
-            moveStraightMM(JITTER_DISTANCE);
+            moveStraightMM(JITTER_DISTANCE && count < MAX_JITTER);
             if (wallRight() && count == 0) {
                 count++;
             } else if ((!wallRight() || !wallLeft()) && count == 1) {
@@ -397,7 +398,7 @@ void Ratatoskr::moveForward(float distance_cells) {
         // Only reduce speed when we're close to the target
         if ((avg_counts >
              target_counts * (distance_cells - 2) / distance_cells) ||
-            avg_counts < target_counts / (0.5 *distance_cells))
+            avg_counts < target_counts / (0.5 * distance_cells))
             BASE_PWM = FORWARD_PWM;
         else {
             BASE_PWM =
