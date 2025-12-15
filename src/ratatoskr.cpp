@@ -168,7 +168,14 @@ constexpr float TRESH = 10.0f;
 void Ratatoskr::moveDiagonal(float distance) {
     /*  Convert cells to mm and then to encoder counts */
     int distance_mm = distance * CELL_SIZE_MM * sqrt(2);
-    long target_counts = (long)(distance_mm * ENCODER_COUNTS_PER_MM);
+
+    float overshoot_factor = 1.0f;
+    if (distance >= 1.0f) {
+        overshoot_factor += FORWARD_OVERSHOOT_SLOPE * (distance - 1.0f);
+    }
+
+    long target_counts =
+        (long)(distance_mm * ENCODER_COUNTS_PER_MM * overshoot_factor);
 
     const int BASE_PWM = FORWARD_PWM;
 
@@ -286,6 +293,9 @@ void Ratatoskr::turn(int angle) {
     }
     int requested_turn = angle;
 
+    if (abs(requested_turn) == 90) {
+        moveStraightMM(-20.0f);
+    }
     unsigned long t_start = millis();
     m_gyro.update();
 
@@ -312,10 +322,6 @@ void Ratatoskr::turn(int angle) {
              */
             coast();
             delay(1);
-            if (turn_speed > TURN_PWM) {
-                turn_speed -= 3;
-                if (turn_speed < TURN_PWM) turn_speed = TURN_PWM;
-            }
         } else {
             /*  Outside band: correct direction based on sign of error */
 
@@ -516,7 +522,7 @@ void Ratatoskr::moveStraightMM(float mm) {
 
     int t_now = millis();
     int t_prev = t_now;
-    int BASE_PWM = FORWARD_PWM - 15;
+    int BASE_PWM = FORWARD_PWM - 8;
 
     /* Same encoder PID as moveForward */
     long avg_counts = (labs(left_encoder) + labs(right_encoder)) / 2;
