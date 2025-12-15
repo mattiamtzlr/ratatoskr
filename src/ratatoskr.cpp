@@ -398,7 +398,7 @@ void Ratatoskr::moveForward(float distance_cells) {
         // Only reduce speed when we're close to the target
         if ((avg_counts >
              target_counts * (distance_cells - 2) / distance_cells) ||
-            avg_counts < target_counts / (0.5 * distance_cells))
+            avg_counts < target_counts *  (2/3) / distance_cells)
             BASE_PWM = FORWARD_PWM;
         else {
             BASE_PWM =
