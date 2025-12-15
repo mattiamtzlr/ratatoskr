@@ -31,8 +31,9 @@ Team members: Leoluca Bernardi, Leonardo Bolognese, Ali Gorgani, Mattia Metzler,
     * [ESP32](#esp32)
     * [XSHUT Cables](#xshut-cables)
 * [Software Setup](#software-setup)
-    * [PIO Setup](#pio-setup)
+  * [PIO Setup](#pio-setup)
     * [MMS Setup](#mms-setup)
+
 <!-- mtoc-end -->
 
 <br>
@@ -130,8 +131,6 @@ level code that handles solving a maze and calculating the final run without phy
 
 <p align="center"><video src='https://github.com/user-attachments/assets/aed72121-12ea-4d18-b9f5-ffeec3736798' height=100 width=100/></video></p>
 
-
-
 Ratatoskr uses _principal-integral-derivative_ (PID) controllers to generate precise and stable movement. These
 controllers continually adjust the motor power based on sensor feedback, allowing the micromouse to correct itself on the
 fly. There are three PID systems in total:
@@ -147,9 +146,8 @@ algorithm is tuned to favor diagonals over turns. This path is finally further o
 movements into one so that Ratatoskr doesn't stop at every cell.
 
 Documentation can be accessed by running `make docs` at project root. By using [Doxygen](https://www.doxygen.nl/index.html)
-and a [CSS extension](https://github.com/jothepro/doxygen-awesome-css/tree/1f3620084ff75734ed192101acf40e9dff01d848) all 
+and a [CSS extension](https://github.com/jothepro/doxygen-awesome-css/tree/1f3620084ff75734ed192101acf40e9dff01d848) all
 function headers get collected into a nice multipage format including call-graphs.
-
 
 ### The Maze
 
@@ -324,7 +322,7 @@ And you're done! Enjoy your finished micromouse! :smile:
 
 #### PIO Setup
 
-The [`platformio.ini`](./platformio.ini) file specifies the environment of the project, which for this project is the 
+The [`platformio.ini`](./platformio.ini) file specifies the environment of the project, which for this project is the
 microcontroller and the libraries needed for the project. To easiest way of interacting with PlatformIO is their
 [CLI](https://docs.platformio.org/en/latest/core/index.html) which is used as follows:
 
@@ -358,18 +356,19 @@ All of these commands need to be run from the root directory of this repository.
 To set up MMS, you first need to download the version of MMS corresponding to your operating system on the [MMS releases page](https://github.com/mackorone/mms/releases).
 
 <img src="./img/mms_config_field.jpg" align="right" height="25%">
+
 In the top right of your MMS program, you will find a box titled _Config_.
 
 - Press the `+` button to create a new configuration.
-    - Choose any *Name*
-    - Choose the project root directory for the *Directory* field
-    - Enter `make sim` as *Build Command*
-    - Enter `./out/sim.out` as *Run Command*
+    - Choose any _Name_
+    - Choose the project root directory for the _Directory_ field
+    - Enter `make sim` as _Build Command_
+    - Enter `./out/sim.out` as _Run Command_
     - Click ok
 - The button with the colorwheel is a simple way to adjust the colors of the simulation.
 
-
 <img src="./img/mms_controls_field.jpg" align="right" height="25%">
+
 Now you are ready to run the simulation.
 
 - Press the `Build` button to compile the mouse code.
