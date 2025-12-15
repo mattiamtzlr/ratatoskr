@@ -41,11 +41,8 @@ Team members: Leoluca Bernardi, Leonardo Bolognese, Ali Gorgani, Mattia Metzler,
 
 ## Introduction
 
-Ratatoskr is a small autonomous robot, called a 'micromouse' which can find the fastest path through a maze.
-In two separate `search` and `run` phases, the mouse first finds the most optimal path and then traverses it,
-trying to accomplish both in the shortest possible time. In this project we designed a compact micromouse capable
-of traversing a maze smoothly and precisely. Additionally we optimised the final `run` phase such that the mouse
-can take diagonal paths if it is more efficient.
+Ratatoskr is a small autonomous robotic 'micromouse' that can find the fastest path through a maze.
+In two separate `search` and `run` phases, the mouse first finds the most optimal path and then traverses it, doing both in the shortest possible time. In this project we designed a compact micromouse capable of traversing a maze smoothly, precisely, and efficiently, allowing it to take diagonal paths during the final `run`.
 
 ### Inspiration and References
 
@@ -53,14 +50,14 @@ This project is inspired by the micromice of a previous iteration of the course,
 [MinosMouse](https://github.com/epfl-cs358/2024fa-minosmouse) and
 [PicoMouse](https://github.com/epfl-cs358/2024fa-picomouse). We used their projects to get an idea of the needed
 components and the general layout of the software.  
-We also used parts of their maze for convenience and to save on resources and waste, as remaking these would
-include a lot of material and time. More about this in the maze section.
+We also used parts of their maze for convenience and to save on resources and waste, because remaking these would
+use a lot of material and time. There is more about this in the maze section.
 
 <img align="right" src="./img/ratatoskr_myth.png" height="150">
-Finally, the name 'Ratatoskr' comes from Norse mythology and refers to a squirrel which runs through the world-tree
+Finally, the name 'Ratatoskr' comes from Norse mythology and refers to a squirrel that runs through the world-tree
 Yggdrasil, carrying messages. We found this name to be quite fitting for our project, as Ratatoskr is one of the only
-creatures capable of traversing the complicated insides of Yggdrasil.  
-For your enjoyment, here's an image from a 17<sup>th</sup> icelandic manuscript depicting Ratatoskr, taken from Wikipedia
+creatures capable of navigating the complex interior of Yggdrasil.
+For your enjoyment, here is an image from a 17<sup>th</sup> icelandic manuscript depicting Ratatoskr, taken from Wikipedia
 (public domain).
 
 <p></p>
@@ -68,9 +65,8 @@ For your enjoyment, here's an image from a 17<sup>th</sup> icelandic manuscript 
 
 ## Design
 
-The design of Ratatoskr is made to be fully 3D-printable for most parts, with the remaining parts being common Lego
-pieces.  
-The final Micromouse weighs approximately 190g, it's 7cm wide and about 10cm long. Most of the weight comes from the
+By design, most parts of Ratatoskr are fully 3D-printable, with the remaining parts being common Lego pieces.  
+The final Micromouse weighs approximately 190g, it is 7cm wide and about 10cm long. Most of the weight comes from the
 9V battery used to power it.
 
 ### Hardware
@@ -97,8 +93,7 @@ Ratatoskr requires the following electronic and mechanical components:
 Below is the full electronics schematic of ratatoskr.
 
 <p align="center"><img width="90%" src="./img/schematic.png"></p>
-Note that the exact pinout of the components might differ to the actual parts, as there are generally many different
-versions available.
+Note that the exact pinout of the components might differ depending on the manufacturer and version of each part.
 
 ### Firmware and Software
 
@@ -118,11 +113,8 @@ We use the following libraries to simplify the hardware interfaces:
 Additionally, we use [PlatformIO](https://platformio.org/) to compile the source code for the ESP32 and to handle all
 the libraries above. See [PIO Setup](#pio-setup) for more details.
 
-All sensors communicate with the ESP over the I<sup>2</sup>C protocol, where the same SDA and SCL pin can be used for
-all sensors, as the components are able to use different addresses. An exception to this are the ToF sensors which
-additionally require some XSHUT logic. The OLED is also controlled via I<sup>2</sup>C.  
-There are C++ classes for most components which handle all their low-level usage and provide a nice high-level interface
-to interact with the components.
+All sensors communicate with the ESP over the I<sup>2</sup>C protocol because the components can be assigned to different addresses. As a result, we can use the same SDA and SCL pins for them. ToF sensors additionally require an extra pin for some XSHUT logic. The OLED is also controlled via I<sup>2</sup>C.  
+There are C++ classes for most components that handle all their low-level functionality and provide a clean, high-level interface for interacting with them.
 
 #### Software and Logic
 
@@ -141,26 +133,26 @@ fly. There are three PID systems in total:
 3. Front ToF sensors: ensure that the mouse stays centered during diagonals and detect the end of diagonals.
 
 To find the best path in the maze, Ratatoskr uses a floodfill algorithm while regularly updating its image of the maze
-using the sensors. The best path is then extracted from a Dijkstra graph constructed from this information. The Dijkstra
-algorithm is tuned to favor diagonals over turns. This path is finally further optimised to combine multiple forward
-movements into one so that Ratatoskr doesn't stop at every cell.
+using the sensors. The best path is then computed from a Dijkstra graph constructed from this information. The Dijkstra
+algorithm is tuned to favor diagonals over turns. This path is finally further optimized to combine multiple forward
+movements into one so that Ratatoskr does not stop at every cell.
 
 Documentation can be accessed by running `make docs` at project root. By using [Doxygen](https://www.doxygen.nl/index.html)
 and a [CSS extension](https://github.com/jothepro/doxygen-awesome-css/tree/1f3620084ff75734ed192101acf40e9dff01d848) all
-function headers get collected into a nice multipage format including call-graphs.
+function headers get collected into a nice multipage format including function headers, descriptions, and call-graphs.
 
 ### The Maze
 
-The maze we use for Ratatoskr uses the same walls and mounting posts as the previous iterations of micromice with a newly
-designed floor. The posts are 3D-printed with a pocket to put an M2.5 nut. The walls and baseplates are lasercut from MDF.
-As a sidenote, it would have probably been better to redesign the posts and walls as well, as they aren't that easy
-to assemble and use. However, for the sake of saving on resources and time, we decided to go with the existing ones.  
-To mount the posts to the baseplates M2.5 flathead screws are used whose heads can be countersunk in the underside of
-the baseplates. The walls can then simply be slid inbetween the posts.
+The maze we use for Ratatoskr uses the same wall pieces and mounting posts designed by the previous year's micromice teams, although with a newly
+designed tiled floor. The posts are 3D-printed with a pocket for an M2.5 nut. The walls and baseplates are lasercut from MDF.
+As a sidenote, it probably would have been better to redesign the posts and walls because they are not easy
+to assemble and use. However, to save resources and time, we decided to go with the existing ones.  
+To mount the posts to the baseplates, use M2.5 flathead screws, which can be countersunk to the underside of
+the baseplates with a tapered (hand) drill. The walls are simply slid in between the posts.
 
-The baseplates have been designed to interlock similarly to puzzle tiles eliminating the need for complex mounting
+The baseplates are designed to interlock like puzzle tiles, eliminating the need for complex mounting
 
-Below is a technical drawing of the maze baseplates.
+Below is a technical drawing of a maze baseplate.
 
 <p align="center"><img src="./img/maze_v2_drawing.png" width="90%"></p>
 
@@ -182,8 +174,8 @@ To assemble Ratatoskr, the following additional hardware is needed:
 
 In addition:
 
-- Various jumper cables, depending on the amount of servicability wanted.
-- An additional M2.5 5mm machine screw to screw into the hole on the ball caster, although this isn't necessarily needed.
+- Various jumper cables, depending on the amount of serviceability desired.
+- An additional M2.5 5mm machine screw to screw through the hole on the ball caster, although this is not strictly needed.
 
 ### 3D-printing
 
@@ -194,16 +186,16 @@ The following STL files need to be 3D-printed:
 | `./CAD/STL/miter_gear.stl`        | 4        | Drivetrain gears                                                                          |
 | `./CAD/STL/lego_adapter_v2b.stl`  | 2        | Motor shaft adapters, **brim recommended**                                                |
 | `./CAD/STL/screen_mount.stl`      | 2        | OLED screen mounts, **brim needed**                                                       |
-| `./CAD/STL/v2/ball_caster.stl`    | 1        | **Supports recommended**                                                                  |
-| `./CAD/STL/v2/battery_clip.stl`   | 1        | -                                                                                         |
-| `./CAD/STL/v2/battery_holder.stl` | 1        | **Supports needed**                                                                       |
-| `./CAD/STL/v2/chassis_cutout.stl` | 1        | Lightest version of chassis, **some supports needed for axle holes and sidewall cutouts** |
+| `./CAD/STL/v2/ball_caster.stl`    | 1        | Ball caster, **Supports recommended**                                                     |
+| `./CAD/STL/v2/battery_clip.stl`   | 1        | Battery clip                                                                              |
+| `./CAD/STL/v2/battery_holder.stl` | 1        | Battery holder, **Supports needed**                                                       |
+| `./CAD/STL/v2/chassis_cutout.stl` | 1        | Latest, Lightest ver. of chassis, **supports needed for axle holes and sidewall cutouts** |
 | `./CAD/STL/v2/middle_shelf.stl`   | 1        | Shelf to mount gyro on                                                                    |
 | `./CAD/STL/v2/top_shelf.stl`      | 1        | Shelf to mount motor driver on                                                            |
 
-It is recommended to print all parts on the Prusa MK4 printers and to split the print into the chassis and all the other
-parts.  
-After that's done, heat-set the threaded inserts into the battery holder and the chassis:
+It is recommended to print all parts on Prusa MK4 printers, splitting the job into two prints: the chassis and the remaining
+components.  
+After that is done, heat-set the threaded inserts into the battery holder and the chassis:
 
 <p align="center"><img src="./img/01a_chassis.JPG" width="45%"><img src="./img/01b_battery_holder.JPG" width="45%"></p>
 
@@ -215,7 +207,7 @@ For more details see photos further below.
 
 ### Chassis
 
-Insert the inverted (!) ball-caster into the cutout in the front. You'll probably have to sand this quite a bit, as it's
+Insert the inverted (!) ball-caster into the cutout in the front. You will probably have to sand this quite a bit, as it is
 designed to be press-fit.  
 Mount the ToF sensors as shown below to the chassis using 2x M2 5mm screws each.
 
@@ -224,8 +216,8 @@ Mount the ToF sensors as shown below to the chassis using 2x M2 5mm screws each.
 ### Drivetrain and Housing
 
 Screw the gyro to the middle shelf of the drivetrain housing making sure to put three (3) washers between the underside
-of the gyro and the shelf, and a nut at the underside of the shelf. Use 2x M2.5 10mm screws. Take note of the orientation of the gyro in the below
-picture -- the back edge of the gyro should be aligned with the edge of the shelf.  
+of the gyro and the shelf, and a nut at the underside of the shelf. Use 2x M2.5 10mm screws. Take note of the orientation of the gyro in the picture
+below -- the back edge of the gyro should be aligned with the edge of the shelf.  
 Then slide the shelf down the rails in the drivetrain housing. Again, you will probably need to sand/file some things here.
 
 <p align="center"><img src="./img/03a_middle_shelf.JPG" width="90%"></p>
@@ -271,13 +263,13 @@ I<sup>2</sup>C communication as follows:
 - four (4) connectors for the ToF sensors
 - one (1) connector each for the gyro and the OLED
 
-In total that's six (6) female connectors, first split into two, one for ToFs/OLED and one for gyro, the former then
+In total that is six (6) female connectors, first split into two, one for ToFs/OLED and one for gyro, the former then
 further split into five.  
-We recommend keeping the colors between the trees different so they're easier to differentiate, as in the photos below.
+We recommend keeping the colors between the trees different so they are easier to tell apart, as in the photos below.
 
 > [!WARNING]
-> It's crucial to make these cables the right length. Too short and you won't be able to connect the components, too long
-> and there won't be enough space in the mouse to put all the cables. Measure the cables before you cut them by
+> It is crucial to make these cables the right length. Too short and you will not be able to connect the components, too long
+> and there will not be enough space in the mouse to put all the cables. Measure the cables before you cut them by
 > dry-fitting them on the mouse.
 
 <p align="center"><img src="./img/06a_comm_tree.JPG" width="45%"><img src="./img/06b_comm_trees.JPG" width="45%"></p>
@@ -314,7 +306,7 @@ previous cables as specified on the schematic.
 The last step is to solder some short cables for the XSHUT pins on the ToF sensors. These should be just long enough to
 connect, but not be too long as they might not have enough space otherwise.
 
-And you're done! Enjoy your finished micromouse! :smile:
+And you are done! Enjoy your finished micromouse! :smile:
 
 <p align="center"><img src="./img/08_finished.JPG" width="90%"></p>
 
@@ -322,8 +314,8 @@ And you're done! Enjoy your finished micromouse! :smile:
 
 #### PIO Setup
 
-The [`platformio.ini`](./platformio.ini) file specifies the environment of the project, which for this project is the
-microcontroller and the libraries needed for the project. To easiest way of interacting with PlatformIO is their
+The [`platformio.ini`](./platformio.ini) file specifies the environment of the project, telling PlatformIO the
+microcontroller and the libraries needed for compilation and flashing. The easiest way of interacting with PlatformIO is their
 [CLI](https://docs.platformio.org/en/latest/core/index.html) which is used as follows:
 
 - Compile the project
@@ -348,7 +340,7 @@ All of these commands need to be run from the root directory of this repository.
 > pio run --target compiledb
 > ```
 >
-> from the command-line in the root directory to generate `compile_commands.json` which tells `clangd` how to compile
+> from the command-line in the root directory to generate `compile_commands.json` which tells `gcc/clang` how to compile
 > everything.
 
 #### MMS Setup
@@ -357,7 +349,7 @@ To set up MMS, you first need to download the version of MMS corresponding to yo
 
 <img src="./img/mms_config_field.jpg" align="right" height="25%">
 
-In the top right of your MMS program, you will find a box titled _Config_.
+At the top right of your MMS window, you will find a box titled _Config_.
 
 - Press the `+` button to create a new configuration.
     - Choose any _Name_
@@ -365,7 +357,7 @@ In the top right of your MMS program, you will find a box titled _Config_.
     - Enter `make sim` as _Build Command_
     - Enter `./out/sim.out` as _Run Command_
     - Click ok
-- The button with the colorwheel is a simple way to adjust the colors of the simulation.
+- The button with the color wheel is a simple way to adjust the colors of the simulation.
 
 <img src="./img/mms_controls_field.jpg" align="right" height="25%">
 
