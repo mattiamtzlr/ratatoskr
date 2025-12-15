@@ -26,8 +26,8 @@ constexpr int TURN_TIME_LIMIT = 1500;
 constexpr float TURN_TRESHOLD = 2.f;
 
 constexpr uint8_t FORWARD_PWM = 181;
-constexpr uint8_t FORWARD_FAST_PWM_CHUNK = 10;
-constexpr uint8_t FORWARD_FAST_PWM_MAX = 240;
+constexpr uint8_t FORWARD_FAST_PWM_CHUNK = 25;
+constexpr uint8_t FORWARD_FAST_PWM_MAX = 220;
 constexpr float FORWARD_OVERSHOOT_SLOPE = 0.02f;
 constexpr int STOP_DISTANCE = 55;
 /* ========================================================================== */
