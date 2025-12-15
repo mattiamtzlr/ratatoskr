@@ -269,12 +269,12 @@ void Ratatoskr::moveDiagonal(float distance) {
     safe_stop();
     // delay(1000);
     // moveStraightMM(35.0f);
-    delay(10);
+    delay(1000);
 }
 
 void Ratatoskr::turn(int angle) {
     safe_stop();
-    delay(10);
+    delay(100);
     /* Verifies in which way is better to do the turn */
     if (abs(angle) == 180) {
         uint16_t distance_left = m_tof_left.get_reading();
