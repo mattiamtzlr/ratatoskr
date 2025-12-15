@@ -33,7 +33,7 @@ Team members: Leoluca Bernardi, Leonardo Bolognese, Ali Gorgani, Mattia Metzler,
     * [XSHUT Cables](#xshut-cables)
 * [Software Setup](#software-setup)
   * [PIO Setup](#pio-setup)
-    * [MMS Setup](#mms-setup)
+  * [MMS Setup](#mms-setup)
 
 <!-- mtoc-end -->
 
@@ -42,7 +42,9 @@ Team members: Leoluca Bernardi, Leonardo Bolognese, Ali Gorgani, Mattia Metzler,
 ## Introduction
 
 Ratatoskr is a small autonomous robotic 'micromouse' that can find the fastest path through a maze.
-In two separate `search` and `run` phases, the mouse first finds the most optimal path and then traverses it, doing both in the shortest possible time. In this project we designed a compact micromouse capable of traversing a maze smoothly, precisely, and efficiently, allowing it to take diagonal paths during the final `run`.
+In two separate `search` and `run` phases, the mouse first finds the most optimal path and then traverses it, doing
+both in the shortest possible time. In this project we designed a compact micromouse capable of traversing a maze
+smoothly, precisely, and efficiently, allowing it to take diagonal paths during the final `run`.
 
 ### Inspiration and References
 
@@ -66,25 +68,24 @@ For your enjoyment, here is an image from a 17<sup>th</sup> icelandic manuscript
 ## Design
 
 By design, most parts of Ratatoskr are fully 3D-printable, with the remaining parts being common Lego pieces.  
-The final Micromouse weighs approximately 190g, it is 7cm wide and about 10cm long. Most of the weight comes from the
-9V battery used to power it.
+The final Micromouse weighs approximately 190g, it is 7cm wide and about 10cm long. About a quarter of the weight comes
+from the 9V battery used to power it.
 
 ### Hardware
 
 Ratatoskr requires the following electronic and mechanical components:
-| Component | Quantity | Notes |
+| Component                                  | Quantity | Notes                                                                                        |
 |--------------------------------------------|----------|----------------------------------------------------------------------------------------------|
-| N20 DC gear motor w/ encoder and connector | 2 | Working RPMs: 500, 750, 300[^1] |
-| MX1508 motor driver | 1 | - |
-| ESP32 development kit | 1 | **30-pin** version, higher should be fine |
-| LM2596 buck converter | 1 | - |
-| VL53L1X time-of-flight sensor | 4 | Also known as `TOF400C` |
-| MPU-6050 3-axis accelerometer w/ gyroscope | 1 | - |
-| SSD1306 OLED screen | 1 | These come in multiple colors, we used hybrid yellow-blue |
-| 9V (PP3) battery w/ connector | 1 | We recommend using good quality batteries for this, as the current should be somewhat stable |
-| LEGO(r) 58090 Tire 30.4 x 14 Solid | 2 | Other tires of approximately the same size should work |
-| LEGO(r) 55982 Wheel 18mm x 14mm Axle Hole | 2 | Alternatively, these can be 3D-printed: [STL file](./CAD/STL/rim_17.5x12.5mm_no_chamfer.stl) |
-| LEGO(r) 3705 Technic Axle 4L | 2 | - |
+| N20 DC gear motor w/ encoder and connector | 2        | Working RPMs: 500, 750, 300[^1]                                                              |
+| MX1508 motor driver                        | 1        | -                                                                                            |
+| ESP32 development kit                      | 1        | **30-pin** version, higher should be fine                                                    |
+| LM2596 buck converter                      | 1        | -                                                                                            |
+| VL53L1X time-of-flight sensor              | 4        | Also known as `TOF400C`                                                                      |
+| MPU-6050 3-axis accelerometer w/ gyroscope | 1        | -                                                                                            |
+| SSD1306 OLED screen                        | 1        | These come in multiple colors, we used hybrid yellow-blue                                    |
+| 9V (PP3) battery w/ connector              | 1        | We recommend using good quality batteries for this, as the current should be somewhat stable |
+| LEGO(r) 58090 Tire 30.4 x 14 Solid         | 2        | Other tires of approximately the same size should work                                       |
+| LEGO(r) 3705 Technic Axle 4L               | 2        | -                                                                                            |
 
 [^1]: Not tested, but should work given the torque and speed requirements
 
@@ -113,13 +114,16 @@ We use the following libraries to simplify the hardware interfaces:
 Additionally, we use [PlatformIO](https://platformio.org/) to compile the source code for the ESP32 and to handle all
 the libraries above. See [PIO Setup](#pio-setup) for more details.
 
-All sensors communicate with the ESP over the I<sup>2</sup>C protocol because the components can be assigned to different addresses. As a result, we can use the same SDA and SCL pins for them. ToF sensors additionally require an extra pin for some XSHUT logic. The OLED is also controlled via I<sup>2</sup>C.  
-There are C++ classes for most components that handle all their low-level functionality and provide a clean, high-level interface for interacting with them.
+All sensors communicate with the ESP over the I<sup>2</sup>C protocol because the components can be assigned to
+different addresses. As a result, we can use the same SDA and SCL pins for them. ToF sensors additionally require an extra pin for some XSHUT logic. The OLED is also controlled via I<sup>2</sup>C.  
+There are C++ classes for most components that handle all their low-level functionality and provide a clean, high-level
+interface for interacting with them.
 
 #### Software and Logic
 
-To make testing easier we use [MMS](https://github.com/mackorone/mms), a micromouse simulator. It allows us to test the higher
-level code that handles solving a maze and calculating the final run without physically needing to run Ratatoskr in a maze.
+To make testing easier we use [MMS](https://github.com/mackorone/mms), a micromouse simulator. It allows us to test the
+higher level code that handles solving a maze and calculating the final run without physically needing to run Ratatoskr
+in a maze.
 
 <p align="center"><video src='https://github.com/user-attachments/assets/aed72121-12ea-4d18-b9f5-ffeec3736798' height=100 width=100/></video></p>
 
@@ -144,7 +148,8 @@ function headers get collected into a nice multipage format including function h
 ### The Maze
 
 The maze we use for Ratatoskr uses the same wall pieces and mounting posts designed by the previous year's micromice teams, although with a newly
-designed tiled floor. The posts are 3D-printed with a pocket for an M2.5 nut. The walls and baseplates are lasercut from MDF.
+designed tiled floor. The posts are 3D-printed with a pocket for an M2.5 nut. The walls and baseplates are lasercut
+from MDF.  
 As a sidenote, it probably would have been better to redesign the posts and walls because they are not easy
 to assemble and use. However, to save resources and time, we decided to go with the existing ones.  
 To mount the posts to the baseplates, use M2.5 flathead screws, which can be countersunk to the underside of
@@ -193,8 +198,8 @@ The following STL files need to be 3D-printed:
 | `./CAD/STL/v2/middle_shelf.stl`   | 1        | Shelf to mount gyro on                                                                    |
 | `./CAD/STL/v2/top_shelf.stl`      | 1        | Shelf to mount motor driver on                                                            |
 
-It is recommended to print all parts on Prusa MK4 printers, splitting the job into two prints: the chassis and the remaining
-components.  
+It is recommended to print all parts on Prusa MK4 printers, splitting the job into two prints: the chassis and the
+remaining components.  
 After that is done, heat-set the threaded inserts into the battery holder and the chassis:
 
 <p align="center"><img src="./img/01a_chassis.JPG" width="45%"><img src="./img/01b_battery_holder.JPG" width="45%"></p>
@@ -207,8 +212,8 @@ For more details see photos further below.
 
 ### Chassis
 
-Insert the inverted (!) ball-caster into the cutout in the front. You will probably have to sand this quite a bit, as it is
-designed to be press-fit.  
+Insert the inverted (!) ball-caster into the cutout in the front. You will probably have to sand this quite a bit, as
+it is designed to be press-fit.  
 Mount the ToF sensors as shown below to the chassis using 2x M2 5mm screws each.
 
 <p align="center"><img src="./img/02_chassis.JPG" width="90%"></p>
@@ -216,15 +221,15 @@ Mount the ToF sensors as shown below to the chassis using 2x M2 5mm screws each.
 ### Drivetrain and Housing
 
 Screw the gyro to the middle shelf of the drivetrain housing making sure to put three (3) washers between the underside
-of the gyro and the shelf, and a nut at the underside of the shelf. Use 2x M2.5 10mm screws. Take note of the orientation of the gyro in the picture
-below -- the back edge of the gyro should be aligned with the edge of the shelf.  
+of the gyro and the shelf, and a nut at the underside of the shelf. Use 2x M2.5 10mm screws. Take note of the
+orientation of the gyro in the picture below -- the back edge of the gyro should be aligned with the edge of the shelf.  
 Then slide the shelf down the rails in the drivetrain housing. Again, you will probably need to sand/file some things here.
 
 <p align="center"><img src="./img/03a_middle_shelf.JPG" width="90%"></p>
 
-Put one adapter over each motor shaft and slide on a gear. Insert the LEGO axles into the assembled wheels, put the washer on top
-and slide them through the axle holes in the chassis, while simultaneously putting in the second set of gears. This
-step is somewhat tricky but well doable with some pliers or tweezers.  
+Put one adapter over each motor shaft and slide on a gear. Insert the LEGO axles into the assembled wheels, put the
+washer on top and slide them through the axle holes in the chassis, while simultaneously putting in the second set of
+gears. This step is somewhat tricky but well doable with some pliers or tweezers.  
 Before doing this, you need to file down the insides of the axle holes (including the holder in the middle) to make sure
 the wheels turn freely. This is again somewhat finnicky but well doable with a small round file.
 
@@ -263,12 +268,12 @@ I<sup>2</sup>C communication as follows:
 - four (4) connectors for the ToF sensors
 - one (1) connector each for the gyro and the OLED
 
-In total that is six (6) female connectors, first split into two, one for ToFs/OLED and one for gyro, the former then
-further split into five.  
+Therefore you need (6) female connectors in total, first split into two, one for ToFs/OLED and one for gyro, the former
+then further split into five.  
 We recommend keeping the colors between the trees different so they are easier to tell apart, as in the photos below.
 
 > [!WARNING]
-> It is crucial to make these cables the right length. Too short and you will not be able to connect the components, too long
+> It is crucial to make these cables the right length. Too short and you won't be able to connect the components, too long
 > and there will not be enough space in the mouse to put all the cables. Measure the cables before you cut them by
 > dry-fitting them on the mouse.
 
@@ -312,7 +317,7 @@ And you are done! Enjoy your finished micromouse! :smile:
 
 ## Software Setup
 
-#### PIO Setup
+### PIO Setup
 
 The [`platformio.ini`](./platformio.ini) file specifies the environment of the project, telling PlatformIO the
 microcontroller and the libraries needed for compilation and flashing. The easiest way of interacting with PlatformIO is their
@@ -343,7 +348,7 @@ All of these commands need to be run from the root directory of this repository.
 > from the command-line in the root directory to generate `compile_commands.json` which tells `gcc/clang` how to compile
 > everything.
 
-#### MMS Setup
+### MMS Setup
 
 To set up MMS, you first need to download the version of MMS corresponding to your operating system on the [MMS releases page](https://github.com/mackorone/mms/releases).
 
