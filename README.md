@@ -102,8 +102,7 @@ versions available.
 
 ### Firmware and Software
 
-Below follows a very brief overview of how the software for Ratatoskr works. For more details look at the source code
-:wink:
+Below follows a very brief overview of how the software for Ratatoskr works. For more details look at the source code :wink:
 
 #### Firmware
 
