@@ -128,8 +128,9 @@ to interact with the components.
 To make testing easier we use [MMS](https://github.com/mackorone/mms), a micromouse simulator. It allows us to test the higher
 level code that handles solving a maze and calculating the final run without physically needing to run Ratatoskr in a maze.
 
-<p align="center"> <video width="640" height="580" autoplay muted>
-  <source src="img/mms_showcase.mp4" type="video/mp4"></video></p>
+<p align="center"><video src='https://github.com/user-attachments/assets/aed72121-12ea-4d18-b9f5-ffeec3736798' height=100 width=100/></video></p>
+
+
 
 Ratatoskr uses _principal-integral-derivative_ (PID) controllers to generate precise and stable movement. These
 controllers continually adjust the motor power based on sensor feedback, allowing the micromouse to correct itself on the
