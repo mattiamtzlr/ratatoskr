@@ -4,7 +4,7 @@
 
 #include "util.hpp"
 
-// Defalut address for MPU6050
+// Default address for MPU6050
 static constexpr uint8_t MPU6050_ADDRESS = 0x68;
 
 // MPU6050 Registers Addresses
