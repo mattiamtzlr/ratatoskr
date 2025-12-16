@@ -44,7 +44,11 @@ Team members: Leoluca Bernardi, Leonardo Bolognese, Ali Gorgani, Mattia Metzler,
 Ratatoskr is a small autonomous robotic 'micromouse' that can find the fastest path through a maze.
 In two separate `search` and `run` phases, the mouse first finds the most optimal path and then traverses it, doing
 both in the shortest possible time. In this project we designed a compact micromouse capable of traversing a maze
-smoothly, precisely, and efficiently, allowing it to take diagonal paths during the final `run`.
+smoothly, precisely, and efficiently, allowing it to take diagonal paths during the final `run`.  
+Below is a video showing both these phases. The start is at the top left and the goal is at the bottom right. The `run`
+phase starts once the mouse has returned back to the start.
+
+https://github.com/user-attachments/assets/25bfac3e-31b9-44ee-8b9a-028d77b7232d
 
 ### Inspiration and References
 
