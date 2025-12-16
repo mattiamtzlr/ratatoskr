@@ -30,7 +30,7 @@ bool Ratatoskr::wallFront() {
     uint16_t distance_front_left = m_tof_front_left.get_reading();
     uint16_t distance_front_right = m_tof_front_right.get_reading();
 
-    return (distance_front_left > 0) && (distance_front_left < FRONT_WALL_MM) ||
+    return (distance_front_left > 0) && (distance_front_left < FRONT_WALL_MM) &&
            (distance_front_right > 0) && (distance_front_right < FRONT_WALL_MM);
 }
 
@@ -160,7 +160,7 @@ void Ratatoskr::moveForwardHalf(int num_half_steps) {
         }
     }
     moveStraightMM(10.0f);
-    delay(10);
+    delay(250);
     in_diagonal = true;
     has_passed_pole = false;  // i know we do this on init but fuck you
 }
@@ -274,9 +274,8 @@ void Ratatoskr::moveDiagonal(float distance) {
         avg_counts = (left_encoder + right_encoder) / 2;
     }
     safe_stop();
-    // delay(1000);
-    // moveStraightMM(35.0f);
-    delay(50);
+    moveStraightMM(10.0f);
+    delay(250);
 }
 
 void Ratatoskr::turn(int angle) {
@@ -293,8 +292,8 @@ void Ratatoskr::turn(int angle) {
     }
     int requested_turn = angle;
 
-    if (abs(requested_turn) == 90) {
-        moveStraightMM(-15.0f);
+    if (abs(requested_turn) == 90 && !in_diagonal) {
+        moveStraightMM(-10.0f);
     }
     unsigned long t_start = millis();
     m_gyro.update();
