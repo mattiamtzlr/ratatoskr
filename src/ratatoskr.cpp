@@ -131,32 +131,30 @@ void Ratatoskr::moveForwardHalf(int num_half_steps) {
         return;
     }
     float JITTER_DISTANCE = 15.f;
-    const size_t MAX_JITTER = 8;
+    const size_t MAX_JITTER = 10;
     bool has_passed_pole = false;
-    int changes = wallLeft() && wallRight() ? 1 : 2;
     int count = 0;
-    if (!wallLeft()) {
-        while (!has_passed_pole && count < MAX_JITTER) {
-            moveStraightMM(JITTER_DISTANCE);
+    int jitter_count = 0;
+
+    bool left_wall_present = wallLeft();
+    bool right_wall_present = wallRight();
+
+    while (!has_passed_pole && jitter_count < MAX_JITTER) {
+        moveStraightMM(JITTER_DISTANCE);
+        jitter_count += 1;
+        if (left_wall_present && right_wall_present &&
+            (!wallRight() || !wallLeft())) {
+            has_passed_pole = true;
+        } else if (!left_wall_present) {
             if (wallLeft() && count == 0) {
                 count++;
             } else if ((!wallRight() || !wallLeft()) && count == 1) {
                 has_passed_pole = true;
             }
-        }
-    } else if (!wallRight()) {
-        while (!has_passed_pole) {
-            moveStraightMM(JITTER_DISTANCE && count < MAX_JITTER);
+        } else if (!right_wall_present) {
             if (wallRight() && count == 0) {
                 count++;
             } else if ((!wallRight() || !wallLeft()) && count == 1) {
-                has_passed_pole = true;
-            }
-        }
-    } else if (changes == 1) {
-        while (!has_passed_pole) {
-            moveStraightMM(JITTER_DISTANCE);
-            if ((!wallRight() || !wallLeft())) {
                 has_passed_pole = true;
             }
         }
@@ -320,7 +318,8 @@ void Ratatoskr::turn(int angle) {
         float abs_err = fabs(err);
 
         if (abs_err <= TURN_TRESHOLD) {
-            /* Inside band: stop and shrink speed so next corrections are softer
+            /* Inside band: stop and shrink speed so next corrections are
+             * softer
              */
             coast();
             delay(1);
@@ -398,7 +397,7 @@ void Ratatoskr::moveForward(float distance_cells) {
         // Only reduce speed when we're close to the target
         if ((avg_counts >
              target_counts * (distance_cells - 2) / distance_cells) ||
-            avg_counts < target_counts *  (2/3) / distance_cells)
+            avg_counts < target_counts * (2 / 3) / distance_cells)
             BASE_PWM = FORWARD_PWM;
         else {
             BASE_PWM =
@@ -439,11 +438,13 @@ void Ratatoskr::moveForward(float distance_cells) {
                 /*  Corridor: center between walls */
                 tof_error = (float)right_raw - (float)left_raw;
             } else if (right_ok && !left_ok) {
-                /*  Only right wall: keep right distance at TOF_SIDE_EXPECTED_MM
+                /*  Only right wall: keep right distance at
+                 * TOF_SIDE_EXPECTED_MM
                  */
                 tof_error = (float)right_raw - (float)TOF_SIDE_EXPECTED_MM;
             } else if (left_ok && !right_ok) {
-                /*  Only left wall: keep left distance at TOF_SIDE_EXPECTED_MM
+                /*  Only left wall: keep left distance at
+                 * TOF_SIDE_EXPECTED_MM
                  */
                 tof_error = (float)TOF_SIDE_EXPECTED_MM - (float)left_raw;
             }
