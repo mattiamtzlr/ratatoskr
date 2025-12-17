@@ -293,7 +293,7 @@ void Ratatoskr::turn(int angle) {
     int requested_turn = angle;
 
     if (abs(requested_turn) == 90 && !in_diagonal) {
-        moveStraightMM(-10.0f);
+        moveStraightMM(10.0f);
     }
     unsigned long t_start = millis();
     m_gyro.update();
@@ -336,6 +336,9 @@ void Ratatoskr::turn(int angle) {
     /*  Reset PIDs when turning */
     if (abs(requested_turn) == 180) {
         moveStraightMM(-35.0f);
+    }
+    if (abs(requested_turn) == 90 && !in_diagonal) {
+        moveStraightMM(-10.0f);
     }
     m_pid_encoders.reset();
     m_pid_tof_sides.reset();
