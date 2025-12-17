@@ -184,7 +184,8 @@ To assemble Ratatoskr, the following additional hardware is needed:
 In addition:
 
 - Various jumper cables, depending on the amount of serviceability desired.
-- An additional M2.5 5mm machine screw to screw through the hole on the ball caster, although this is not strictly needed.
+- There is an alternative version of the ball caster piece (see below) which has a screw hole for a M2.5 5mm machine
+screw to reduce wear on the plastic. We found however that that version leads to more snagging on the maze tile borders.
 
 ### 3D-printing
 
@@ -216,8 +217,8 @@ For more details see photos further below.
 
 ### Chassis
 
-Insert the inverted (!) ball-caster into the cutout in the front. You will probably have to sand this quite a bit, as
-it is designed to be press-fit.  
+Insert the inverted (!) ball-caster into the cutout in the front. You shouldn't need to sand this much once the supports
+are removed, as it has been designed with the right tolerances.  
 Mount the ToF sensors as shown below to the chassis using 2x M2 5mm screws each.
 
 <p align="center"><img src="./img/02_chassis.JPG" width="90%"></p>
