@@ -13,7 +13,7 @@ constexpr int MAZE_WIDTH = 9;
 constexpr int MAZE_HEIGHT = 9;
 
 const std::vector<Position> START_POINTS = {Position(0, 0)};
-const std::vector<Position> END_POINTS = {Position(8, 8)};
+const std::vector<Position> END_POINTS = {Position(5, 5)};
 
 constexpr int CELL_SIZE_MM = 180;
 constexpr int WALL_TO_WALL_MM = 160;

@@ -235,6 +235,10 @@ void Ratatoskr::moveDiagonal(float distance) {
         /*  ------------------ TIME STEP ------------------ */
         t_now = millis();
         float t_diff = (t_now - t_prev) / 100.0f;
+
+        m_gyro.update();
+        float gyro_angle = m_gyro.get_next_angle();
+        update_screen(gyro_angle, DIAGONAL);
         t_prev = t_now;
 
         /*  ------------------ PID UPDATES ------------------ */
@@ -293,7 +297,7 @@ void Ratatoskr::turn(int angle) {
     int requested_turn = angle;
 
     if (abs(requested_turn) == 90 && !in_diagonal) {
-        moveStraightMM(10.0f);
+        moveStraightMM(5.0f);
     }
     unsigned long t_start = millis();
     m_gyro.update();
