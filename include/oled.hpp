@@ -44,17 +44,44 @@ class OLED {
     MODE mode = RUN;
 
     OLED(uint8_t addr = 0x3C);
+
+    /**
+     * Initialise the OLED display to
+     * - White text
+     * - Font5x7FixedMono
+     * - Medium text size
+     * And show splash screen.
+     */
     void begin();
 
+    /**
+     * Setter for text size
+     */
     void set_text_size(TextSize size);
+
+    /**
+     * Clear the display.
+     */
     void clear();
+
     void display();
     void freeze();
     void unfreeze();
 
+    /**
+     * Update the upper part of the screen (in yellow)
+     */
     void update_status_bar(int16_t gyro_angle, uint16_t left_rpm,
                            uint16_t right_rpm);
+
+    /**
+     * Update the lower part of the screen (in blue)
+     */
     void update_ToFs(uint16_t tof_left, uint16_t tof_front_left,
                      uint16_t tof_front_right, uint16_t tof_right);
+
+    /**
+     * Draw a face on the entire screen (incompatible with status bar)
+     */
     void draw_face(Face face);
 };

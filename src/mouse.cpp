@@ -45,6 +45,10 @@ void Mouse::setPosition(int x, int y) {
     pos.x = x;
     pos.y = y;
 }
+bool Mouse::is_in_diagonal() {
+    return dir == NORTH_EAST || dir == NORTH_WEST || dir == SOUTH_EAST ||
+           dir == SOUTH_WEST;
+}
 
 Position Mouse::getPosition() { return pos; }
 

@@ -7,8 +7,8 @@ class PID {
     /**
      * Update function for the PID.
      *
-     * @param error and time since the last update.
-     * @return the corrected signal.
+     * Takes error and time since the last update.
+     * Returns the correction on the signal.
      */
     float update(float time_step, float error);
 

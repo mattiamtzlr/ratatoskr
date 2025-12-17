@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <cmath>
 #include <deque>
+#include <iostream>
 #include <map>
 
 #include "config.hpp"
@@ -78,29 +79,35 @@ void Solver::solve() {
         float best_dist = 0;
         for (Position neighbor :
              m_maze.valid_neighbors(m_mouse.getPosition())) {
+            Direction neighbor_dir =
+                dir_for_neighbor(neighbor, m_mouse.getPosition());
+
             if (m_maze.get_distance(neighbor) < best_val ||
                 (m_maze.get_distance(neighbor) == best_val &&
-                 m_maze.distance_to_target_L2(neighbor) < best_dist)) {
+                 m_maze.distance_to_target_L2(neighbor) < best_dist) ||
+                (m_maze.get_distance(neighbor) == best_val &&
+                 m_maze.distance_to_target_L2(neighbor) == best_dist &&
+                 neighbor_dir == m_mouse.getDirection())) {
                 best_val = m_maze.get_distance(neighbor);
-                best_dir = dir_for_neighbor(neighbor, m_mouse.getPosition());
+                best_dir = neighbor_dir;
                 best_dist = m_maze.distance_to_target_L2(neighbor);
             }
         }
-        // Identify turns to use them later for finding best path in the
-        // speedrun
+
         Direction curr_dir = m_mouse.getDirection();
         Position pos_before = m_mouse.getPosition();
         face(best_dir);
         m_mouse.moveForward();
         m_maze.visited.insert(m_mouse.getPosition());
     }
+    m_mouse.pause(10000);
 }
 
 std::vector<GraphCoordinate>& Solver::dijkstra(
-    std::vector<GraphCoordinate>& path) {
+    std::vector<GraphCoordinate>& path, bool diagonals) {
     std::map<GraphCoordinate, std::set<Edge>>* adj_list =
         new std::map<GraphCoordinate, std::set<Edge>>;
-    m_maze.get_adj_list(*adj_list);
+    m_maze.get_adj_list(*adj_list, diagonals);
 
     // prio queue of (distance, position) with comparator on distance only
     p_queue pq;
@@ -192,20 +199,45 @@ std::vector<Position> get_diag(
     return {};
 }
 
-void Solver::filter_turns(std::vector<Instruction>& instr) {
-    for (int i = 0; i < instr.size() - 2; i++) {
+void Solver::filter_T90_in_diag(std::vector<Instruction>& instr) {
+    for (int i = 1; i < instr.size() - 3; i++) {
         if (instr[i] == TURN_LEFT_45 && instr[i + 1] == MOVE_FORWARD_HALF &&
-            instr[i + 2] == TURN_LEFT_45) {
-            instr[i] = MOVE_FORWARD_HALF;
+            instr[i + 2] == TURN_LEFT_90) {
+            instr[i - 1] = MOVE_FORWARD;
+            instr[i] = BLANK;
             instr[i + 1] = TURN_LEFT_90;
             instr[i + 2] = MOVE_FORWARD_HALF;
+            instr[i + 3] = TURN_LEFT_45;
+
+        } else if (instr[i] == TURN_RIGHT_45 &&
+                   instr[i + 1] == MOVE_FORWARD_HALF &&
+                   instr[i + 2] == TURN_RIGHT_90) {
+            instr[i - 1] = MOVE_FORWARD;
+            instr[i] = BLANK;
+            instr[i + 1] = TURN_RIGHT_90;
+            instr[i + 2] = MOVE_FORWARD_HALF;
+            instr[i + 3] = TURN_RIGHT_45;
+        }
+    }
+}
+void Solver::filter_turns(std::vector<Instruction>& instr) {
+    for (int i = 1; i < instr.size() - 3; i++) {
+        if (instr[i] == TURN_LEFT_45 && instr[i + 1] == MOVE_FORWARD_HALF &&
+            instr[i + 2] == TURN_LEFT_45) {
+            instr[i - 1] = MOVE_FORWARD;
+            instr[i] = BLANK;
+            instr[i + 1] = TURN_LEFT_90;
+            instr[i + 2] = MOVE_FORWARD;
+            instr[i + 3] = BLANK;
 
         } else if (instr[i] == TURN_RIGHT_45 &&
                    instr[i + 1] == MOVE_FORWARD_HALF &&
                    instr[i + 2] == TURN_RIGHT_45) {
-            instr[i] = MOVE_FORWARD_HALF;
+            instr[i - 1] = MOVE_FORWARD;
+            instr[i] = BLANK;
             instr[i + 1] = TURN_RIGHT_90;
-            instr[i + 2] = MOVE_FORWARD_HALF;
+            instr[i + 2] = MOVE_FORWARD;
+            instr[i + 3] = BLANK;
         }
     }
 }
@@ -244,13 +276,18 @@ std::vector<Instruction>& Solver::parse_path(
         mouse_direction = next_dir;
         mouse_coordinate = next_coordinate;
     }
-
+    filter_T90_in_diag(instructions);
     filter_turns(instructions);
 
     return instructions;
 }
 
 void Solver::accumulative_forward(double steps) {
+    if (!m_mouse.is_in_diagonal() && fabs(steps) > 0.00001) {
+        m_mouse.moveForward((float)steps);
+        return;
+    }
+
     int full_steps = std::floor(steps);
     if (full_steps > 0) {
         m_mouse.moveForward(full_steps);
@@ -262,6 +299,7 @@ void Solver::accumulative_forward(double steps) {
 
 void Solver::run(const std::vector<Instruction>& instructions) {
     face(NORTH);
+    detect_and_set_walls();
     double move_forward_for = 0.0;
     for (const Instruction& next_instruction : instructions) {
         switch (next_instruction) {
@@ -269,7 +307,15 @@ void Solver::run(const std::vector<Instruction>& instructions) {
                 move_forward_for += 1;
                 break;
             case MOVE_FORWARD_HALF:
-                move_forward_for += 0.5;
+                // Execute any accumulated full moves first
+                if (m_mouse.is_in_diagonal()) {
+                    move_forward_for += 0.5;
+                } else {
+                    accumulative_forward(move_forward_for);
+                    move_forward_for = 0;
+                    // Execute half move immediately without accumulation
+                    m_mouse.moveForwardHalf();
+                }
                 break;
             case TURN_LEFT_45:
                 accumulative_forward(move_forward_for);
@@ -290,6 +336,8 @@ void Solver::run(const std::vector<Instruction>& instructions) {
                 accumulative_forward(move_forward_for);
                 move_forward_for = 0;
                 m_mouse.turnRight();
+                break;
+            case BLANK:
                 break;
         }
     }

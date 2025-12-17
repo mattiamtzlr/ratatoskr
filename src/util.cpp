@@ -44,11 +44,7 @@ GraphCoordinate get_diag_neighbor(GraphCoordinate pos, Direction d) {
 
 bool isInteger(double n) {
     int x = n;
-
-    if (((double)(n - x)) > 0) {
-        return false;
-    }
-    return true;
+    return !((double)(n - x) > 0);
 }
 Direction dir_for_neighbor(Position pos_n, Position pos_m) {
     if (pos_n.x > pos_m.x)

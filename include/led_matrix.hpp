@@ -18,8 +18,31 @@ class LEDMatrix {
     Adafruit_8x8matrix m_matrix = Adafruit_8x8matrix();
 
    public:
+    /**
+     * Constructor for LEDMatrix
+     */
     LEDMatrix(uint8_t addr);
+
+    /**
+     * 0 -> side-left
+     * 1 -> top-left
+     * 2 -> top-right
+     * 3 -> side-right
+     * @params id of the wall to be drawn
+     */
     void drawWall(uint8_t id);
+
+    /**
+     * 0 -> side-left
+     * 1 -> top-left
+     * 2 -> top-right
+     * 3 -> side-right
+     * @params id of the wall to be cleared
+     */
     void clearWall(uint8_t id);
+
+    /**
+     * Clear LED-Matrix.
+     */
     void clearAll();
 };

@@ -32,6 +32,7 @@ void Maze::set_border_walls() {
         set_wall(Position(MAZE_WIDTH - 1, y), EAST);
     }
 }
+
 void Maze::set_wall(Position pos, Direction d) {
     m_wall_storage[pos.x][pos.y] |= (0b1 << d);
     Position front_neighbor = get_neighbor(pos, d);
@@ -92,7 +93,7 @@ bool Maze::can_move_diag(Position pos, Direction dir) {
 }
 
 std::map<GraphCoordinate, std::set<Edge>>& Maze::get_adj_list(
-    std::map<GraphCoordinate, std::set<Edge>>& adj_list) {
+    std::map<GraphCoordinate, std::set<Edge>>& adj_list, bool diagonals) {
     std::set<GraphCoordinate>* halfway_nodes = new std::set<GraphCoordinate>;
 
     for (int x = 0; x < MAZE_WIDTH; x++) {
@@ -118,6 +119,7 @@ std::map<GraphCoordinate, std::set<Edge>>& Maze::get_adj_list(
             }
         }
     }
+    if (!diagonals) return adj_list;
 
     for (const GraphCoordinate& node : (*halfway_nodes)) {
         for (Direction d : {NORTH_EAST, SOUTH_EAST, SOUTH_WEST, NORTH_WEST}) {

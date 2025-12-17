@@ -43,8 +43,6 @@ void ToF::begin() {
     m_sensor.setAddress(i2c_address);
     delay(100);
 
-    log("VL53L1X at pin" + std::to_string(xshut_pin) + "initialized");
-
     m_sensor.startContinuous(TIMING_BUDGET);
 
     // Discard the initial few readings
@@ -60,7 +58,10 @@ uint16_t ToF::read() {
 }
 uint16_t ToF::get_reading() {
     if (m_sensor.dataReady()) m_reading = read();
-    /* only return value if it's sensible i.e. not underflown */
+    /* only return value if it's sensible i.e. not underflown
+     * Otherwise a returning zero is equivalent to a very small
+     * reading.
+     * */
     return m_reading > 60000 ? 0 : m_reading;
 }
 
