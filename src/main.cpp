@@ -109,6 +109,10 @@ void setup() {
             ESPLogger::clear_sol();
             delete instr;
             ESPLogger::clear_logs();
+
+            rat.update_screen(0.0f, HAPPY);
+            /* TODO: dance (jiggy) */
+
             break;
         }
 
