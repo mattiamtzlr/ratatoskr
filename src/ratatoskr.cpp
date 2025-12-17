@@ -297,7 +297,7 @@ void Ratatoskr::turn(int angle) {
     int requested_turn = angle;
 
     if (abs(requested_turn) == 90 && !in_diagonal) {
-        moveStraightMM(10.0f);
+        moveStraightMM(5.0f);
     }
     unsigned long t_start = millis();
     m_gyro.update();

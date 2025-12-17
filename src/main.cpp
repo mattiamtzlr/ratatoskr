@@ -100,7 +100,7 @@ void setup() {
                 solver.finalize_discovery();
                 std::vector<GraphCoordinate>* solved =
                     new std::vector<GraphCoordinate>;
-                solver.dijkstra(*solved, false);
+                solver.dijkstra(*solved, true);
                 solver.parse_path(*solved, *instr);
                 delete solved;
                 ESPLogger::write_solution(*instr);
