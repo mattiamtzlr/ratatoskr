@@ -199,6 +199,27 @@ std::vector<Position> get_diag(
     return {};
 }
 
+void Solver::filter_T90_in_diag(std::vector<Instruction>& instr) {
+    for (int i = 1; i < instr.size() - 3; i++) {
+        if (instr[i] == TURN_LEFT_45 && instr[i + 1] == MOVE_FORWARD_HALF &&
+            instr[i + 2] == TURN_LEFT_90) {
+            instr[i - 1] = MOVE_FORWARD;
+            instr[i] = BLANK;
+            instr[i + 1] = TURN_LEFT_90;
+            instr[i + 2] = MOVE_FORWARD_HALF;
+            instr[i + 3] = TURN_LEFT_45;
+
+        } else if (instr[i] == TURN_RIGHT_45 &&
+                   instr[i + 1] == MOVE_FORWARD_HALF &&
+                   instr[i + 2] == TURN_RIGHT_90) {
+            instr[i - 1] = MOVE_FORWARD;
+            instr[i] = BLANK;
+            instr[i + 1] = TURN_RIGHT_90;
+            instr[i + 2] = MOVE_FORWARD_HALF;
+            instr[i + 3] = TURN_RIGHT_45;
+        }
+    }
+}
 void Solver::filter_turns(std::vector<Instruction>& instr) {
     for (int i = 1; i < instr.size() - 3; i++) {
         if (instr[i] == TURN_LEFT_45 && instr[i + 1] == MOVE_FORWARD_HALF &&
@@ -255,7 +276,7 @@ std::vector<Instruction>& Solver::parse_path(
         mouse_direction = next_dir;
         mouse_coordinate = next_coordinate;
     }
-
+    filter_T90_in_diag(instructions);
     filter_turns(instructions);
 
     return instructions;

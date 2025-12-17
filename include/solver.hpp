@@ -21,6 +21,7 @@ class Solver {
     void detect_and_set_walls();
     void accumulative_forward(double steps);
     void filter_turns(std::vector<Instruction> &instr);
+    void filter_T90_in_diag(std::vector<Instruction> &instr);
 
    public:
     Solver(Mouse &mouse, Maze &maze);
