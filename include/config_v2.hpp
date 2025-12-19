@@ -13,7 +13,7 @@ constexpr int MAZE_WIDTH = 9;
 constexpr int MAZE_HEIGHT = 9;
 
 const std::vector<Position> START_POINTS = {Position(0, 0)};
-const std::vector<Position> END_POINTS = {Position(5, 5)};
+const std::vector<Position> END_POINTS = {Position(6, 6)};
 
 constexpr int CELL_SIZE_MM = 180;
 constexpr int WALL_TO_WALL_MM = 160;
@@ -22,8 +22,8 @@ constexpr int WALL_TO_WALL_MM = 160;
 /* |                                movement                                | */
 /* ========================================================================== */
 constexpr int TURN_PWM = 187;
-constexpr int TURN_TIME_LIMIT = 1500;
-constexpr float TURN_TRESHOLD = 4.f;
+constexpr int TURN_TIME_LIMIT = 2000;
+constexpr float TURN_TRESHOLD = 3.f;
 
 constexpr uint8_t FORWARD_PWM = 181;
 constexpr uint8_t FORWARD_FAST_PWM_CHUNK = 25;

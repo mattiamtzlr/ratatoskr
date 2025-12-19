@@ -160,7 +160,7 @@ void Ratatoskr::moveForwardHalf(int num_half_steps) {
         }
     }
     moveStraightMM(10.0f);
-    delay(250);
+    delay(500);
     in_diagonal = true;
     has_passed_pole = false;  // i know we do this on init but fuck you
 }
@@ -342,7 +342,7 @@ void Ratatoskr::turn(int angle) {
         moveStraightMM(-35.0f);
     }
     if (abs(requested_turn) == 90 && !in_diagonal) {
-        moveStraightMM(-10.0f);
+        moveStraightMM(-25.0f);
     }
     m_pid_encoders.reset();
     m_pid_tof_sides.reset();
