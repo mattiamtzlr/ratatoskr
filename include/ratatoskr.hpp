@@ -40,7 +40,7 @@ class Ratatoskr : public Mouse {
     inline void in_place_turn_right(int pwm);
 
     PID m_pid_encoders{0.75, 0.8, 0.1};
-    PID m_pid_tof_sides{0.25, 0.0, 0.0};
+    PID m_pid_tof_sides{0.45, 0.0, 0.4};
     PID m_pid_tof_front_diagonals{1., 0, 0.45};
 
    public:
