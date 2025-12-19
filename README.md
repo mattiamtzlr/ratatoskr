@@ -45,10 +45,10 @@ Ratatoskr is a small autonomous robotic 'micromouse' that can find the fastest p
 In two separate `search` and `run` phases, the mouse first finds the most optimal path and then traverses it, doing
 both in the shortest possible time. In this project we designed a compact micromouse capable of traversing a maze
 smoothly, precisely, and efficiently, allowing it to take diagonal paths during the final `run`.  
-Below is a video showing both these phases. The start is at the top left and the goal is at the bottom right. The `run`
+Below is a video showing both these phases. The start is marked in blue and the goal in red. The `run`
 phase starts once the mouse has returned back to the start.
 
-https://github.com/user-attachments/assets/25bfac3e-31b9-44ee-8b9a-028d77b7232d
+https://github.com/user-attachments/assets/a93646fe-425e-46f5-a616-213aecb9d267
 
 ### Inspiration and References
 
@@ -184,7 +184,8 @@ To assemble Ratatoskr, the following additional hardware is needed:
 In addition:
 
 - Various jumper cables, depending on the amount of serviceability desired.
-- An additional M2.5 5mm machine screw to screw through the hole on the ball caster, although this is not strictly needed.
+- There is an alternative version of the ball caster piece (see below) which has a screw hole for a M2.5 5mm machine
+screw to reduce wear on the plastic. We found however that that version leads to more snagging on the maze tile borders.
 
 ### 3D-printing
 
@@ -216,8 +217,8 @@ For more details see photos further below.
 
 ### Chassis
 
-Insert the inverted (!) ball-caster into the cutout in the front. You will probably have to sand this quite a bit, as
-it is designed to be press-fit.  
+Insert the inverted (!) ball-caster into the cutout in the front. You shouldn't need to sand this much once the supports
+are removed, as it has been designed with the right tolerances.  
 Mount the ToF sensors as shown below to the chassis using 2x M2 5mm screws each.
 
 <p align="center"><img src="./img/02_chassis.JPG" width="90%"></p>
