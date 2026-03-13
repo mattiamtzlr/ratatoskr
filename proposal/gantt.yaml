@@ -1,0 +1,83 @@
+show-today: true
+# Either month or day
+viewport-snap: day
+# Can include `year`, `month`, `week`, or `day`
+headers:
+  - month
+  - week
+# A start date. Not required.
+start: 2025-10-10
+# An end date. Not required.
+end: 2025-12-18
+taskgroups:
+  - name: Document
+    tasks:
+      - name: BoM
+        start: 2025-10-10
+        end: 2025-10-17
+      - name: Risk Assessment
+        start: 2025-10-10
+        end: 2025-10-17
+      - name: Proposal 
+        start: 2025-10-10
+        end: 2025-10-17
+  - name: Maze
+    tasks:
+      - name: PoC
+        start: 2025-10-10
+        end: 2025-10-22
+      - name: Production
+        start: 2025-10-22
+        end: 2025-11-05
+  - name: Hardware
+    tasks:
+      - name: 3D printing
+        start: 2025-10-20
+        end: 2025-10-29
+      - name: Electronics
+        start: 2025-10-29
+        end: 2025-11-05
+      - name: Assembly
+        start: 2025-11-05
+        end: 2025-11-12
+      - name: Improve
+        start: 2025-11-12
+        end: 2025-11-27
+  - name: Software 
+    tasks:
+      - name: TOF Interface
+        start: 2025-10-20
+        end: 2025-10-29
+      - name: Gyro Interface
+        start: 2025-10-20
+        end: 2025-10-29
+      - name: Motor Interface
+        start: 2025-10-20
+        end: 2025-11-05
+      - name: LED/SD Interface
+        start: 2025-10-20
+        end: 2025-10-29
+      - name: Basic Driving 
+        start: 2025-10-23
+        end: 2025-11-12
+      - name: Maze Solver
+        start: 2025-10-29
+        end: 2025-11-26
+      - name: PID
+        start: 2025-11-03
+        end: 2025-11-18
+      - name: Diagonal driving
+        start: 2025-11-12
+        end: 2025-12-01
+      - name: Optimization
+        start: 2025-12-01
+        end: 2025-12-17
+milestones:
+  - name: Design Document
+    date: 2025-10-17
+  - name: RatatoskrV1
+    date: 2025-11-12
+  - name: Ratatoskr Final
+    date: 2025-12-01
+  - name: Demo
+    date: 2025-12-17
